@@ -1,0 +1,20 @@
+
+/*
+	to study:
+		socket
+		AF_INET
+		SOCK_STREAM
+		sockaddr_in
+		setsockopt
+		htons
+		ntohs
+		inet_pton
+		inet_ntop
+		bind
+		listen
+		accept
+		getnameinfo
+		pollfd
+		poll
+		send
+*/
