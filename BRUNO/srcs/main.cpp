@@ -47,6 +47,10 @@ class Client
 		int			_id;
 		int			_socket;
 		pollfd		_pfd;
+		std::string	_username;
+		std::string	_realname;
+		std::string _nick;
+		bool		_authenticated;
 	public:
 		Client(int srvSocket)
 		{
@@ -55,6 +59,8 @@ class Client
 			_pfd.fd = _socket;
 			_pfd.events = POLLIN;
 			_pfd.revents = 0;
+			_authenticated = false;
+			_username = "Guest";
 		}
 
 		int		getId() {
@@ -66,8 +72,62 @@ class Client
 		pollfd	&getPfd() {
 			return (_pfd);
 		}
+		void	setUsername(std::string username) {
+			_username = username;
+		}
+		std::string	getUsername() {
+			return (_username);
+		}
+		void setAuthenticated(bool auth) {
+			_authenticated = auth;
+		}
+		bool isAuthenticated() {
+			return (_authenticated);
+		}
+		void	setRealname(std::string realname) {
+			_realname = realname;
+		}
+		std::string	getRealname() {
+			return (_realname);
+		}
+
+		std::string	getNick() {
+			return (_nick);
+		}
+		void	setNick(std::string nick) {
+			_nick = nick;
+		}
 };
 
+std::string getUsername(const std::string &line) {
+    size_t pos = 0;
+    for (int i = 0; i < 1; ++i)
+        pos = line.find(' ', pos + 1);
+    return line.substr(pos + 1, line.find(' ', pos + 2) - pos - 1);
+}
+
+std::string getRealname(const std::string &line) {
+    size_t pos = 0;
+    for (int i = 0; i < 4; ++i)
+        pos = line.find(' ', pos + 1);
+    return line.substr(pos + 1);
+}
+
+std::string getNick(const std::string &line) {
+    size_t pos = 0;
+	std::string nickname;
+    for (int i = 0; i < 1; ++i)
+        pos = line.find(' ', pos + 1);
+	nickname = line.substr(pos + 1, line.find(' ', pos + 2) - pos - 1);
+	if (nickname[0] == ':' || nickname == "#" || !strncmp(nickname.c_str(), "#&", 2) || !strncmp(nickname.c_str(), "&#", 2) || nickname.empty())
+		return ("");
+	for (size_t i = 0; i < nickname.size(); i++)
+	{
+		if (nickname[i] == ' ')
+			return ("");
+	}
+    return (nickname);
+}
 //so weird so random
 int Client::_globalId;
 
@@ -142,13 +202,50 @@ void	IRC(char *port, char *pass)
 				} else {
 					buf[bytesRecv] = 0;
 					//*debugging line, it will use username instead of getId
-					std::cout << "Client " << clients[i - 1].getId() + 1<< " said: " << buf;
-					if (strcmp(buf, pass))
-						std::cout << "Password correct\nClient should now be able to set user and talk\n";
-					else {
-						std::cout << "Password incorrect\nClient should close\n";
-						// close (pfds[i].fd);
-						// clients.erase(clients.begin() + (i - 1));
+					//std::cout << "Client " << clients[i - 1].getUsername()<< " said: " << buf;
+					if (!clients[i - 1].isAuthenticated())
+					{
+						char *bufPass = buf/* strncpy(buf, bufPass, bytesRecv) */;
+						bufPass[bytesRecv - 1] = '\0'; //removing \r\n
+						std::cout << "Mine: " << bufPass << "\tOrig: " << pass << "\tValue: " << (bufPass == pass) << std::endl;
+						if (!strncmp(buf, "PASS ", 5)/* strcmp(bufPass, &pass[0]) == 0 */)
+						{
+							std::string line(bufPass);
+							size_t pos = 0;
+							for (int i = 0; i < 1; ++i)
+								pos = line.find(' ', pos + 1);
+							std::cout << "Extracted pass: " << line.substr(pos + 1) << std::endl;	
+							if (strcmp(line.substr(pos + 1).c_str(), pass) == 0)
+							{
+								std::cout << "Password correct\nClient should now be able to set user and talk\n";
+								clients[i - 1].setAuthenticated(true);
+							}
+							else {
+								std::cout << "Password incorrect\nClient should close\n";
+								// close (pfds[i].fd);
+								// clients.erase(clients.begin() + (i - 1));
+							}
+						}
+						else {
+							std::cout << "Client cannot talk\n";
+							// close (pfds[i].fd);
+							// clients.erase(clients.begin() + (i - 1));
+						}
+					}
+					else
+					{
+						std::cout << "Client " << clients[i - 1].getUsername()<< " said: " << buf;
+						if (strncmp(buf, "USER ", 5) == 0)
+						{
+							clients[i - 1].setUsername(getUsername(buf));
+							clients[i - 1].setRealname(getRealname(buf));
+							std::cout << "Username set to: " << clients[i - 1].getUsername() << " || " << clients[i - 1].getRealname() << std::endl;
+						}
+						if (strncmp(buf, "NICK ", 5) == 0)
+						{
+							clients[i - 1].setNick(getNick(buf));
+							std::cout << "Nick set to: " << clients[i - 1].getNick() << std::endl;
+						}
 					}
 					//! Now do password acceptance
 					if (shouldServerExit(srv, clients, buf))//TEMPORARY
@@ -174,6 +271,3 @@ int		main(int ac, char **av)
 
 	return 0;
 }
-
-
-

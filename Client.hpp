@@ -1,5 +1,5 @@
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
 
 #include <iostream>
 #include <string>
@@ -27,30 +27,29 @@
 #include <netinet/in.h>  // for sockaddr_in, htons, INADDR_ANY
 #include <arpa/inet.h>   // for inet_ntoa, inet_addr
 #include <unistd.h>     // for close
+#include <poll.h>     // for close
 
-class Server
+class Client
 {
 	private:
-		std::string _port;
-		std::string _password;
-		sockaddr_in _serverAddr;
-		struct addrinfo _hints;
-		struct addrinfo *_res;
-		int _ServerSocket;
-
+		struct sockaddr_in _clientAddr;
+		socklen_t _clientLen;
+		int _clientSocket;
+		pollfd 		_pfd;
+		char		_host[NI_MAXHOST];
+		char		_svc[NI_MAXSERV];
 	public:
-        Server();
-		Server(std::string port, std::string password);
-		Server(Server const & src);
-		Server & operator=(Server const & src);
-		~Server();
-		std::string getPort() const;
-		std::string getPassword() const;
-		int getServerSocket() const;
-		const struct addrinfo &getHints() const;
-		struct addrinfo *getRes() const;
-		void setRes(struct addrinfo *res);
-		void setServerSocket(int serverSocket);
+		Client();
+		Client(Client const & src);
+		Client & operator=(Client const & src);
+		~Client();
+		struct sockaddr_in &getClientAddr();
+		socklen_t &getClientLen();
+		int getClientSocket() const;
+		void setClientSocket(int clientSocket);
+		char *getHost();
+		char *getSvc();
+		pollfd getPfd();
 };
 
 #endif

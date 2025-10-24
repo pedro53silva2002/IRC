@@ -1,7 +1,7 @@
 NAME = RPN
 CC = c++
 CFLAGS = -Wall -Wextra -Werror -g -std=c++98
-SRCS = main.cpp Server.cpp
+SRCS = main.cpp Server.cpp Client.cpp
 	
 OBJS = $(SRCS:.cpp=.o)
 
@@ -22,6 +22,6 @@ fclean: clean
 re: fclean all
 
 valgrind: 
-	/usr/bin/valgrind --leak-check=full -s --show-leak-kinds=all ./$(NAME) "8080" "mysecret"
+	/usr/bin/valgrind --leak-check=full -s --show-leak-kinds=all ./$(NAME) "6667" "mysecret"
 
 .PHONY: all clean fclean re download
