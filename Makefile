@@ -1,27 +1,38 @@
-NAME = RPN
-CC = c++
-CFLAGS = -Wall -Wextra -Werror -g -std=c++98
-SRCS = main.cpp Server.cpp Client.cpp
-	
-OBJS = $(SRCS:.cpp=.o)
+NAME = ircserv
+SRCS_DIR = ./srcs
+SRCS = main.cpp Server.cpp myfuncs.cpp Client.cpp
+OBJS_DIR = ./objs
+OBJS = $(addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o))
+CXX = c++
+CXXFLAGS = -std=c++98 -g #-Wall -Wextra -Werror 
+INCLUDES = -I includes
+RM = rm -f
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-$(OBJS): $(SRCS)
-	$(CC) $(CFLAGS) $(SRCS) -c 
+$(NAME): $(OBJS)
+	@echo "$(NAME) compiling..."
+	@$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $(INCLUDES)
+	@echo "$(NAME) ready!"
+
+valgrind: 
+	/usr/bin/valgrind --leak-check=full -s --show-leak-kinds=all ./$(NAME) 6667 pass
 
 clean:
-	@rm -rf $(OBJS)
+	@$(RM) -r $(OBJS_DIR)
+	@echo "$(NAME) OBJS cleaned!"
 
 fclean: clean
-	@rm -f $(NAME)
+	@$(RM) $(NAME)
+	@echo "$(NAME) cleaned!"
 
 re: fclean all
 
-valgrind: 
-	/usr/bin/valgrind --leak-check=full -s --show-leak-kinds=all ./$(NAME) "6667" "mysecret"
+run: all
+	@./ft_irc
 
-.PHONY: all clean fclean re download
+.PHONY: all fclean clean re
