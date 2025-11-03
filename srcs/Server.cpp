@@ -240,20 +240,31 @@ int	Server::handleClientPoll(int i)//i here is only sent so that _pfds and _clie
 			std::cout << "Client cannot talk\n";
 		}
 	}
-	else
+	else if (!_clients[i].isRegistrated() && _clients[i].isAuthenticated())
 	{
 		//std::cout << "Client " << _clients[i].getUsername()<< " said: " << buf;
 		if (strncmp(buf, "USER ", 5) == 0)
 		{
 			_clients[i].setUsername(getUsername(buf));
 			_clients[i].setRealname(getRealname(buf));
+			if (!_clients[i].getNick().empty() && !_clients[i].getUsername().empty() && !_clients[i].getRealname().empty())
+				_clients[i].setRegistrated(true);
 			std::cout << "Username set to: " << _clients[i].getUsername() << " || " << _clients[i].getRealname() << std::endl;
 		}
-		if (strncmp(buf, "NICK ", 5) == 0)
+		else if (strncmp(buf, "NICK ", 5) == 0)
 		{
 			_clients[i].setNick(getNick(buf));
+			if (!_clients[i].getNick().empty() && !_clients[i].getUsername().empty() && !_clients[i].getRealname().empty())
+				_clients[i].setRegistrated(true);
 			std::cout << "Nick set to: " << _clients[i].getNick() << std::endl;
 		}
+		else
+		{
+			std::cout << "Client not registrated yet\n";
+		}
+	}
+	else if (_clients[i].isRegistrated() && _clients[i].isAuthenticated())
+	{
 		if (strncmp(buf, "KICK ", 5) == 0)
 		{
 			std::string userToKick = kickUser(buf, _clients, _pfds);
@@ -270,6 +281,10 @@ int	Server::handleClientPoll(int i)//i here is only sent so that _pfds and _clie
 		if (strncmp(buf, "TOPIC ", 5) == 0)
 		{
 			std::cout << "User " << _clients[i].getUsername() << " changed the topic" << std::endl;
+		}
+		if (strncmp(buf, "MODE ", 5) == 0)
+		{
+			std::cout << "User " << _clients[i].getUsername() << " changed the channel's mode to something." << std::endl;
 		}
 		if (strncmp(buf, "QUIT", 4) == 0)
 		{
