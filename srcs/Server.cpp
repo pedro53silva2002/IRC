@@ -1,7 +1,66 @@
 #include "../includes/Server.hpp"
 
+//todo do the isRegistered() part and the welcome part, then remove all comments and make it readable, then channels!!!
+
+//todo Channel logic
+/* 
+when a message is sent to server, save the channel that the client who sent it used, 
+then go to that channels ClientsInChannel, then loop through getId to find which clients to sendInfo to
+
+
+
+
+	class channel
+	{
+		vector ClientsInChannel (saves their id)
+		
+	}
+	
+	
+	Server
+	{
+		vector Channel
+	}
+
+
+	
+
+
+	WHERE WOULD THIS GO THO????
+	SHALL I JUST TEST IT AFTER PROCESSING REGISTRATION???
+	while (_clients[i]) 
+	{
+		if (_clients[i].getId() == ClientsInChannel)      FIND INSIDE THE VECTOR OF ClientsInChannel
+		{
+			sendToClient(_clients[i], LINE_TO_SEND);
+		}
+	}
+
+
+	commandJoin(std::string str) {
+		if (Channel with name str doesnt exist)
+		{
+			createChannel()
+			save _clients[i].getId() into channel.ClientsInChannel
+		}
+		else
+		{
+			save _clients[i].getId() into channel.ClientsInChannel
+		}
+	}
+
+
+
+ */
+
+
+
+
+
+
 //*CONSTRUCTORS
-Server::Server(char *port, char *pass){
+Server::Server(char *port, char *pass) {
+	_name = "MyIRC";
 	_port = atoi(port);
 	_pass = pass;
 
@@ -18,14 +77,17 @@ Server::Server(char *port, char *pass){
 
 	myListen(_socket, SOMAXCONN);
 
-	std::cout << "Server open in port: " << _port << std::endl;
-	// std::cout << GREEN("Server open in port: ") << _port << std::endl;
+	std::cout << GREEN("Server open in port: ") << _port << std::endl;
 
 	_srvPfd.fd = _socket;
 	_srvPfd.events = POLLIN;
 	_srvPfd.revents = 0;
 
 	_clients.push_back(Client());//This is so that we dont have to work with _clients[i - 1]
+
+	//!VERY TEMPORARY
+	Channel temp("temp");//NAME WILL BE A PARAMETER FROM BUF
+	_channels.push_back(temp);
 }
 
 //*Accepting client
@@ -36,6 +98,7 @@ int		Server::acceptClient()
 	socklen_t	clientSize = sizeof(clientAddr);
 	char		host[NI_MAXHOST];
 	
+	//myAccept
 	tempSocket = accept(_socket, (sockaddr*)&clientAddr, &clientSize);
 	if (tempSocket == -1)
 		throw (std::runtime_error("Problem with client connecting"));
@@ -51,7 +114,7 @@ void	Server::setPfds()
 {
 	_pfds.clear();
 	_pfds.push_back(_srvPfd);
-	std::vector<Client>::iterator it = _clients.begin();//stupid fucking fix
+	std::vector<Client>::iterator it = _clients.begin();//stupid fix
 	it++;
 	while (it != _clients.end()){
 		_pfds.push_back(it->getPfd());
@@ -60,239 +123,129 @@ void	Server::setPfds()
 }
 
 //*Disconnect client when client exits
-void	Server::disconnectClient(Client client, int i)
+void	Server::commandQuit(int i, std::string str)//calling QUIT asks for reason, ctrl+c doesnt need reason
 {
-	//remove client
-	std::cout << "Client " << client.getUsername() << " disconnected" << std::endl;
-
-	//use getID to make it one less parameter
+	serverLog(_clients[i].getNick(), "has disconnected");
+	sendToClient(_clients[i], "QUIT :" + str);
 	close (_pfds[i].fd);
 	_clients.erase(_clients.begin() + i - 1);
 }
 
+
 //this is just testing
-bool	Server::shouldServerExit(char buf[])
+int	Server::exitServer()
 {
-	if (strncmp(buf, "exit", 4) == 0) {
-		std::cout << "exiting server" << std::endl;
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-			close(it->getSocket());
-		close(_socket);
-		return (true);
-	}
-	return (false);
+	std::cout << "exiting server" << std::endl;
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		close(it->getSocket());
+	close(_socket);
+	return (0);
 }
 
 
-//debug message, replace by printInfo when done
-void	debugClientMessage(Client client, char buf[])
-{
-	std::cout << "Client " << client.getId() << " said: " << buf;
-}	
 
 
-enum	pollCondition//fucking stupid find a better solution
-{
-	DISCONNECT,
-	EXIT,
-	OK
-};
-
-
-//*Parsing i think, coletes double check
-std::string getUsername(const std::string &line) {
-    size_t pos = 0;
-    for (int i = 0; i < 1; ++i)
-        pos = line.find(' ', pos + 1);
-    return line.substr(pos + 1, line.find(' ', pos + 2) - pos - 1);
+void	sendToClient(Client client, std::string str) {
+	std::string reply = ":<FIXED_SENDER> :" + str + "\r\n";
+	send(client.getSocket(), reply.c_str(), reply.size(), 0);
 }
 
-std::string getRealname(const std::string &line) {
-    size_t pos = 0;
-    for (int i = 0; i < 4; ++i)
-        pos = line.find(' ', pos + 1);
-    return line.substr(pos + 1);
+
+
+
+//!THIS IS SO BAD HONESTLY
+void	Server::commandJoin(int i)
+{
+	//before creating a new channel, it will check if there is one with that name
+	// Channel temp("temp");//NAME WILL BE A PARAMETER FROM BUF
+	// _channels.push_back(temp);
+
+	_channels[0].clientJoin(_clients[i].getId());
+	
 }
 
-std::string getNick(const std::string &line) {
-    size_t pos = 0;
-	std::string nickname;
-    for (int i = 0; i < 1; ++i)
-        pos = line.find(' ', pos + 1);
-	nickname = line.substr(pos + 1, line.find(' ', pos + 2) - pos - 1);
-	if (nickname[0] == ':' || nickname == "#" || !strncmp(nickname.c_str(), "#&", 2) || !strncmp(nickname.c_str(), "&#", 2) || nickname.empty())
-		return ("");
-	for (size_t i = 0; i < nickname.size(); i++)
+
+//!THIS IS BAD BECAUSE IT SENDS TO THE RIGHT CLIENT BUT THE WRONG NICKNAME, HOW TF DO I CORRECT THIS
+void	Channel::sendToClientsInChannel(std::vector<Client> clients, std::string str) {
+	for (std::vector<int>::iterator idIt = _clientsInChannel.begin(); idIt != _clientsInChannel.end(); idIt++)
 	{
-		if (nickname[i] == ' ')
-			return ("");
-	}
-    return (nickname);
-}
-
-std::string kickUser(const std::string &line, std::vector<Client> &clients, std::vector<pollfd> &_pfds) {
-    size_t pos = 0;
-	std::string userToKick;
-    for (int i = 0; i < 1; ++i)
-        pos = line.find(' ', pos + 1);
-	userToKick = line.substr(pos + 1, line.find(' ', pos + 1) - pos);
-	userToKick[userToKick.size() - 2] = '\0'; // Remove trailing \r\n
-	/* for (std::vector<Client>::iterator client_it = clients.begin(); client_it != clients.end(); client_it++)
-		if (client_it->getUsername() == userToKick)
-		{
-			close(client_it->getSocket());
-			clients.erase(client_it);
-			break ;
-		} */
-	// Find and remove the client safely
-    for (std::vector<Client>::iterator it = clients.begin() + 1; it != clients.end(); ++it) {
-		std::cout << "SEARCH: " << userToKick << "\t\tCOMPARISON: " << it->getUsername() << " | " << strcmp(it->getUsername().c_str(), userToKick.c_str()) << std::endl;
-        if (!strcmp(it->getUsername().c_str(), userToKick.c_str())) {
-			std::cout << "GOT HERE\n" << std::endl;
-            //send(it->getSocket(), "You were kicked\r\n", 19, 0);
-            close(it->getSocket());
-			_pfds.erase(_pfds.begin() + std::distance(clients.begin(), it)); // Remove from pollfds
-            clients.erase(it);  // Erase removes them safely
-            break;              // Stop — iterator is now invalid
-        }
-    }
-
-    return (userToKick);
-}
-
-
-
-
-
-
-
-
-
-
-
-int	Server::handleClientPoll(int i)//i here is only sent so that _pfds and _clients are at the same index
-{
-	char buf[512];//this can change for a vector if needed
-	int bytesRecv = myRecv(_pfds[i].fd, buf, sizeof(buf), 0);
-	if (bytesRecv == 0) {
-		disconnectClient(_clients[i], i);
-		return (DISCONNECT);
-	}
-	buf[bytesRecv] = 0;
-	// debugClientMessage(_clients[i], buf);
-
-	if (shouldServerExit(buf))
-		return (EXIT);
-
-	_clients[i].setBuf(buf);
-
-		//Vou por os comandos a serem processados assim, depois vemos isto juntos
-		/* 
-			tryPass(extractedPass) {
-				if (extractedPass != _pass)
-					throw WRONGPASSstd::vector<Client> _clients
-			processCommand() {
-				if (!clients.isauth())
-					tryAuthClient()
-				else {
-					Any other command, like USER or NICK or JOIN or PRIVMSG or whatever
+		int id = *idIt;
+		for (std::vector<Client>::iterator clientIt = clients.begin();
+			clientIt != clients.end(); ++clientIt) {
+				if (clientIt->getId() == id)
+				{
+					sendToClient(*clientIt, str);
+					break ;
 				}
 			}
-			
-			AQUI
-
-			try
-				processCommand
-			catch
-				cout "command error"
-
-				(check :IRC (RFC 1459 / 2812) for what to do in each case)
-
-		*/
+	}
+}
 
 
+
+
+// enum	ClientStatus
+// {
+// 	NOT_AUTHED,
+// 	NOT_REGISTERED,
+// 	REGISTERED,
+// 	QUITTING,
+// 	EXITING_SRV
+// };
+// int		Server::getStatus(int i)
+// {
+// 	if (!_clients[i].isAuthenticated())
+// 		return NOT_AUTHED;
+// 	else if (!_clients[i].isRegistered())
+// 		return NOT_REGISTERED;
+// 	else if (strncmp(_clients[i].getBuf(), "QUIT ", 4) == 0)
+// 		return QUITTING;
+// 	else if (strncmp(_clients[i].getBuf(), "exit ", 4) == 0)
+// 		return EXITING_SRV;
+// }
+
+
+void	Server::processCommand(int i)
+{
+	// std::cout << YELLOW("Debug: ") << "Client " << _clients[i].getNick()<< " said: " << _clients[i].getBuf();
 	
-
-	if (!_clients[i].isAuthenticated())
-	{
-		char *bufPass = buf/* strncpy(buf, bufPass, bytesRecv) */;
-		bufPass[bytesRecv - 2] = '\0'; //removing \r\n
-		//bufPass[bytesRecv - 1] = '\0'; //removing \r\n
-		std::cout << "Mine: " << bufPass << "\tOrig: " << _pass << "\tValue: " << (bufPass == _pass) << std::endl;
-		if (!strncmp(buf, "PASS ", 5)/* strcmp(bufPass, &pass[0]) == 0 */)
-		{
-			std::string line(bufPass);
-			size_t pos = 0;
-			for (int i = 0; i < 1; ++i)
-				pos = line.find(' ', pos + 1);
-			std::cout << "Extracted pass: " << line/* .substr(pos + 1) */ << std::endl;	
-			if (strcmp(line.substr(pos + 1).c_str(), _pass.c_str()) == 0)
-			{
-				std::cout << "Password correct\nClient should now be able to set user and talk\n";
-				_clients[i].setAuthenticated(true);
-			}
-			else {
-				//std::cout << _clients[i].getUsername() << " Password incorrect\n";
-				throw std::runtime_error(_clients[i].getUsername() + ": Password incorrect\n");
-			}
-		}
-		else {
-			std::cout << "Client cannot talk\n";
-		}
-	}
-	else if (!_clients[i].isRegistrated() && _clients[i].isAuthenticated())
-	{
-		//std::cout << "Client " << _clients[i].getUsername()<< " said: " << buf;
-		if (strncmp(buf, "USER ", 5) == 0)
-		{
-			_clients[i].setUsername(getUsername(buf));
-			_clients[i].setRealname(getRealname(buf));
-			if (!_clients[i].getNick().empty() && !_clients[i].getUsername().empty() && !_clients[i].getRealname().empty())
-				_clients[i].setRegistrated(true);
-			std::cout << "Username set to: " << _clients[i].getUsername() << " || " << _clients[i].getRealname() << std::endl;
-		}
-		else if (strncmp(buf, "NICK ", 5) == 0)
-		{
-			_clients[i].setNick(getNick(buf));
-			if (!_clients[i].getNick().empty() && !_clients[i].getUsername().empty() && !_clients[i].getRealname().empty())
-				_clients[i].setRegistrated(true);
-			std::cout << "Nick set to: " << _clients[i].getNick() << std::endl;
-		}
-		else
-		{
-			std::cout << "Client not registrated yet\n";
-		}
-	}
-	else if (_clients[i].isRegistrated() && _clients[i].isAuthenticated())
-	{
-		if (strncmp(buf, "KICK ", 5) == 0)
-		{
-			std::string userToKick = kickUser(buf, _clients, _pfds);
-			std::cout << "User " << userToKick << " kicked." << std::endl;
-		}
-		if (strncmp(buf, "JOIN ", 5) == 0)
-		{
-			std::cout << "User " << _clients[i].getUsername() << " joined the chat." << std::endl;
-		}
-		if (strncmp(buf, "INVITE ", 5) == 0)
-		{
-			std::cout << "User " << _clients[i].getUsername() << " got invited" << std::endl;
-		}
-		if (strncmp(buf, "TOPIC ", 5) == 0)
-		{
-			std::cout << "User " << _clients[i].getUsername() << " changed the topic" << std::endl;
-		}
-		if (strncmp(buf, "MODE ", 5) == 0)
-		{
-			std::cout << "User " << _clients[i].getUsername() << " changed the channel's mode to something." << std::endl;
-		}
-		if (strncmp(buf, "QUIT", 4) == 0)
-		{
-			return (EXIT);
-		}
+	//*Closing server
+	if (strncmp(_clients[i].getBuf(), "exit ", 4) == 0)
+		throw (exitServer());
+	//*Disconnects client
+	else if (strncmp(_clients[i].getBuf(), "QUIT ", 4) == 0)
+		return (commandQuit(i, "hardcoded quit"));
+	
+	//*Registering client
+	if (!_clients[i].isRegistered()) {
+		registration(i);
+		return ;
 	}
 
-	return (OK);
+
+	//*echo
+	sendToClient(_clients[i], _clients[i].getBuf());
+
+	//!THIS IS SO BAD HONESTLY
+	// if (strncmp(_clients[i].getBuf(), "JOIN ", 5) == 0)
+	// 	commandJoin(i);
+	// _channels[0].sendToClientsInChannel(_clients, _clients[i].getBuf());
+	//!THIS IS SO BAD HONESTLY
+}
+
+
+bool	Server::handleClientPoll(int i)
+{
+	char buf[512];
+	_clients[i]._bytesRecv = myRecv(_pfds[i].fd, buf, sizeof(buf), 0);
+	if (_clients[i]._bytesRecv == 0) {
+		commandQuit(i, "");
+		return (false);
+	}
+	_clients[i].setBuf(buf);
+
+	processCommand(i);
+	return (true);
 }
 
 
@@ -313,21 +266,10 @@ void	Server::srvRun()
 		{
 			if (_pfds[i].revents & POLLIN) {
 				int ret = handleClientPoll(i);
-				if (ret == DISCONNECT)//i dont like this
+				if (ret == false)//i dont like this
 					continue ;
-				else if (ret == EXIT)
-					return ;
 			}
 		}
 	}
 	close(_socket);
 }
-
-
-
-/* 
-	Have a function called printInfo, that will have client id, nick and/or user, authenticated, and the command
-	maybe for this, buffer or command will have to be saved onto client
-
-	also, hard code a client with info already in it and pass a command as if it was written to test the parsing
-*/

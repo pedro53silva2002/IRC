@@ -1,6 +1,6 @@
 NAME = ircserv
 SRCS_DIR = ./srcs
-SRCS = main.cpp Server.cpp myfuncs.cpp Client.cpp
+SRCS = main.cpp Server.cpp Client.cpp AuthReg.cpp myfuncs.cpp aux.cpp
 OBJS_DIR = ./objs
 OBJS = $(addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o))
 CXX = c++
@@ -18,9 +18,6 @@ $(NAME): $(OBJS)
 	@echo "$(NAME) compiling..."
 	@$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $(INCLUDES)
 	@echo "$(NAME) ready!"
-
-valgrind: 
-	/usr/bin/valgrind --leak-check=full -s --show-leak-kinds=all ./$(NAME) 6667 pass
 
 clean:
 	@$(RM) -r $(OBJS_DIR)

@@ -13,12 +13,18 @@ int		main(int ac, char **av)
 		srv.srvRun();
 	} catch (std::exception &e) {
 		std::cerr << RED("Exception caught: ") << e.what() << std::endl;
+	} catch (int n) {
+		std::cerr << GREEN("Server exit Ok: ") << n << std::endl;
 	}
 
 	return 0;
 }
 
 /* 
+	unless password, user or nick is incorrect in terms of parsing, 
+	nothing should be sent to client until registration is done
+
+
 	Client needs to register itself in server before using stuff like JOIN or PRIVMSG
 	client should send info:
 		recommended order by ircdocs:

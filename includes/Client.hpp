@@ -27,13 +27,16 @@ class Client
 
 		//INFO
 		bool		_authenticated;
-		bool		_registrated;
+		bool		_registered;
+		bool		_capped;
 		std::string	_username;
 		std::string _nick;
 		std::string	_realname;
 
 		char		*_buf;
+
 	public:
+		id_t		_bytesRecv;//any other way?
 		//*CONSTRUCTORS
 
 		Client(int srvSocket) {
@@ -43,10 +46,11 @@ class Client
 			_pfd.events = POLLIN;
 			_pfd.revents = 0;
 			_authenticated = false;
-			_registrated = false;
-			_username = nullptr;
-			_nick = nullptr;
-			_realname = nullptr;
+			_registered = false;
+			_capped = false;
+			_username = "";
+			_nick = "*";
+			_realname = "";
 		}
 
 		Client() {
@@ -59,30 +63,35 @@ class Client
 		int		getSocket() { return (_socket); }
 		pollfd	&getPfd() { return (_pfd); }//why &
 
-
+		bool isCapped() {
+			return (_capped);
+		}
+		void setCapped(bool auth) {
+			_capped = auth;
+		}
 		bool isAuthenticated() {
 			return (_authenticated);
 		}
 		void setAuthenticated(bool auth) {
 			_authenticated = auth;
 		}
-		bool isRegistrated() {
-			return (_registrated);
+		bool isRegistered() {
+			return (_registered);
 		}
-		void setRegistrated(bool auth) {
-			_registrated = auth;
+		void setRegistered(bool auth) {
+			_registered = auth;
 		}
 		std::string	getUsername() {
 			return (_username);
 		}
-		void	setUsername(std::string username) {
+		void		setUsername(std::string username) {
 			_username = username;
 		}
 		//check order
 		std::string	getNick() {
 			return (_nick);
 		}
-		void	setNick(std::string nick) {
+		void		setNick(std::string nick) {
 			_nick = nick;
 		}
 		std::string	getRealname() {
@@ -106,3 +115,4 @@ class Client
 
 
 #endif
+
