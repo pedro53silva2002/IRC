@@ -21,19 +21,31 @@ class Server
 {
 	private:
 		std::string		_name;
+		
 		int				_port;
 		std::string		_pass;
+
 		int				_socket;
 		sockaddr_in		server_addr;
-		pollfd			_srvPfd;
 
+		pollfd					_srvPfd;
 		std::vector<pollfd>		_pfds;
+
 		std::vector<Client> 	_clients;
 		std::vector<Channel>	_channels;
 
 		int		acceptClient();
 		void	setPfds();
 		bool	handleClientPoll(int i);
+		
+		
+		//Commands
+		void	processCommand(int i);
+		// int		getStatus(int i);
+		void	commandQuit(int i, std::string str);
+
+		void	commandJoin(int i);
+		
 
 		//AuthReg
 		void	registration(int i);
@@ -44,31 +56,12 @@ class Server
 		void	registerNick(int i);
 		void	welcomeClient(int i);
 		
-		//Commands
-		void	processCommand(int i);
-		// int		getStatus(int i);
-		void	commandQuit(int i, std::string str);
-
-		void	commandJoin(int i, std::string name);
 		
 
-		//send to channels
-		void	sendToClientsInChannel(int i, std::string str);
 
-
-
-		//todo this will need sender, the command, which will already have the string in case of PRIVMSG
-		//command from Angel: 		PRIVMSG Wiz :Hello are you receiving this message ?
-		//sendtoClient to Wiz:		:Angel PRIVMSG Wiz :Hello are you receiving this message ?
-		//command from dan:			PRIVMSG #coolpeople :Hi everyone!
-		//sendtoClientinChannel:	:dan!~h@localhost PRIVMSG #coolpeople :Hi everyone!
-		void	sendToClient(int i, std::string sender, std::string str);
-		void	sendToClient(int i, std::string str);
-		
 
 		//just for testing
-		void	exitServer();
-		void	debugMessage(int i);
+		int	exitServer();
 
 	public:
 		//*CONSTRUCTORS
@@ -81,11 +74,11 @@ class Server
 
 
 		void	srvRun();
-		
+
+
 		
 };
-
-
+void	sendToClient(Client client, std::string str);
 void	serverLog(std::string nick, std::string str);
 
 //*myFunctions
@@ -96,3 +89,5 @@ void	myPoll(pollfd *__fds, nfds_t __nfds, int __timeout);
 size_t	myRecv(int __fd, char *__buf, size_t __n, int __flags);
 
 #endif
+
+

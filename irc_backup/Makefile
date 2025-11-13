@@ -1,6 +1,6 @@
 NAME = ircserv
 SRCS_DIR = ./srcs
-SRCS = main.cpp Server.cpp AuthReg.cpp myfuncs.cpp aux.cpp
+SRCS = main.cpp Server.cpp Client.cpp AuthReg.cpp myfuncs.cpp aux.cpp
 OBJS_DIR = ./objs
 OBJS = $(addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o))
 CXX = c++
@@ -30,6 +30,6 @@ fclean: clean
 re: fclean all
 
 run: all
-	@./ircserv 6667 pass
+	@./ft_irc
 
 .PHONY: all fclean clean re

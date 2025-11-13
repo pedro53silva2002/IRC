@@ -13,6 +13,7 @@
 # include <poll.h>
 # include <stdlib.h>//atoi
 # include "Colours.hpp"
+# include "Channel.hpp"
 
 
 //todo when setting username and nick, have the setUser and setNick do the parsing
@@ -28,17 +29,19 @@ class Client
 		//INFO
 		bool		_authenticated;
 		bool		_registered;
-		bool		_capped;
+		// bool		_capped;
 		std::string	_username;
 		std::string _nick;
 		std::string	_realname;
 
 		char		*_buf;
+		int		_channelId;
 
+		
 	public:
-		id_t		_bytesRecv;//any other way?
-		//*CONSTRUCTORS
+		id_t		_bytesRecv;//! any other way? this is bad
 
+		//*CONSTRUCTORS
 		Client(int srvSocket) {
 			_id = _globalId++;
 			_socket = srvSocket;
@@ -47,67 +50,45 @@ class Client
 			_pfd.revents = 0;
 			_authenticated = false;
 			_registered = false;
-			_capped = false;
+			// _capped = false;
 			_username = "";
 			_nick = "*";
 			_realname = "";
+			_channelId = -1;
 		}
 
 		Client() {
 			_id = -1;
 			_socket = 0;
+			_channelId = -1;
 		}//DUMMY
 
 		//*GETTERS
-		int		getId() { return (_id); }
-		int		getSocket() { return (_socket); }
-		pollfd	&getPfd() { return (_pfd); }//why &
+		int			getId() { return (_id); }
+		int			getSocket() { return (_socket); }
+		pollfd		&getPfd() { return (_pfd); }//why &
+		bool		isAuthenticated() { return (_authenticated); }
+		bool		isRegistered() { return (_registered); }
+		// bool		isCapped() { return (_capped); }
+		std::string	getUsername() { return (_username); }
+		std::string	getNick() { return (_nick); }
+		std::string	getRealname() { return (_realname); }
+		char*		getBuf() { return (_buf); }
 
-		bool isCapped() {
-			return (_capped);
-		}
-		void setCapped(bool auth) {
-			_capped = auth;
-		}
-		bool isAuthenticated() {
-			return (_authenticated);
-		}
-		void setAuthenticated(bool auth) {
-			_authenticated = auth;
-		}
-		bool isRegistered() {
-			return (_registered);
-		}
-		void setRegistered(bool auth) {
-			_registered = auth;
-		}
-		std::string	getUsername() {
-			return (_username);
-		}
-		void		setUsername(std::string username) {
-			_username = username;
-		}
-		//check order
-		std::string	getNick() {
-			return (_nick);
-		}
-		void		setNick(std::string nick) {
-			_nick = nick;
-		}
-		std::string	getRealname() {
-			return (_realname);
-		}
-		void	setRealname(std::string realname) {
-			_realname = realname;
-		}
+		int			getChannelId() { return (_channelId); }
+
+		//*SETTERS
+		void	setAuthenticated(bool auth) { _authenticated = auth; }
+		void	setRegistered(bool auth) { _registered = auth; }
+		// void	setCapped(bool auth) { _capped = auth; }
+		void	setUsername(std::string username) { _username = username; }
+		void	setNick(std::string nick) { _nick = nick; }
+		void	setRealname(std::string realname) { _realname = realname; }
+		void	setBuf(char buf[]) { _buf = buf; }
+
+		void	setChannelId(int channelId) { _channelId = channelId; }
 
 
-		void	setBuf(char buf[]) {
-			_buf = buf;
-		}
-		char*	getBuf() {
-			return (_buf);
-		}
 
 
 
@@ -115,4 +96,3 @@ class Client
 
 
 #endif
-

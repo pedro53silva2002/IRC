@@ -1,0 +1,110 @@
+
+//todo 
+/*
+	create a socket
+	bind the socket to IP / port
+	mark the socket for listening in
+
+	accept the client call
+	close the listening socket
+
+	wait for message from client
+	receive message, print it, and echo it
+
+	close client socket
+*/
+
+//echo message
+// send(clients[i - 1].getSocket(), buf, bytesRecv + 1, 0);
+
+//* THIS IS CLIENT CREATION
+/* 
+	char		svc[NI_MAXSERV];
+	char		host[NI_MAXHOST];
+	sockaddr_in	client;
+	socklen_t	clientSize = sizeof(client);
+	_socket = accept(srvSocket, (sockaddr*)&client, &clientSize);
+	if (_socket == -1)
+		throw (std::runtime_error("Problem with client connecting"));
+	memset(host, 0, NI_MAXHOST);
+	inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
+	std::cout << host << " manually connected on " << ntohs(client.sin_port) << std::endl;//study ntohs()
+	int result = getnameinfo((sockaddr*)&client, clientSize, host, NI_MAXHOST, svc, NI_MAXSERV, 0);
+	if (result)
+		std::cout << host << " connected on " << svc << std::endl;
+	else{//this seems stupid
+		inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
+		std::cout << host << " manually connected on " << ntohs(client.sin_port) << std::endl;//study ntohs()
+	} 
+*/
+
+//* poll() test
+/* 	
+	std::vector<Client> cls;
+	Client cl1(srv.getSrvSocket()), cl2(srv.getSrvSocket());
+	cls.push_back(cl1);
+	cls.push_back(cl2);
+
+	//study pollfd struct, and POLLIN
+
+	struct pollfd pfds[3];
+	pfds[0].fd = cl1.getClientSocket();
+	pfds[0].events = POLLIN;
+	pfds[0].revents = 0;
+	pfds[1].fd = cl2.getClientSocket();
+	pfds[1].events = POLLIN;
+	pfds[1].revents = 0;
+
+	while (1)
+	{
+		if (poll(pfds, 2, -1) == -1)
+			throw (std::runtime_error("Poll failed"));
+		for (int i = 0; i < 2; i++) {
+			if (pfds[i].revents & POLLIN) {
+				char buf[512];
+				int n = recv(pfds[i].fd, buf, sizeof(buf), 0);
+				buf[n] = 0;
+				std::cout << "Client " << i + 1 << " said: " << buf;
+			}
+		}
+	} 
+*/
+	
+
+//* non poll() test
+/*
+	Client cl1(srv.getSrvSocket()), cl2(srv.getSrvSocket());
+
+	//todo EXCHANGE
+	char	buf[4096];
+	while (1)
+	{
+		//clear buffer
+		memset(buf, 0, 4096);
+		//waits for a message
+		int bytesRecv = recv(cl1.getClientSocket(), buf, 4096, 0);//study recv()
+		if (bytesRecv == -1)
+			throw (std::runtime_error("There was a connection issue: 1"));
+		if (bytesRecv == 0) {
+			std::cout << "The client disconnected" << std::endl;
+			break ;
+		}
+		std::cout << "Received from 1: " << std::string(buf, 0, bytesRecv) << std::endl;
+
+		send(cl1.getClientSocket(), buf, bytesRecv + 1, 0);//study send()
+		
+		//clear buffer
+		memset(buf, 0, 4096);
+		//waits for a message
+		bytesRecv = recv(cl1.getClientSocket(), buf, 4096, 0);//study recv()
+		if (bytesRecv == -1)
+			throw (std::runtime_error("There was a connection issue: 1"));
+		if (bytesRecv == 0) {
+			std::cout << "The client disconnected" << std::endl;
+			break ;
+		}
+		std::cout << "Received from 1: " << std::string(buf, 0, bytesRecv) << std::endl;
+
+		send(cl1.getClientSocket(), buf, bytesRecv + 1, 0);//study send()
+	}
+*/
