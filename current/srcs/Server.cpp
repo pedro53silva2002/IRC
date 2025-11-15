@@ -67,12 +67,8 @@ void	Server::setPfds()
 {
 	_pfds.clear();
 	_pfds.push_back(_srvPfd);
-	std::vector<Client>::iterator it = _clients.begin();//stupid fix
-	it++;
-	while (it != _clients.end()){
+	for (std::vector<Client>::iterator it = _clients.begin() + 1; it != _clients.end(); it++)
 		_pfds.push_back(it->getPfd());
-		it++;
-	}
 }
 
 //*Disconnect client when client exits
@@ -139,13 +135,12 @@ void	Server::sendToClientsInChannel(int i, std::string str)
 
 int		Server::findOrCreateChannel(int i, std::string name)
 {
-
 	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 	{
-		if (name.substr(0, name.size() - 1) == channelIt->getName())//PARSE AAAAAAAAA
+		if (name.substr(0, name.size() - 1) == channelIt->getName())
 			return (channelIt->getId());
 	}
-	Channel temp(name.substr(0, name.size() - 1));//PARSE AAAAAAAAA
+	Channel temp(name.substr(0, name.size() - 1));
 	_channels.push_back(temp);
 	std::cout << _channels.rbegin()->getName() << " has been created" << std::endl;
 	return (_channels.rbegin()->getId());
@@ -157,9 +152,11 @@ void	Server::commandJoin(int i, std::string name)
 	std::cout << "Client " << _clients[i].getNick() << 
 				" joined channel " << _channels[_clients[i].getChannelId()].getName() << std::endl;
 
-	std::string strToSend = "JOIN " + _channels[_clients[i].getChannelId()].getName();
+	std::string strToSend = "JOIN " + _channels[_clients[i].getChannelId()].getName();//check if this is whats supposed to be said
 	sendToClientsInChannel(i, strToSend);
-	//!should send to the client that just joined a welcome message
+
+	std::string welcomeMessage =  "Welcome to the channel, today's MOTD: " + _channels[_clients[i].getChannelId()].getName() + "temp motd!";//check if this is whats supposed to be said
+	sendToClient(i, welcomeMessage);//THIS ONE IS NOT NEEDED, BUT ITS AN AGKNOWLEDGEMENT THAT CLIENT HAS JOINED
 }
 
 
@@ -215,9 +212,9 @@ void	Server::testClients()
 		_clients[1].setNick("First");
 		_clients[1].setUsername("First");
 		_clients[1].setRealname("First");
-		_clients[1].setChannelId(1);
-		Channel temp("FirstChannel");
-		_channels.push_back(temp);
+		// _clients[1].setChannelId(1);
+		// Channel temp("FirstChannel");
+		// _channels.push_back(temp);
 		welcomeClient(1);
 	}
 	else if (_clients.size() == 3) {
@@ -226,7 +223,7 @@ void	Server::testClients()
 		_clients[2].setNick("Second");
 		_clients[2].setUsername("Second");
 		_clients[2].setRealname("Second");
-		_clients[2].setChannelId(1);
+		// _clients[2].setChannelId(1);
 		// Channel temp("SecondChannel");
 		// _channels.push_back(temp);
 		welcomeClient(2);
@@ -237,7 +234,7 @@ void	Server::testClients()
 		_clients[3].setNick("Third");
 		_clients[3].setUsername("Third");
 		_clients[3].setRealname("Third");
-		_clients[3].setChannelId(1);
+		// _clients[3].setChannelId(1);
 		// Channel temp("FirstChannel");
 		// _channels.push_back(temp);
 		welcomeClient(3);
@@ -248,7 +245,7 @@ void	Server::testClients()
 		_clients[4].setNick("Fourth");
 		_clients[4].setUsername("Fourth");
 		_clients[4].setRealname("Fourth");
-		_clients[4].setChannelId(1);
+		// _clients[4].setChannelId(1);
 		// Channel temp("FirstChannel");
 		// _channels.push_back(temp);
 		welcomeClient(4);
@@ -268,7 +265,7 @@ void	Server::srvRun()
 			_clients.push_back(Client(temp));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			// testClients();
+			testClients();
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)//*loop through clients
