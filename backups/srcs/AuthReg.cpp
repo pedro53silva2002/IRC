@@ -123,7 +123,6 @@ void	Server::registration(int i)
 	// 		send(_clients[i].getSocket(), response.c_str(), response.size(), 0); */
 	// 	}
 	// }
-	
 	if (!_clients[i].isAuthenticated()) {
 		tryAuthClient(i);
 		return ;
@@ -147,6 +146,11 @@ void	Server::tryPass(int i, char *bufPass)
 	size_t pos = 0;
 	for (int i = 0; i < 1; ++i)
 		pos = line.find(' ', pos + 1);
+	while (!line.empty() && (line[line.size() - 1] == '\r' || line[line.size() - 1] == '\n'))
+		line.erase(line.size() - 1);
+	std::cout << "MINE: " << line.substr(pos + 1) << std::endl;
+	std::cout << "ORIGINAL: " << _pass << std::endl;
+	std::cout << "RESULT: " << strcmp(line.substr(pos + 1).c_str(), _pass.c_str()) << std::endl;
 	if (strcmp(line.substr(pos + 1).c_str(), _pass.c_str()) != 0) {
 		//todo can hard code to sender be "*"
 		sendToClient(i, ERR_PASSWDMISMATCH);
@@ -161,7 +165,8 @@ void	Server::tryPass(int i, char *bufPass)
 void	Server::tryAuthClient(int i)
 {
 	char *bufPass = _clients[i].getBuf();
-	bufPass[_clients[i]._bytesRecv - 1] = '\0'; 
+	//This maybe fucking it up
+	//bufPass[_clients[i]._bytesRecv - 1] = '\0'; 
 	if (!ft_PassComand(_clients[i].getBuf())) {
 		//todo can hard code to sender be "*"
 		sendToClient(i, ERR_NOTAUTH);

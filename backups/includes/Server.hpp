@@ -50,7 +50,6 @@ class Server
 		void	commandQuit(int i, std::string str);
 
 		void	commandJoin(int i, std::string name);
-		int		findOrCreateChannel(int i, std::string name);
 		
 
 		//send to channels
@@ -58,18 +57,18 @@ class Server
 
 
 
+		//todo this will need sender, the command, which will already have the string in case of PRIVMSG
 		//command from Angel: 		PRIVMSG Wiz :Hello are you receiving this message ?
 		//sendtoClient to Wiz:		:Angel PRIVMSG Wiz :Hello are you receiving this message ?
 		//command from dan:			PRIVMSG #coolpeople :Hi everyone!
 		//sendtoClientinChannel:	:dan!~h@localhost PRIVMSG #coolpeople :Hi everyone!
-		void	sendToClient(int id, std::string sender, std::string str);
+		void	sendToClient(int i, std::string sender, std::string str);
 		void	sendToClient(int i, std::string str);
 		
 
 		//just for testing
 		void	exitServer();
 		void	debugMessage(int i);
-		void	testClients();
 
 	public:
 		//*CONSTRUCTORS
