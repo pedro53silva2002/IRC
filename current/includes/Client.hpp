@@ -35,8 +35,10 @@ class Client
 		std::string	_realname;
 
 		char		*_buf;
-		int		_channelId;
+		int			_channelId;
+		std::string	_channelName;
 
+		bool		_isOp;
 		
 	public:
 		int		_bytesRecv;//! any other way? this is bad
@@ -55,12 +57,16 @@ class Client
 			_nick = "*";
 			_realname = "";
 			_channelId = -1;
+			_channelName = "";
+			_isOp = false;
 		}
 
 		Client() {
 			_id = -1;
 			_socket = 0;
 			_channelId = -1;
+			_channelName = "";
+			_isOp = false;
 		}//DUMMY
 
 		//*GETTERS
@@ -74,8 +80,9 @@ class Client
 		std::string	getNick() { return (_nick); }
 		std::string	getRealname() { return (_realname); }
 		char*		getBuf() { return (_buf); }
-
+		bool		getOp() { return (_isOp); }
 		int			getChannelId() { return (_channelId); }
+		std::string	getChannelName() { return (_channelName); }
 
 		//*SETTERS
 		void	setAuthenticated(bool auth) { _authenticated = auth; }
@@ -85,14 +92,14 @@ class Client
 		void	setNick(std::string nick) { _nick = nick; }
 		void	setRealname(std::string realname) { _realname = realname; }
 		void	setBuf(char buf[]) { _buf = buf; }
-
 		void	setChannelId(int channelId) { _channelId = channelId; }
+		void	setchannelName(std::string channelName) { _channelName = channelName; }
+		void	setOp(bool op) { _isOp = op; }
 
 
 
 
 
 };
-
 
 #endif

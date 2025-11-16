@@ -1,18 +1,9 @@
 #include "../includes/Server.hpp"
 
+//What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
+//also, when a client that was op leaves his channel, and joins another, need to take op from him
 
-/*
-	COLETES os comandos precisam de ser parsed para:
-		<Comando>				(sem mais nada, nem o espaço)
-		<Comando> 				(com o espaço)
-		<Comando> I				(um só caracter)
-	
-	especificamente, preciso também do commandJoin me guarde uma variavel chamada channelName, 
-	que esteja já só com o nome que o client der input. (Exemplo: JOIN Channel1   ->  channelName = Channel1)
-
-*/
-
-
+//each time a command uses getBuf and receives a std::string, should parse it before running the rest of the function, to get like names or parameteres or whatever needed
 
 //*CONSTRUCTORS
 Server::Server(char *port, char *pass) {
@@ -82,66 +73,17 @@ void	Server::commandQuit(int i, std::string str)
 }
 
 
-//this is just testing
-void	Server::exitServer()
-{
-	std::cout << "exiting server" << std::endl;
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		close(it->getSocket());
-	close(_socket);
-	throw (0);
-}
-
-
-void	Server::sendToClient(int id, std::string sender, std::string str)
-{
-	std::string reply = sender + " :" + str + "\r\n";
-
-	for (std::vector<Client>::iterator clientIt = _clients.begin();
-		clientIt != _clients.end(); ++clientIt)
-		{
-			if (clientIt->getId() == id) {
-				send(clientIt->getSocket(), reply.c_str(), reply.size(), 0);
-				return ;
-			}
-		}
-}
-void	Server::sendToClient(int i, std::string str) {
-
-	std::string reply = _clients[i].getNick() + " :" + str + "\r\n";
-	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
-}
-
-void	Server::sendToClientsInChannel(int i, std::string str)
-{
-	int	channelId = _clients[i].getChannelId();
-	if (channelId == -1)
-		return ;
-	std::string		channelName = _channels[channelId].getName();
-
-	for (std::vector<Client>::iterator clientIt = _clients.begin();
-		clientIt != _clients.end(); ++clientIt)//
-		{
-			if (clientIt->getChannelId() == channelId 
-				&& clientIt->getId() != _clients[i].getId())
-				{
-					std::string sender = channelName + " :" + _clients[i].getNick();
-					sendToClient(clientIt->getId(), sender, str);
-				}
-		}
-}
-
-
 
 int		Server::findOrCreateChannel(int i, std::string name)
 {
 	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 	{
 		if (name.substr(0, name.size() - 1) == channelIt->getName())
-			return (channelIt->getId());
+			return (channelIt->getId());//Found an existing channel
 	}
 	Channel temp(name.substr(0, name.size() - 1));
 	_channels.push_back(temp);
+	_clients[i].setOp(true);
 	std::cout << _channels.rbegin()->getName() << " has been created" << std::endl;
 	return (_channels.rbegin()->getId());
 }
@@ -149,23 +91,47 @@ void	Server::commandJoin(int i, std::string name)
 {
 	int channelId = findOrCreateChannel(i, name);
 	_clients[i].setChannelId(channelId + 1);
+	_clients[i].setchannelName( _channels[_clients[i].getChannelId()].getName());
 	std::cout << "Client " << _clients[i].getNick() << 
-				" joined channel " << _channels[_clients[i].getChannelId()].getName() << std::endl;
+				" joined channel " << _clients[i].getChannelName() << std::endl;
 
 	std::string strToSend = "JOIN " + _channels[_clients[i].getChannelId()].getName();//check if this is whats supposed to be said
 	sendToClientsInChannel(i, strToSend);
 
-	std::string welcomeMessage =  "Welcome to the channel, today's MOTD: " + _channels[_clients[i].getChannelId()].getName() + "temp motd!";//check if this is whats supposed to be said
+	std::string welcomeMessage =  "Welcome to the channel: " + _clients[i].getChannelName() + ", today's MOTD: temp motd!";//check if this is whats supposed to be said
 	sendToClient(i, welcomeMessage);//THIS ONE IS NOT NEEDED, BUT ITS AN AGKNOWLEDGEMENT THAT CLIENT HAS JOINED
 }
 
+void	Server::commandKick(int i, std::string toKick)
+{
+	if (!_clients[i].getOp()) {
+		std::cout << _clients[i].getNick() << " tried to Kick without being op" << std::endl;
+		return ;
+	}
 
+	toKick = toKick.substr(0, toKick.size() - 1);
+	if (toKick == _clients[i].getNick()) {
+		std::cout << _clients[i].getNick() << " cannot kick themselves" << std::endl;
+		sendToClient(_clients[i].getId(), "you cannot kick yourself from channel");//!check the actual output
+		return ;
+	}
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		if (toKick == it->getNick() && it->getChannelId() == _clients[i].getChannelId()) {
+			std::cout << _clients[i].getNick() << " kicked " << it->getNick() << " from " 
+						<< _clients[i].getChannelName() << std::endl;
+			it->setChannelId(-1);
+			sendToClient(it->getId() + 1, "you have been kicked");//!check the actual output
+			//!also why is this a +1 again? i thought i had solved this, check it when you want
+		}
+	}
+}
 
 void	Server::processCommand(int i)
 {
 	// debugMessage(i);
 	// sendToClient(i, _clients[i].getBuf());
-	
+
 	//*Closing server
 	if (strncmp(_clients[i].getBuf(), "exit ", 4) == 0)
 		exitServer();
@@ -184,6 +150,8 @@ void	Server::processCommand(int i)
 	//*START OF CHANNEL LOGIC
 	if (strncmp(_clients[i].getBuf(), "JOIN ", 5) == 0)
 		commandJoin(i, _clients[i].getBuf() + 5);
+	else if (strncmp(_clients[i].getBuf(), "KICK ", 5) == 0)
+		commandKick(i, _clients[i].getBuf() + 5);
 	else
 		sendToClientsInChannel(i, _clients[i].getBuf());
 

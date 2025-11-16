@@ -49,9 +49,12 @@ class Server
 		// int		getStatus(int i);
 		void	commandQuit(int i, std::string str);
 
+		//join
 		void	commandJoin(int i, std::string name);
 		int		findOrCreateChannel(int i, std::string name);
-		
+		//kick
+		void	commandKick(int i, std::string toKick);
+
 
 		//send to channels
 		void	sendToClientsInChannel(int i, std::string str);
