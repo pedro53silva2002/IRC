@@ -102,14 +102,14 @@ void	Server::commandJoin(int i, std::string name)
 	sendToClient(i, welcomeMessage);//THIS ONE IS NOT NEEDED, BUT ITS AN AGKNOWLEDGEMENT THAT CLIENT HAS JOINED
 }
 
+
 void	Server::commandKick(int i, std::string toKick)
 {
 	if (!_clients[i].getOp()) {
 		std::cout << _clients[i].getNick() << " tried to Kick without being op" << std::endl;
 		return ;
 	}
-
-	toKick = toKick.substr(0, toKick.size() - 1);
+	toKick = toKick.substr(0, toKick.size());
 	if (toKick == _clients[i].getNick()) {
 		std::cout << _clients[i].getNick() << " cannot kick themselves" << std::endl;
 		sendToClient(_clients[i].getId(), "you cannot kick yourself from channel");//!check the actual output
@@ -125,6 +125,56 @@ void	Server::commandKick(int i, std::string toKick)
 			//!also why is this a +1 again? i thought i had solved this, check it when you want
 		}
 	}
+}
+
+void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DONT TOUCH
+{
+	if (_clients[i].getChannelId() == -1) {
+		std::cout << _clients[i].getNick() << " cannot invite users without being in the channel." << std::endl;
+		sendToClient(_clients[i].getId(), "you cannot users without being in the channel");//!check the actual output
+		return ;
+	}
+	std::cout << "INVITED: " << name << " by " << _clients[i].getNick() << std::endl;
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		std::cout << "LOOKING FOR: " << name << " is it " << it->getNick() << std::endl;
+		if (name == it->getNick() /* && it->getChannelId() == -1 */) {
+			std::cout << "GOT IN" << std::endl;
+			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+			{
+				if (it->getChannelName() != "" && channelIt->getName() == it->getChannelName())
+				{
+					std::cout << _clients[i].getNick() << " cannot invite users without being in the channel." << std::endl;
+					sendToClient(_clients[i].getId(), "you cannot users without being in the channel");//!check the actual output
+					return ;
+				}
+				std::cout << "CHECKING CHANNEL: " << channelIt->getName() << "my channel: " << it->getChannelName() << std::endl;
+				/* if (name.substr(0, name.size() - 1) == channelIt->getName())
+					return (channelIt->getId());//Found an existing channel */
+			}
+		}
+	}
+	/* for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		if (toKick == it->getNick() && it->getChannelId() == _clients[i].getChannelId()) {
+			std::cout << _clients[i].getNick() << " kicked " << it->getNick() << " from " 
+						<< _clients[i].getChannelName() << std::endl;
+			it->setChannelId(-1);
+			sendToClient(it->getId() + 1, "you have been kicked");//!check the actual output
+			//!also why is this a +1 again? i thought i had solved this, check it when you want
+		}
+	}
+	int channelId = findOrCreateChannel(i, name);
+	_clients[i].setChannelId(channelId + 1);
+	_clients[i].setchannelName( _channels[_clients[i].getChannelId()].getName());
+	std::cout << "Client " << _clients[i].getNick() << 
+				" joined channel " << _clients[i].getChannelName() << std::endl;
+
+	std::string strToSend = "JOIN " + _channels[_clients[i].getChannelId()].getName();//check if this is whats supposed to be said
+	sendToClientsInChannel(i, strToSend);
+
+	std::string welcomeMessage =  "Welcome to the channel: " + _clients[i].getChannelName() + ", today's MOTD: temp motd!";//check if this is whats supposed to be said
+	sendToClient(i, welcomeMessage);//THIS ONE IS NOT NEEDED, BUT ITS AN AGKNOWLEDGEMENT THAT CLIENT HAS JOINED */
 }
 
 void	Server::processCommand(int i)
@@ -152,6 +202,8 @@ void	Server::processCommand(int i)
 		commandJoin(i, _clients[i].getBuf() + 5);
 	else if (strncmp(_clients[i].getBuf(), "KICK ", 5) == 0)
 		commandKick(i, _clients[i].getBuf() + 5);
+	else if (strncmp(_clients[i].getBuf(), "INVITE ", 7) == 0)
+		commandInvite(i, _clients[i].getBuf() + 7); ///////STILL DOING THIS DONT TOUCH
 	else
 		sendToClientsInChannel(i, _clients[i].getBuf());
 

@@ -54,6 +54,8 @@ class Server
 		int		findOrCreateChannel(int i, std::string name);
 		//kick
 		void	commandKick(int i, std::string toKick);
+		//invite
+		void	commandInvite(int i, std::string name);
 
 
 		//send to channels
