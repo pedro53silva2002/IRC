@@ -76,12 +76,15 @@ void	Server::commandQuit(int i, std::string str)
 
 int		Server::findOrCreateChannel(int i, std::string name)
 {
+	int take = 0;
 	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 	{
-		if (name.substr(0, name.size() - 1) == channelIt->getName())
+		if (name.substr(0, name.size()) == channelIt->getName())
 			return (channelIt->getId());//Found an existing channel
 	}
-	Channel temp(name.substr(0, name.size() - 1));
+	if (_channels.size() == 1)
+		take = 2;
+	Channel temp(name.substr(0, name.size() - take));
 	_channels.push_back(temp);
 	_clients[i].setOp(true);
 	std::cout << _channels.rbegin()->getName() << " has been created" << std::endl;
@@ -127,18 +130,127 @@ void	Server::commandKick(int i, std::string toKick)
 	}
 }
 
+template<typename T>
+bool hasInChannels(std::vector<T> channels, std::string name)
+{
+	for (typename std::vector<T>::iterator channelIt = channels.begin(); channelIt != channels.end(); ++channelIt)
+	{
+		if (name == channelIt->getName())
+			return (true);
+	}
+	return (false);
+}
+
+bool hasInUserChannels(Client client, std::string name)
+{
+	std::vector<std::string> channelsInside;
+	std::string line(client.getChannelName());
+	size_t pos = 0;
+	if (line == "")
+		return (0);
+	else if (line.find(';', pos + 1) == std::string::npos)
+	{
+		channelsInside.push_back(line);
+	}
+	else 
+	{
+		channelsInside.push_back(line.substr(0, line.find(';', pos)));
+		while (line.find(';', pos + 1) != std::string::npos)
+		{
+			pos = line.find(';', pos + 1);
+			//std::cout << "POS: " << pos << std::endl;
+			channelsInside.push_back(line.substr(pos + 1, line.find(';', pos + 1) - pos - 1));
+		}
+		//std::cout << "LAST LINE?: " <<  line.find(';', pos) << std::endl;
+	}
+	for (std::vector<std::string>::iterator insideIt = channelsInside.begin(); insideIt != channelsInside.end(); ++insideIt)
+	{
+		if (name == *insideIt)
+		{
+			//std::cout << "FOUND CHANNEL: " << *insideIt << std::endl;
+			return (true);
+		}
+	}
+	return (false);
+}
+
+Client* Server::foundInUsers(std::string name)
+{
+	for (size_t i = 1; i < _clients.size(); i++)
+	{
+		if (name == _clients[i].getNick())
+			return (&_clients[i]);
+	}
+	return (0);
+}
+
+int Server::findChannel(Client client, std::vector<Channel> channels,std::string name)
+{
+	std::string userToInvite (name);
+	std::string channelToGet(name);
+	Client *invitedClient;
+	size_t pos = 0;
+	//std::cout << "NAME BEFORE: " << channelToGet << std::endl;
+	for (int i = 0; i < 3; ++i)
+		pos = channelToGet.find(' ', pos + 1);
+	channelToGet = channelToGet.substr(pos + 1, channelToGet.find(' ', pos + 2) - pos - 1);
+	for (int i = 0; i < 2; ++i)
+		pos = channelToGet.find(' ', pos + 1);
+	userToInvite = userToInvite.substr(pos + 1, userToInvite.find(' ', pos + 2) - pos - 1);
+	//std::cout << "NAME AFTER: " << userToInvite << std::endl;
+	invitedClient = foundInUsers(userToInvite);
+	if (!invitedClient)
+	{
+		std::cout <<"User to invite was not found in the list of users" << std::endl;
+		return (0);
+	}
+	else if (!hasInChannels(channels, channelToGet))
+	{
+		std::cout <<"This channel was not found int the list of channels" << std::endl;
+		return (0);
+	}
+	else if (!hasInUserChannels(client, channelToGet))
+	{
+		std::cout <<"This client is not in the channel" << std::endl;
+		return (0);
+	}
+	else if (hasInUserChannels(*invitedClient, channelToGet))
+	{
+		std::cout <<"This invited client is already in the channel" << std::endl;
+		return (0);
+	}
+	/* for (std::vector<std::string>::iterator insideIt = channelsInside.begin(); insideIt != channelsInside.end(); ++insideIt)
+	{
+		if (channelToGet == *insideIt)
+		{
+			std::cout << "FOUND CHANNEL: " << *insideIt << std::endl;
+			return (1);
+		}
+	} */
+	//std::cout << "FOUND CHANNEL: " << std::endl;
+	return (1);
+}
+
 void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DONT TOUCH
 {
 	if (_clients[i].getChannelId() == -1) {
-		std::cout << _clients[i].getNick() << " cannot invite users without being in the channel." << std::endl;
-		sendToClient(_clients[i].getId(), "you cannot users without being in the channel");//!check the actual output
+		std::cout << _clients[i].getNick() << " cannot invite users without being in any channel." << std::endl;
+		sendToClient(_clients[i].getId(), "you cannot users without being in any channel");//!check the actual output
 		return ;
 	}
-	std::cout << "INVITED: " << name << " by " << _clients[i].getNick() << std::endl;
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	if (findChannel(_clients[i], _channels, name))
+		std::cout << "INVITED: " << name.substr(0, name.find(' ', 0))<< " by " << _clients[i].getNick() << std::endl;
+	/* else
+		std::cout << "Didnt found the channel to invite " << std::endl; */
+	/* for (size_t i = 0; i < _channels.size(); i++)
+	{
+		std::cout << "WHERES THE CHANNEL NAMES: " << _channels[i].getName() << std::endl;
+	} */
+	//findChannel(_clients[i], _channels, name);
+	/* for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		std::cout << "LOOKING FOR: " << name << " is it " << it->getNick() << std::endl;
-		if (name == it->getNick() /* && it->getChannelId() == -1 */) {
+		if (name == it->getNick()) {
 			std::cout << "GOT IN" << std::endl;
 			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 			{
@@ -149,11 +261,9 @@ void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DO
 					return ;
 				}
 				std::cout << "CHECKING CHANNEL: " << channelIt->getName() << "my channel: " << it->getChannelName() << std::endl;
-				/* if (name.substr(0, name.size() - 1) == channelIt->getName())
-					return (channelIt->getId());//Found an existing channel */
 			}
 		}
-	}
+	} */
 	/* for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		if (toKick == it->getNick() && it->getChannelId() == _clients[i].getChannelId()) {

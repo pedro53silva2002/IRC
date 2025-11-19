@@ -61,7 +61,9 @@ class Server
 		//send to channels
 		void	sendToClientsInChannel(int i, std::string str);
 
-
+		//utils
+		int findChannel(Client client, std::vector<Channel> channels,std::string name);
+		Client* foundInUsers(std::string name);
 
 		//command from Angel: 		PRIVMSG Wiz :Hello are you receiving this message ?
 		//sendtoClient to Wiz:		:Angel PRIVMSG Wiz :Hello are you receiving this message ?

@@ -14,6 +14,7 @@
 # include <stdlib.h>//atoi
 # include "Colours.hpp"
 # include "Channel.hpp"
+# include <algorithm>
 
 
 //todo when setting username and nick, have the setUser and setNick do the parsing
@@ -93,7 +94,15 @@ class Client
 		void	setRealname(std::string realname) { _realname = realname; }
 		void	setBuf(char buf[]) { _buf = buf; }
 		void	setChannelId(int channelId) { _channelId = channelId; }
-		void	setchannelName(std::string channelName) { _channelName = channelName; }
+		void	setchannelName(std::string channelName){ 
+			if (_channelName == "")
+			{
+				channelName.erase(std::remove(channelName.begin(),channelName.end(), '\n'),channelName.end());
+				_channelName = channelName;
+			}
+			else
+				_channelName += ";" + channelName; 
+		}
 		void	setOp(bool op) { _isOp = op; }
 
 
