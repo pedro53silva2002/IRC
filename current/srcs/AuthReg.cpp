@@ -137,9 +137,10 @@ void	Server::registration(int i)
 	// 		send(_clients[i].getSocket(), response.c_str(), response.size(), 0); */
 	// 	}
 	// }
-	std::string line;
-	if (line.compare(0, 10, "CAP LS 302") == 0)
-		return (sendToClient(i, "ircserv CAP * LS :"));//!needs checking
+	
+	// std::string line;
+	// if (line.compare(0, 10, "CAP LS 302") == 0)
+	// 	return (sendToClient(i, "ircserv CAP * LS :"));//!needs checking
 	
 	if (!_clients[i].isAuthenticated())
 		return (tryAuthClient(i));
