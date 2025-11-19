@@ -37,6 +37,7 @@ class Server
 
 		//AuthReg
 		void	registration(int i);
+		void	regCommand(int i, std::string command);
 		void	tryAuthClient(int i);
 		void	tryPass(int i, char *bufPass);
 		void	checkRegistration(int i);

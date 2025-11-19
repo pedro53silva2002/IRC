@@ -84,6 +84,20 @@ bool	ft_UserCommand(char *buf)
 }
 
 
+
+/* 
+	ok big news. Apparently hexchat sends PASS USER and NICK all at the same time
+	this means i need to find a way to skip each command?
+	cause it it sends
+	PASS <pass> USER <user> NICK <nick>
+	all in the same poll, how do i split it?????
+*/
+
+void	Server::regCommand(int i, std::string command)
+{
+	
+}
+
 void	Server::registration(int i)
 {
 	// if (!_clients[i].isCapped())
@@ -123,11 +137,13 @@ void	Server::registration(int i)
 	// 		send(_clients[i].getSocket(), response.c_str(), response.size(), 0); */
 	// 	}
 	// }
+	std::string line;
+	if (line.compare(0, 10, "CAP LS 302") == 0)
+		return (sendToClient(i, "ircserv CAP * LS :"));//!needs checking
 	
-	if (!_clients[i].isAuthenticated()) {
-		tryAuthClient(i);
-		return ;
-	}
+	if (!_clients[i].isAuthenticated())
+		return (tryAuthClient(i));
+
 	if (ft_UserCommand(_clients[i].getBuf()))
 		registerUser(i);
 	else if (ft_NickComand(_clients[i].getBuf()))
@@ -148,13 +164,11 @@ void	Server::tryPass(int i, char *bufPass)
 	for (int i = 0; i < 1; ++i)
 		pos = line.find(' ', pos + 1);
 	if (strcmp(line.substr(pos + 1).c_str(), _pass.c_str()) != 0) {
-		//todo can hard code to sender be "*"
 		sendToClient(i, ERR_PASSWDMISMATCH);
 		return (serverLog(_clients[i].getNick(), "guessed the password wrong"));
 	}
 
 	_clients[i].setAuthenticated(true);
-	//todo can hard code to sender be "*"
 	sendToClient(i, PASSACCEPT);
 	serverLog(_clients[i].getNick(), "has authenticated, needs to register");
 }
@@ -163,7 +177,6 @@ void	Server::tryAuthClient(int i)
 	char *bufPass = _clients[i].getBuf();
 	bufPass[_clients[i]._bytesRecv - 1] = '\0'; 
 	if (!ft_PassComand(_clients[i].getBuf())) {
-		//todo can hard code to sender be "*"
 		sendToClient(i, ERR_NOTAUTH);
 		return (serverLog(_clients[i].getNick(), "is not authenticated, cannot talk"));
 	}

@@ -3,8 +3,6 @@
 //What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
 //also, when a client that was op leaves his channel, and joins another, need to take op from him
 
-//each time a command uses getBuf and receives a std::string, should parse it before running the rest of the function, to get like names or parameteres or whatever needed
-
 //*CONSTRUCTORS
 Server::Server(char *port, char *pass) {
 	_name = "MyIRC";
@@ -104,6 +102,7 @@ void	Server::commandJoin(int i, std::string name)
 	std::string welcomeMessage =  "Welcome to the channel: " + _clients[i].getChannelName() + ", today's MOTD: temp motd!";//check if this is whats supposed to be said
 	sendToClient(i, welcomeMessage);//THIS ONE IS NOT NEEDED, BUT ITS AN AGKNOWLEDGEMENT THAT CLIENT HAS JOINED
 }
+
 
 
 void	Server::commandKick(int i, std::string toKick)
@@ -307,12 +306,14 @@ void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DO
 	sendToClient(i, welcomeMessage);//THIS ONE IS NOT NEEDED, BUT ITS AN AGKNOWLEDGEMENT THAT CLIENT HAS JOINED */
 }
 
+
+
 void	Server::processCommand(int i)
 {
-	// debugMessage(i);
+	debugMessage(i);
 	// sendToClient(i, _clients[i].getBuf());
 
-	//*Closing server
+	//*Closing server, for testing purposes
 	if (strncmp(_clients[i].getBuf(), "exit ", 4) == 0)
 		exitServer();
 	//*Disconnects client
@@ -415,7 +416,7 @@ void	Server::srvRun()
 			_clients.push_back(Client(temp));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			testClients();
+			// testClients();
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)//*loop through clients

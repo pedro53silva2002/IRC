@@ -29,7 +29,7 @@ fclean: clean
 
 re: fclean all
 
-run: all
-	@./ircserv 6667 pass
+run:
+	@make; clear; ./ircserv 6667 pass
 
 .PHONY: all fclean clean re
