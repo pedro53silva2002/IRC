@@ -35,15 +35,12 @@ class Client
 		std::string _nick;
 		std::string	_realname;
 
-		char		*_buf;
 		int			_channelId;//check if this is good
 		std::string	_channelName;//check if this is good
 
 		bool		_isOp;
 		
 	public:
-		int		_bytesRecv;//! any other way? this is bad
-
 		//*CONSTRUCTORS
 		Client(int srvSocket) {
 			_id = _globalId++;
@@ -80,7 +77,6 @@ class Client
 		std::string	getUsername() { return (_username); }
 		std::string	getNick() { return (_nick); }
 		std::string	getRealname() { return (_realname); }
-		char*		getBuf() { return (_buf); }
 		bool		getOp() { return (_isOp); }
 		int			getChannelId() { return (_channelId); }
 		std::string	getChannelName() { return (_channelName); }
@@ -92,7 +88,6 @@ class Client
 		void	setUsername(std::string username) { _username = username; }
 		void	setNick(std::string nick) { _nick = nick; }
 		void	setRealname(std::string realname) { _realname = realname; }
-		void	setBuf(char buf[]) { _buf = buf; }
 		void	setChannelId(int channelId) { _channelId = channelId; }
 		void	setchannelName(std::string channelName){ 
 			if (_channelName == "")

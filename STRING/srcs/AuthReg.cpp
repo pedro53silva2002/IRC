@@ -84,21 +84,9 @@ bool	ft_UserCommand(char *buf)
 }
 
 
+//CASES WHERE NAMES ARE EMPTY OR DUPLICATE, OR USER IS TRIED TO BE SET AGAIN, THERES OUTPUTS TO PUT
 
-/* 
-	ok big news. Apparently hexchat sends PASS USER and NICK all at the same time
-	this means i need to find a way to skip each command?
-	cause it it sends
-	PASS <pass> USER <user> NICK <nick>
-	all in the same poll, how do i split it?????
-*/
-
-void	Server::regCommand(int i, std::string command)
-{
-	
-}
-
-void	Server::registration(int i)
+void	Server::registration(int i, std::string line)
 {
 	// if (!_clients[i].isCapped())
 	// {
@@ -141,14 +129,16 @@ void	Server::registration(int i)
 	// std::string line;
 	// if (line.compare(0, 10, "CAP LS 302") == 0)
 	// 	return (sendToClient(i, "ircserv CAP * LS :"));//!needs checking
-	
+		
 	if (!_clients[i].isAuthenticated())
-		return (tryAuthClient(i));
+		return (authClient(i, line));
 
-	if (ft_UserCommand(_clients[i].getBuf()))
-		registerUser(i);
-	else if (ft_NickComand(_clients[i].getBuf()))
-		registerNick(i);
+	// if (ft_UserCommand(_clients[i].getBuf()))//!COLETES FIX
+	if (line.compare(0, 5, "USER ") == 0)
+		registerUser(i, line);
+	// else if (ft_NickComand(_clients[i].getBuf()))//!COLETES FIX
+	else if (line.compare(0, 5, "NICK ") == 0)
+		registerNick(i, line);
 	else {
 		sendToClient(i, ERR_NOTREGISTERED);
 		serverLog(_clients[i].getNick(), "not registered, cant talk");
@@ -158,30 +148,24 @@ void	Server::registration(int i)
 
 
 //*Authenticating
-void	Server::tryPass(int i, char *bufPass)
+void	Server::authClient(int i, std::string line)
 {
-	std::string line(bufPass);
-	size_t pos = 0;
-	for (int i = 0; i < 1; ++i)
-		pos = line.find(' ', pos + 1);
-	if (strcmp(line.substr(pos + 1).c_str(), _pass.c_str()) != 0) {
+	// if (!ft_PassComand(_clients[i].getBuf()))//!COLETES FIX
+	if (line.compare(0, 5, "PASS "))
+	{
+		// sendToClient(i, ERR_NOTAUTH);
+		return (serverLog(_clients[i].getNick(), "is not authenticated, cannot talk"));
+	}
+	line = line.substr(5);
+	if (line.compare(0, line.size(), _pass))
+	{
 		sendToClient(i, ERR_PASSWDMISMATCH);
 		return (serverLog(_clients[i].getNick(), "guessed the password wrong"));
 	}
 
 	_clients[i].setAuthenticated(true);
-	sendToClient(i, PASSACCEPT);
+	// sendToClient(i, PASSACCEPT);
 	serverLog(_clients[i].getNick(), "has authenticated, needs to register");
-}
-void	Server::tryAuthClient(int i)
-{
-	char *bufPass = _clients[i].getBuf();
-	bufPass[_clients[i]._bytesRecv - 1] = '\0'; 
-	if (!ft_PassComand(_clients[i].getBuf())) {
-		sendToClient(i, ERR_NOTAUTH);
-		return (serverLog(_clients[i].getNick(), "is not authenticated, cannot talk"));
-	}
-	tryPass(i, bufPass);
 }
 
 
@@ -271,18 +255,18 @@ void	Server::checkRegistration(int i)
 	}
 }
 
-void	Server::registerUser(int i)//should be client class, not server class
+void	Server::registerUser(int i, std::string line)//should be client class, not server class
 {
 	std::cout << _clients[i].getNick() << " set their username to: ";//check if here is getNick
-	_clients[i].setUsername(getUsername(_clients[i].getBuf()));
-	_clients[i].setRealname(getRealname(_clients[i].getBuf()));
+	_clients[i].setUsername(getUsername(line));
+	_clients[i].setRealname(getRealname(line));
 	std::cout << _clients[i].getUsername() << " || " << _clients[i].getRealname() << std::endl;
 	checkRegistration(i);
 }
-void	Server::registerNick(int i)//should be client class, not server class
+void	Server::registerNick(int i, std::string line)//should be client class, not server class
 {
 	std::cout << _clients[i].getNick() << " set their nick to: ";
-	_clients[i].setNick(getNick(_clients[i].getBuf()));
+	_clients[i].setNick(getNick(line));
 	std::cout << _clients[i].getNick() << std::endl;
 	checkRegistration(i);
 }

@@ -36,27 +36,25 @@ class Server
 		bool	handleClientPoll(int i);
 
 		//AuthReg
-		void	registration(int i);
+		void	registration(int i, std::string line);
 		void	regCommand(int i, std::string command);
-		void	tryAuthClient(int i);
-		void	tryPass(int i, char *bufPass);
+		void	authClient(int i, std::string line);
 		void	checkRegistration(int i);
-		void	registerUser(int i);
-		void	registerNick(int i);
+		void	registerUser(int i, std::string line);
+		void	registerNick(int i, std::string line);
 		void	welcomeClient(int i);
 		
 		//Commands
-		void	processCommand(int i);
-		// int		getStatus(int i);
-		void	commandQuit(int i, std::string str);
+		void	processCommand(int i, std::string line);
 
-		//join
+
 		void	commandJoin(int i, std::string name);
 		int		findOrCreateChannel(int i, std::string name);
-		//kick
+
 		void	commandKick(int i, std::string toKick);
-		//invite
+
 		void	commandInvite(int i, std::string name);
+		void	commandQuit(int i, std::string str);//disconnect client
 
 
 		//send to channels
@@ -76,7 +74,6 @@ class Server
 
 		//just for testing
 		void	exitServer();
-		void	debugMessage(int i);
 		void	testClients();
 
 	public:

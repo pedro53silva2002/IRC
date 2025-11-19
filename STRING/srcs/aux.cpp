@@ -5,11 +5,6 @@ void	serverLog(std::string nick, std::string str)
 	std::cout << YELLOW("Server log: ") << nick << " " << str << std::endl;
 }
 
-void	Server::debugMessage(int i)
-{
-	std::cout << YELLOW("Client ") << _clients[i].getNick()<< " said: " << _clients[i].getBuf();
-}
-
 //this is just testing
 void	Server::exitServer()
 {
@@ -51,7 +46,7 @@ void	Server::sendToClientsInChannel(int i, std::string str)
 		clientIt != _clients.end(); ++clientIt)//
 		{
 			if (clientIt->getChannelId() == channelId 
-				/*&& clientIt->getId() != _clients[i].getId()*/)
+				&& clientIt->getId() != _clients[i].getId())
 				{
 					std::string sender = channelName + " :" + _clients[i].getNick();
 					sendToClient(clientIt->getId(), sender, str);

@@ -80,8 +80,8 @@ int		Server::findOrCreateChannel(int i, std::string name)
 		if (name.substr(0, name.size()) == channelIt->getName())
 			return (channelIt->getId());//Found an existing channel
 	}
-	if (_channels.size() == 1)
-		take = 2;
+	// if (_channels.size() == 1)
+	// 	take = 2;
 	Channel temp(name.substr(0, name.size() - take));
 	_channels.push_back(temp);
 	_clients[i].setOp(true);
@@ -308,52 +308,84 @@ void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DO
 
 
 
-void	Server::processCommand(int i)
+void	Server::processCommand(int i, std::string line)
 {
-	debugMessage(i);
-	// sendToClient(i, _clients[i].getBuf());
+	// std::cout << YELLOW("Client ") << _clients[i].getNick()<< " said: " << line << std::endl;
+	// sendToClient(i, line);
 
 	//*Closing server, for testing purposes
-	if (strncmp(_clients[i].getBuf(), "exit ", 4) == 0)
+	if (line.compare(0, 4, "exit") == 0)
 		exitServer();
 	//*Disconnects client
-	else if (strncmp(_clients[i].getBuf(), "QUIT ", 4) == 0)
+	else if (line.compare(0, 4, "QUIT") == 0)
 		return (commandQuit(i, "hardcoded quit"));
 	
 	//*Registering client
 	else if (!_clients[i].isRegistered()) {
-		registration(i);
+		registration(i, line);
 		return ;
 	}
 
 
 
 	//*START OF CHANNEL LOGIC
-	if (strncmp(_clients[i].getBuf(), "JOIN ", 5) == 0)
-		commandJoin(i, _clients[i].getBuf() + 5);
-	else if (strncmp(_clients[i].getBuf(), "KICK ", 5) == 0)
-		commandKick(i, _clients[i].getBuf() + 5);
-	else if (strncmp(_clients[i].getBuf(), "INVITE ", 7) == 0)
-		commandInvite(i, _clients[i].getBuf() + 7); ///////STILL DOING THIS DONT TOUCH
+	if (line.compare(0, 5, "JOIN ") == 0)
+		commandJoin(i, line.substr(5));
+	else if (line.compare(0, 5, "KICK ") == 0)
+		commandKick(i, line.substr(5));
+	else if (line.compare(0, 7, "INVITE ") == 0)
+		commandInvite(i, line.substr(7)); ///////STILL DOING THIS DONT TOUCH
 	else
-		sendToClientsInChannel(i, _clients[i].getBuf());
-
+		sendToClientsInChannel(i, line);
 }
-
 
 bool	Server::handleClientPoll(int i)
 {
 	char buf[512];
-	_clients[i]._bytesRecv = myRecv(_pfds[i].fd, buf, sizeof(buf), 0);
-	if (_clients[i]._bytesRecv == 0) {
+	int bytesRecv = myRecv(_pfds[i].fd, buf, sizeof(buf), 0);
+	if (bytesRecv == 0) {
 		commandQuit(i, "");
 		return (false);
 	}
-	_clients[i].setBuf(buf);
 
-	processCommand(i);
+	buf[bytesRecv] = 0;
+	
+	//todo HERE I NEED TO DIVIDE OR SKIP \n AND \r
+	//!stupid temporary fix for new line after input
+	buf[bytesRecv - 1] = 0;
+
+/* 
+	ok big news. Apparently hexchat sends PASS USER and NICK all at the same time
+	this means i need to find a way to skip each command?
+	cause it it sends
+	PASS <pass> USER <user> NICK <nick>
+	all in the same poll, how do i split it?????
+*/
+	// if (line.empty() || line == "\n" || line == "\r" || line == "\r\n")//stupid fix
+	// 	return true;
+	std::string line(buf);
+
+	processCommand(i, line);
 	return (true);
 }
+
+/* char buf[512];
+int bytes = recv(sock, buf, sizeof(buf)-1, 0);
+if (bytes <= 0) return;
+
+buf[bytes] = 0;
+recv_buffer += buf;
+
+// Process all complete lines
+size_t pos;
+while ((pos = recv_buffer.find("\r\n")) != std::string::npos) {
+    std::string line = recv_buffer.substr(0, pos);
+    recv_buffer.erase(0, pos + 2);
+
+    if (!line.empty()) {
+        handleCommand(line);
+    }
+} */
 
 void	Server::testClients()
 {
