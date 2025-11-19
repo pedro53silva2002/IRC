@@ -184,9 +184,10 @@ Client* Server::foundInUsers(std::string name)
 	return (0);
 }
 
-int Server::findChannel(Client client, std::vector<Channel> channels,std::string name)
+int Server::findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet)
 {
-	std::string userToInvite (name);
+	Client *invitedClient;
+	/* std::string userToInvite (name);
 	std::string channelToGet(name);
 	Client *invitedClient;
 	size_t pos = 0;
@@ -195,9 +196,10 @@ int Server::findChannel(Client client, std::vector<Channel> channels,std::string
 		pos = channelToGet.find(' ', pos + 1);
 	channelToGet = channelToGet.substr(pos + 1, channelToGet.find(' ', pos + 2) - pos - 1);
 	for (int i = 0; i < 2; ++i)
-		pos = channelToGet.find(' ', pos + 1);
-	userToInvite = userToInvite.substr(pos + 1, userToInvite.find(' ', pos + 2) - pos - 1);
-	//std::cout << "NAME AFTER: " << userToInvite << std::endl;
+		pos = userToInvite.find(' ', pos + 1);
+	userToInvite = userToInvite.substr(pos + 1, userToInvite.find(' ', pos + 2) - pos - 1); */
+	/* std::cout << "NAME AFTER: " << userToInvite << std::endl;
+	std::cout << "CHANNEL AFTER: " << channelToGet << std::endl; */
 	invitedClient = foundInUsers(userToInvite);
 	if (!invitedClient)
 	{
@@ -233,15 +235,33 @@ int Server::findChannel(Client client, std::vector<Channel> channels,std::string
 
 void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DONT TOUCH
 {
+	std::string userToInvite (name);
+	std::string channelToGet(name);
+	size_t pos = 0;
+	//std::cout << "NAME BEFORE: " << channelToGet << std::endl;
+	for (int j = 0; j < 1; ++j)
+		pos = channelToGet.find(' ', pos + 1);
+	channelToGet = channelToGet.substr(pos + 1, channelToGet.find(' ', pos + 2) - pos - 1);
+	for (int j = 0; j < 1; ++j)
+		pos = userToInvite.find(' ', pos + 1);
+	userToInvite = userToInvite.substr(pos + 1, userToInvite.find(' ', pos + 2) - pos - 1);
+	int UserToInviteId;
+
 	if (_clients[i].getChannelId() == -1) {
 		std::cout << _clients[i].getNick() << " cannot invite users without being in any channel." << std::endl;
 		sendToClient(_clients[i].getId(), "you cannot users without being in any channel");//!check the actual output
 		return ;
 	}
-	if (findChannel(_clients[i], _channels, name))
+	if (findChannel(_clients[i], _channels, name, userToInvite, channelToGet))
 		std::cout << "INVITED: " << name.substr(0, name.find(' ', 0))<< " by " << _clients[i].getNick() << std::endl;
+	for (size_t i = 1; i < _clients.size(); i++)
+	{
+		if (userToInvite == _clients[i].getNick())
+			UserToInviteId = i;
+	}
 	/* else
 		std::cout << "Didnt found the channel to invite " << std::endl; */
+	commandJoin(UserToInviteId, channelToGet);
 	/* for (size_t i = 0; i < _channels.size(); i++)
 	{
 		std::cout << "WHERES THE CHANNEL NAMES: " << _channels[i].getName() << std::endl;
