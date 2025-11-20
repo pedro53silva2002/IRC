@@ -39,6 +39,7 @@ class Client
 		std::string	_channelName;//check if this is good
 
 		bool		_isOp;
+		std::string	_hostStart;//!RENAME
 		
 	public:
 		//*CONSTRUCTORS
@@ -57,6 +58,7 @@ class Client
 			_channelId = -1;
 			_channelName = "";
 			_isOp = false;
+			_hostStart = "";
 		}
 
 		Client() {
@@ -80,6 +82,7 @@ class Client
 		bool		getOp() { return (_isOp); }
 		int			getChannelId() { return (_channelId); }
 		std::string	getChannelName() { return (_channelName); }
+		std::string	getHostStart() { return (_hostStart); }
 
 		//*SETTERS
 		void	setAuthenticated(bool auth) { _authenticated = auth; }
@@ -99,6 +102,7 @@ class Client
 				_channelName += ";" + channelName; 
 		}
 		void	setOp(bool op) { _isOp = op; }
+		void	setHostStart(std::string host) { _hostStart = host; };
 
 
 

@@ -31,13 +31,14 @@ class Server
 		std::vector<Client> 	_clients;
 		std::vector<Channel>	_channels;
 
-		int		acceptClient();
-		void	setPfds();
-		bool	handleClientPoll(int i);
+		int				acceptClient();
+		std::string		setClientHost(int i);
+		void			setPfds();
+		bool			handleClientPoll(int i);
+		
 
 		//AuthReg
 		void	registration(int i, std::string line);
-		void	regCommand(int i, std::string command);
 		void	authClient(int i, std::string line);
 		void	checkRegistration(int i);
 		void	registerUser(int i, std::string line);
@@ -57,19 +58,14 @@ class Server
 		void	commandQuit(int i, std::string str);//disconnect client
 
 
-		//send to channels
 		void	sendToClientsInChannel(int i, std::string str);
-
-		//utils
-		int findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
-		Client* foundInUsers(std::string name);
-
-		//command from Angel: 		PRIVMSG Wiz :Hello are you receiving this message ?
-		//sendtoClient to Wiz:		:Angel PRIVMSG Wiz :Hello are you receiving this message ?
-		//command from dan:			PRIVMSG #coolpeople :Hi everyone!
-		//sendtoClientinChannel:	:dan!~h@localhost PRIVMSG #coolpeople :Hi everyone!
 		void	sendToClient(int id, std::string sender, std::string str);
 		void	sendToClient(int i, std::string str);
+
+
+		//utils
+		int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
+		Client*	foundInUsers(std::string name);
 		
 
 		//just for testing
@@ -91,6 +87,10 @@ class Server
 		
 };
 
+		//command from Angel: 		PRIVMSG Wiz :Hello are you receiving this message ?
+		//sendtoClient to Wiz:		:Angel PRIVMSG Wiz :Hello are you receiving this message ?
+		//command from dan:			PRIVMSG #coolpeople :Hi everyone!
+		//sendtoClientinChannel:	:dan!~h@localhost PRIVMSG #coolpeople :Hi everyone!
 
 void	serverLog(std::string nick, std::string str);
 

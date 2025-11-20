@@ -74,15 +74,12 @@ void	Server::commandQuit(int i, std::string str)
 
 int		Server::findOrCreateChannel(int i, std::string name)
 {
-	int take = 0;
 	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 	{
-		if (name.substr(0, name.size()) == channelIt->getName())
+		if (name == channelIt->getName())//change to use subster of the getName
 			return (channelIt->getId());//Found an existing channel
 	}
-	// if (_channels.size() == 1)
-	// 	take = 2;
-	Channel temp(name.substr(0, name.size() - take));
+	Channel temp("#" + name);
 	_channels.push_back(temp);
 	_clients[i].setOp(true);
 	std::cout << _channels.rbegin()->getName() << " has been created" << std::endl;
@@ -96,11 +93,19 @@ void	Server::commandJoin(int i, std::string name)
 	std::cout << "Client " << _clients[i].getNick() << 
 				" joined channel " << _clients[i].getChannelName() << std::endl;
 
-	std::string strToSend = "JOIN " + _channels[_clients[i].getChannelId()].getName();//check if this is whats supposed to be said
-	sendToClientsInChannel(i, strToSend);
+	//OTHER MEMBERS OF CHANNEL KNOWING CLIENT JOINED
+	// std::string strToSend = "JOIN " + _clients[i].getChannelName();
+	// sendToClientsInChannel(i, strToSend);
 
-	std::string welcomeMessage =  "Welcome to the channel: " + _clients[i].getChannelName() + ", today's MOTD: temp motd!";//check if this is whats supposed to be said
-	sendToClient(i, welcomeMessage);//THIS ONE IS NOT NEEDED, BUT ITS AN AGKNOWLEDGEMENT THAT CLIENT HAS JOINED
+
+	std::string joined = "JOIN :" + _clients[i].getChannelName();
+	std::cout << _clients[i].getHostStart() << " :" << joined << std::endl;//THIS IS JUST BROKEN FUCK THIS
+	sendToClient(_clients[i].getId(), _clients[i].getHostStart(), joined);//changed from i to getId()
+
+
+
+	// std::string welcomeMessage =  "Welcome to the channel: " + _clients[i].getChannelName() + ", today's MOTD: temp motd!";//check if this is whats supposed to be said
+	// sendToClient(i, welcomeMessage);
 }
 
 
@@ -387,6 +392,11 @@ while ((pos = recv_buffer.find("\r\n")) != std::string::npos) {
     }
 } */
 
+std::string	Server::setClientHost(int i)//!THIS NEEDS TO BE CALLED MANUALLY, FIX LATER, CAUSE NOW ITS ONLY IN HARDCODED
+{
+	return ":" + _clients[i].getNick() + "!" + _clients[i].getUsername() + "@" + _name;
+}
+
 void	Server::testClients()
 {
 	if (_clients.size() == 2) {
@@ -395,6 +405,7 @@ void	Server::testClients()
 		_clients[1].setNick("First");
 		_clients[1].setUsername("First");
 		_clients[1].setRealname("First");
+		_clients[1].setHostStart(setClientHost(1));
 		// _clients[1].setChannelId(1);
 		// Channel temp("FirstChannel");
 		// _channels.push_back(temp);
@@ -406,6 +417,7 @@ void	Server::testClients()
 		_clients[2].setNick("Second");
 		_clients[2].setUsername("Second");
 		_clients[2].setRealname("Second");
+		_clients[2].setHostStart(setClientHost(2));
 		// _clients[2].setChannelId(1);
 		// Channel temp("SecondChannel");
 		// _channels.push_back(temp);
@@ -422,17 +434,6 @@ void	Server::testClients()
 		// _channels.push_back(temp);
 		welcomeClient(3);
 	}
-	else if (_clients.size() == 5) {
-		_clients[4].setAuthenticated(true);
-		_clients[4].setRegistered(true);
-		_clients[4].setNick("Fourth");
-		_clients[4].setUsername("Fourth");
-		_clients[4].setRealname("Fourth");
-		// _clients[4].setChannelId(1);
-		// Channel temp("FirstChannel");
-		// _channels.push_back(temp);
-		welcomeClient(4);
-	}
 }
 
 void	Server::srvRun()
@@ -448,7 +449,7 @@ void	Server::srvRun()
 			_clients.push_back(Client(temp));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			// testClients();
+			testClients();
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)//*loop through clients
