@@ -32,7 +32,7 @@ class Server
 		std::vector<Channel>	_channels;
 
 		int				acceptClient();
-		std::string		setClientHost(int i);
+		std::string		setPrefixTemp(int i);
 		void			setPfds();
 		bool			handleClientPoll(int i);
 		

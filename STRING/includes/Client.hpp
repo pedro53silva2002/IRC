@@ -39,7 +39,8 @@ class Client
 		std::string	_channelName;//check if this is good
 
 		bool		_isOp;
-		std::string	_hostStart;//!RENAME
+		std::string	_host;
+		std::string	_prefix;
 		
 	public:
 		//*CONSTRUCTORS
@@ -58,7 +59,8 @@ class Client
 			_channelId = -1;
 			_channelName = "";
 			_isOp = false;
-			_hostStart = "";
+			_host = "";
+			_prefix = "";
 		}
 
 		Client() {
@@ -82,7 +84,8 @@ class Client
 		bool		getOp() { return (_isOp); }
 		int			getChannelId() { return (_channelId); }
 		std::string	getChannelName() { return (_channelName); }
-		std::string	getHostStart() { return (_hostStart); }
+		std::string	getPrefix() { return (_prefix); }
+		std::string	getHost() { return (_host); }
 
 		//*SETTERS
 		void	setAuthenticated(bool auth) { _authenticated = auth; }
@@ -92,7 +95,7 @@ class Client
 		void	setNick(std::string nick) { _nick = nick; }
 		void	setRealname(std::string realname) { _realname = realname; }
 		void	setChannelId(int channelId) { _channelId = channelId; }
-		void	setchannelName(std::string channelName){ 
+		void	setchannelName(std::string channelName) { 
 			if (_channelName == "")
 			{
 				channelName.erase(std::remove(channelName.begin(),channelName.end(), '\n'),channelName.end());
@@ -102,7 +105,8 @@ class Client
 				_channelName += ";" + channelName; 
 		}
 		void	setOp(bool op) { _isOp = op; }
-		void	setHostStart(std::string host) { _hostStart = host; };
+		void	setPrefix(std::string prefix) { _prefix = prefix; }
+		void	setHost(std::string host) { _host = host; }
 
 
 

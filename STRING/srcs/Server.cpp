@@ -79,13 +79,13 @@ int		Server::findOrCreateChannel(int i, std::string name)
 		if (name == channelIt->getName())//change to use subster of the getName
 			return (channelIt->getId());//Found an existing channel
 	}
-	Channel temp("#" + name);
+	Channel temp(name);
 	_channels.push_back(temp);
 	_clients[i].setOp(true);
 	std::cout << _channels.rbegin()->getName() << " has been created" << std::endl;
 	return (_channels.rbegin()->getId());
 }
-void	Server::commandJoin(int i, std::string name)
+void	Server::commandJoin(int i, std::string name)//parse so that only #channel is allowed
 {
 	int channelId = findOrCreateChannel(i, name);
 	_clients[i].setChannelId(channelId + 1);
@@ -99,8 +99,8 @@ void	Server::commandJoin(int i, std::string name)
 
 
 	std::string joined = "JOIN :" + _clients[i].getChannelName();
-	std::cout << _clients[i].getHostStart() << " :" << joined << std::endl;//THIS IS JUST BROKEN FUCK THIS
-	sendToClient(_clients[i].getId(), _clients[i].getHostStart(), joined);//changed from i to getId()
+	std::cout << _clients[i].getPrefix() << " :" << joined << std::endl;//THIS IS JUST BROKEN FUCK THIS
+	sendToClient(_clients[i].getId(), _clients[i].getPrefix(), joined);//changed from i to getId()
 
 
 
@@ -347,6 +347,7 @@ void	Server::processCommand(int i, std::string line)
 bool	Server::handleClientPoll(int i)
 {
 	char buf[512];
+	memset(buf, 0, sizeof(buf));//new
 	int bytesRecv = myRecv(_pfds[i].fd, buf, sizeof(buf), 0);
 	if (bytesRecv == 0) {
 		commandQuit(i, "");
@@ -392,9 +393,11 @@ while ((pos = recv_buffer.find("\r\n")) != std::string::npos) {
     }
 } */
 
-std::string	Server::setClientHost(int i)//!THIS NEEDS TO BE CALLED MANUALLY, FIX LATER, CAUSE NOW ITS ONLY IN HARDCODED
+//todo to be put in client
+std::string	Server::setPrefixTemp(int i)//!THIS NEEDS TO BE CALLED MANUALLY, FIX LATER, CAUSE NOW ITS ONLY IN HARDCODED
 {
-	return ":" + _clients[i].getNick() + "!" + _clients[i].getUsername() + "@" + _name;
+	//have to find a way to save host when not using hard coded clients
+	return ":" + _clients[i].getNick() + "!" + _clients[i].getUsername() + "@" + _clients[i].getHost();
 }
 
 void	Server::testClients()
@@ -402,10 +405,11 @@ void	Server::testClients()
 	if (_clients.size() == 2) {
 		_clients[1].setAuthenticated(true);
 		_clients[1].setRegistered(true);
+		_clients[1].setHost(_name);
 		_clients[1].setNick("First");
 		_clients[1].setUsername("First");
 		_clients[1].setRealname("First");
-		_clients[1].setHostStart(setClientHost(1));
+		_clients[1].setPrefix(setPrefixTemp(1));
 		// _clients[1].setChannelId(1);
 		// Channel temp("FirstChannel");
 		// _channels.push_back(temp);
@@ -414,26 +418,27 @@ void	Server::testClients()
 	else if (_clients.size() == 3) {
 		_clients[2].setAuthenticated(true);
 		_clients[2].setRegistered(true);
+		_clients[2].setHost(_name);
 		_clients[2].setNick("Second");
 		_clients[2].setUsername("Second");
 		_clients[2].setRealname("Second");
-		_clients[2].setHostStart(setClientHost(2));
+		_clients[2].setPrefix(setPrefixTemp(2));
 		// _clients[2].setChannelId(1);
 		// Channel temp("SecondChannel");
 		// _channels.push_back(temp);
 		welcomeClient(2);
 	}
-	else if (_clients.size() == 4) {
-		_clients[3].setAuthenticated(true);
-		_clients[3].setRegistered(true);
-		_clients[3].setNick("Third");
-		_clients[3].setUsername("Third");
-		_clients[3].setRealname("Third");
-		// _clients[3].setChannelId(1);
-		// Channel temp("FirstChannel");
-		// _channels.push_back(temp);
-		welcomeClient(3);
-	}
+	// else if (_clients.size() == 4) {
+	// 	_clients[3].setAuthenticated(true);
+	// 	_clients[3].setRegistered(true);
+	// 	_clients[3].setNick("Third");
+	// 	_clients[3].setUsername("Third");
+	// 	_clients[3].setRealname("Third");
+	// 	// _clients[3].setChannelId(1);
+	// 	// Channel temp("FirstChannel");
+	// 	// _channels.push_back(temp);
+	// 	welcomeClient(3);
+	// }
 }
 
 void	Server::srvRun()
