@@ -37,18 +37,18 @@ class Server
 		bool			handleClientPoll(int i);
 		
 
-		//AuthReg
-		void	registration(int i, std::string line);
-		void	authClient(int i, std::string line);
+		
+		//*Commands
+		void	processCommand(int i, std::string line);
+		
+		//*Registration commands, mostly done, needs more parsing still
+		void	commandPass(int i, std::string line);
+		void	commandUser(int i, std::string line);
+		void	commandNick(int i, std::string line);
 		void	checkRegistration(int i);
-		void	registerUser(int i, std::string line);
-		void	registerNick(int i, std::string line);
 		void	welcomeClient(int i);
 		
-		//Commands
-		void	processCommand(int i, std::string line);
-
-
+		
 		void	commandJoin(int i, std::string name);
 		int		findOrCreateChannel(int i, std::string name);
 

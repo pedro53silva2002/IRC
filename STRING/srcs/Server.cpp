@@ -313,35 +313,45 @@ void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DO
 
 
 
+
+//compares can be called without inputing size
+
 void	Server::processCommand(int i, std::string line)
 {
-	// std::cout << YELLOW("Client ") << _clients[i].getNick()<< " said: " << line << std::endl;
+	std::cout << YELLOW("Client ") << _clients[i].getNick()<< " said: " << line << std::endl;
 	// sendToClient(i, line);
 
-	//*Closing server, for testing purposes
+		
+	//testing only
 	if (line.compare(0, 4, "exit") == 0)
 		exitServer();
-	//*Disconnects client
-	else if (line.compare(0, 4, "QUIT") == 0)
-		return (commandQuit(i, "hardcoded quit"));
+
+
+	//*Registration commands
+	if (line.compare(0, 5, "PASS ") == 0)//fix for without space, not enough parameters
+		commandPass(i, line.substr(5));
+	else if (line.compare(0, 5, "USER ") == 0)//fix for without space, not enough parameters
+		commandUser(i, line.substr(5));
+	else if (line.compare(0, 5, "NICK ") == 0)//fix for without space, not enough parameters
+		commandNick(i, line.substr(5));
+
 	
-	//*Registering client
-	else if (!_clients[i].isRegistered()) {
-		registration(i, line);
-		return ;
-	}
-
-
-
-	//*START OF CHANNEL LOGIC
-	if (line.compare(0, 5, "JOIN ") == 0)
+	else if (!_clients[i].isRegistered())
+		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK");
+	
+	
+	else if (line.compare(0, 5, "JOIN ") == 0)
 		commandJoin(i, line.substr(5));
 	else if (line.compare(0, 5, "KICK ") == 0)
 		commandKick(i, line.substr(5));
 	else if (line.compare(0, 7, "INVITE ") == 0)
 		commandInvite(i, line.substr(7)); ///////STILL DOING THIS DONT TOUCH
-	else
-		sendToClientsInChannel(i, line);
+	else if (line.compare(0, 4, "QUIT") == 0)//move this down
+		return (commandQuit(i, "hardcoded quit"));
+	
+	// else THIS WILL BE A PRIVMSG COMMAND
+	// 	sendToClientsInChannel(i, line);
+	
 }
 
 bool	Server::handleClientPoll(int i)
@@ -454,7 +464,7 @@ void	Server::srvRun()
 			_clients.push_back(Client(temp));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			testClients();
+			// testClients();
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)//*loop through clients
