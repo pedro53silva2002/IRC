@@ -8,9 +8,13 @@
     
 */
 
+#define ERR_NEEDMOREPARAMS "461 :Not enough parameters"
+#define ERR_ALREADYREGISTERED "462 :You may not reregister"
 #define ERR_PASSWDMISMATCH "464 :Password incorrect"
-#define PASSACCEPT "Authenticated, set User and Nick to register"
-#define ERR_NOTAUTH "Not authenticated"
+
+
+
+#define ERR_NOTAUTH "Not authenticated FIX LATER"
 #define ERR_NOTREGISTERED "You have not registered"
 
 
