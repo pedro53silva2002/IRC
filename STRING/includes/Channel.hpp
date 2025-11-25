@@ -11,12 +11,16 @@ class Channel
 		static int			_globalChannelId;
 		int					_id;
 		std::string			_name;
+		int				    _maxClients;
+		int 				_nbrClients;
 
 		std::vector<int>	_clientsInChannel;
 	public:
 		Channel(std::string name) {
 			_id = _globalChannelId++;
 			_name = name;
+			_maxClients = 0;//default meaning unlimited
+			_nbrClients = 0;
 		}
 
 		Channel() {
@@ -36,6 +40,16 @@ class Channel
 		
 		void			setId(int id) { _id = id; }
 		void			setName(std::string name) { _name = name; }
+
+		int			getNbrClients() { return (_nbrClients); }
+		int			getMaxClients() { return (_maxClients); }
+
+		void		incrementNbrClients() { 
+			//std::cout << "INCREMENTING NBR CLIENTS FROM " << _nbrClients;
+			_nbrClients++;}
+			//std::cout << " TO " << _nbrClients << std::endl;}
+		void		decrementNbrClients() { _nbrClients--; }
+		void		setMaxClients(int max) { _maxClients = max; }
 
 
 

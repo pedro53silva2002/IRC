@@ -88,11 +88,19 @@ int		Server::findOrCreateChannel(int i, std::string name)
 void	Server::commandJoin(int i, std::string name)//parse so that only #channel is allowed
 {
 	int channelId = findOrCreateChannel(i, name);
+	if (_channels[channelId+1].getNbrClients() >= _channels[channelId+1].getMaxClients() && _channels[channelId+1].getMaxClients() != 0)
+	{
+		std::cout << "Channel " << _channels[channelId].getName() << " is full. Cannot join." << std::endl;
+		sendToClient(_clients[i].getId(), "cannot join channel " + _channels[channelId].getName() + ": channel is full");
+		return ;
+	}
 	_clients[i].setChannelId(channelId + 1);
 	_clients[i].setchannelName( _channels[_clients[i].getChannelId()].getName());
 	std::cout << "Client " << _clients[i].getNick() << 
 				" joined channel " << _clients[i].getChannelName() << std::endl;
-
+	_channels[_clients[i].getChannelId()].incrementNbrClients();
+	/* std::cout << "Channel " << _channels[_clients[i].getChannelId()].getName() << 
+				" now has " << _channels[_clients[i].getChannelId()].getNbrClients() << " users." << std::endl; */
 	//OTHER MEMBERS OF CHANNEL KNOWING CLIENT JOINED
 	// std::string strToSend = "JOIN " + _clients[i].getChannelName();
 	// sendToClientsInChannel(i, strToSend);
@@ -191,19 +199,6 @@ Client* Server::foundInUsers(std::string name)
 int Server::findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet)
 {
 	Client *invitedClient;
-	/* std::string userToInvite (name);
-	std::string channelToGet(name);
-	Client *invitedClient;
-	size_t pos = 0;
-	//std::cout << "NAME BEFORE: " << channelToGet << std::endl;
-	for (int i = 0; i < 3; ++i)
-		pos = channelToGet.find(' ', pos + 1);
-	channelToGet = channelToGet.substr(pos + 1, channelToGet.find(' ', pos + 2) - pos - 1);
-	for (int i = 0; i < 2; ++i)
-		pos = userToInvite.find(' ', pos + 1);
-	userToInvite = userToInvite.substr(pos + 1, userToInvite.find(' ', pos + 2) - pos - 1); */
-	/* std::cout << "NAME AFTER: " << userToInvite << std::endl;
-	std::cout << "CHANNEL AFTER: " << channelToGet << std::endl; */
 	invitedClient = foundInUsers(userToInvite);
 	if (!invitedClient)
 	{
@@ -225,30 +220,14 @@ int Server::findChannel(Client client, std::vector<Channel> channels,std::string
 		std::cout <<"This invited client is already in the channel" << std::endl;
 		return (0);
 	}
-	/* for (std::vector<std::string>::iterator insideIt = channelsInside.begin(); insideIt != channelsInside.end(); ++insideIt)
-	{
-		if (channelToGet == *insideIt)
-		{
-			std::cout << "FOUND CHANNEL: " << *insideIt << std::endl;
-			return (1);
-		}
-	} */
-	//std::cout << "FOUND CHANNEL: " << std::endl;
 	return (1);
 }
 
-void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DONT TOUCH
+void	Server::commandInvite(int i, std::string name)
 {
-	std::string userToInvite (name);
-	std::string channelToGet(name);
+	std::string userToInvite = name.substr(0, name.find(' ', 0));
+	std::string channelToGet = name.substr(name.find(' ', 0) + 1);
 	size_t pos = 0;
-	//std::cout << "NAME BEFORE: " << channelToGet << std::endl;
-	for (int j = 0; j < 1; ++j)
-		pos = channelToGet.find(' ', pos + 1);
-	channelToGet = channelToGet.substr(pos + 1, channelToGet.find(' ', pos + 2) - pos - 1);
-	for (int j = 0; j < 1; ++j)
-		pos = userToInvite.find(' ', pos + 1);
-	userToInvite = userToInvite.substr(pos + 1, userToInvite.find(' ', pos + 2) - pos - 1);
 	int UserToInviteId;
 
 	if (_clients[i].getChannelId() == -1) {
@@ -257,7 +236,7 @@ void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DO
 		return ;
 	}
 	if (findChannel(_clients[i], _channels, name, userToInvite, channelToGet))
-		std::cout << "INVITED: " << name.substr(0, name.find(' ', 0))<< " by " << _clients[i].getNick() << std::endl;
+		std::cout << "INVITED: " << userToInvite << " by " << _clients[i].getNick() << std::endl;
 	for (size_t i = 1; i < _clients.size(); i++)
 	{
 		if (userToInvite == _clients[i].getNick())
@@ -265,50 +244,104 @@ void	Server::commandInvite(int i, std::string name)   ///////STILL DOING THIS DO
 	}
 	/* else
 		std::cout << "Didnt found the channel to invite " << std::endl; */
+	//std::cout << "USER TO INVITE: " << userToInvite << "(" << _clients[UserToInviteId].getNick() << ")\t" << " CHANNEL TO GET: " << channelToGet << std::endl;
 	commandJoin(UserToInviteId, channelToGet);
-	/* for (size_t i = 0; i < _channels.size(); i++)
+}
+
+void	Server::commandMode(int i, std::string line)
+{
+	int pos = line.find(' ', 0);
+	std::string channelTarget = line.substr(0, pos);
+	std::string opr;
+	std::string user;
+	if (line.find(' ', pos + 1) == std::string::npos)
+		opr = line.substr(pos + 1, line.size() - (pos + 1));
+	else
 	{
-		std::cout << "WHERES THE CHANNEL NAMES: " << _channels[i].getName() << std::endl;
-	} */
-	//findChannel(_clients[i], _channels, name);
-	/* for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+		opr = line.substr(pos + 1, line.find(' ', pos + 1) - (pos + 1));
+		user = line.substr(line.find(' ', pos + 1) + 1, line.size() - line.find(' ', pos + 1));
+	}
+	std::cout << "CHANNEL TARGET: " << channelTarget << "\nOPR: " << opr << "\nUSER: " << user << std::endl;
+	std::cout << "MODE command received from " << _clients[i].getNick() << " with params: " << line << std::endl;
+	if (opr == "+o")
 	{
-		std::cout << "LOOKING FOR: " << name << " is it " << it->getNick() << std::endl;
-		if (name == it->getNick()) {
-			std::cout << "GOT IN" << std::endl;
-			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-			{
-				if (it->getChannelName() != "" && channelIt->getName() == it->getChannelName())
-				{
-					std::cout << _clients[i].getNick() << " cannot invite users without being in the channel." << std::endl;
-					sendToClient(_clients[i].getId(), "you cannot users without being in the channel");//!check the actual output
-					return ;
-				}
-				std::cout << "CHECKING CHANNEL: " << channelIt->getName() << "my channel: " << it->getChannelName() << std::endl;
-			}
-		}
-	} */
-	/* for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-	{
-		if (toKick == it->getNick() && it->getChannelId() == _clients[i].getChannelId()) {
-			std::cout << _clients[i].getNick() << " kicked " << it->getNick() << " from " 
-						<< _clients[i].getChannelName() << std::endl;
-			it->setChannelId(-1);
-			sendToClient(it->getId() + 1, "you have been kicked");//!check the actual output
-			//!also why is this a +1 again? i thought i had solved this, check it when you want
+		//std::cout << _clients[i].getNick() << " is trying to give op to " << user << " in channel " << channelTarget << std::endl;
+		Client *clientToOp = foundInUsers(user);
+		if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to give op without being op" << std::endl;
+		else if (strcmp(user.c_str(), _clients[i].getNick().c_str()) == 0)
+			std::cout << _clients[i].getNick() << " tried to give himself ops -_-" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to op someone in " << channelTarget << std::endl;
+		else if (!clientToOp)
+			std::cout << "Client to op not found" << std::endl;
+		else if (!hasInUserChannels(*clientToOp, channelTarget))
+			std::cout << clientToOp->getNick() << " is not in the cshannel to be opped in " << channelTarget << std::endl;
+		else
+		{
+			clientToOp->setOp(true);
+			std::cout << clientToOp->getNick() << " has been given op by " << _clients[i].getNick() << std::endl;
+			sendToClient(clientToOp->getId(), "you have been given op in channel " + channelTarget + " by " + _clients[i].getNick());
 		}
 	}
-	int channelId = findOrCreateChannel(i, name);
-	_clients[i].setChannelId(channelId + 1);
-	_clients[i].setchannelName( _channels[_clients[i].getChannelId()].getName());
-	std::cout << "Client " << _clients[i].getNick() << 
-				" joined channel " << _clients[i].getChannelName() << std::endl;
+	else if (opr == "-o")
+	{
+		/////TO UNDERSTAND AND TO DO
+	}
+	else if (opr == "+l")
+	{
+		//std::cout << _clients[i].getNick() << " is trying to set limit in channel " << channelTarget << " to " << user << std::endl;
+		int limit = atoi(user.c_str());
+		if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to set limit without being op" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to set limit in " << channelTarget << std::endl;
+		else
+		{
+			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+			{
+				if (channelTarget == channelIt->getName())
+				{
+					if (channelIt->getNbrClients() > limit)
+					{
+						std::cout << "Cannot set limit to " << limit << " because there are already " << channelIt->getNbrClients() << " users in the channel" << std::endl;
+						sendToClient(i, "cannot set limit to " + user + " because there are already smaller than the number of users in the channel");
+						return ;
+					}
+					std::cout << "You have " << channelIt->getNbrClients() << " users out of max " << channelIt->getMaxClients() << std::endl;
+					channelIt->setMaxClients(limit);
+					std::cout << "Channel " << channelIt->getName() << " limit has been set to " << channelIt->getMaxClients() << " by " << _clients[i].getNick() << std::endl;
+					sendToClient(i, "you have set the channel " + channelTarget + " limit to " + user);
+				}
+			}
+		}
+	}
+	else if (opr == "-l")
+	{
+		if (user != "")
+		{
+			std::cout << "Cannot have extra parameter " << user << " for -l mode" << std::endl;
+			return ;
+		}
+		else if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to take out user limit without being op" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to take out user limit in " << channelTarget << std::endl;
+		else
+		{
+			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+			{
+				if (channelTarget == channelIt->getName())
+				{
+					channelIt->setMaxClients(0);
+					std::cout << "Channel " << channelIt->getName() << " limit has been removed by " << _clients[i].getNick() << std::endl;
+				}
+			}
+		}
 
-	std::string strToSend = "JOIN " + _channels[_clients[i].getChannelId()].getName();//check if this is whats supposed to be said
-	sendToClientsInChannel(i, strToSend);
-
-	std::string welcomeMessage =  "Welcome to the channel: " + _clients[i].getChannelName() + ", today's MOTD: temp motd!";//check if this is whats supposed to be said
-	sendToClient(i, welcomeMessage);//THIS ONE IS NOT NEEDED, BUT ITS AN AGKNOWLEDGEMENT THAT CLIENT HAS JOINED */
+	}
+	//mode logic here
+	//sendToClient(i, "MODE command received with params: " + line);
 }
 
 
@@ -339,7 +372,9 @@ void	Server::processCommand(int i, std::string line)
 	else if (line.compare(0, 5, "KICK ") == 0)
 		commandKick(i, line.substr(5));
 	else if (line.compare(0, 7, "INVITE ") == 0)
-		commandInvite(i, line.substr(7)); ///////STILL DOING THIS DONT TOUCH
+		commandInvite(i, line.substr(7));
+	else if (line.compare(0, 5, "MODE ") == 0)
+		commandMode(i, line.substr(5));
 	else
 		sendToClientsInChannel(i, line);
 }

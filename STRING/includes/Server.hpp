@@ -55,6 +55,7 @@ class Server
 		void	commandKick(int i, std::string toKick);
 
 		void	commandInvite(int i, std::string name);
+		void	commandMode(int i, std::string line);
 		void	commandQuit(int i, std::string str);//disconnect client
 
 
