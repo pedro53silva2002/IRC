@@ -291,6 +291,11 @@ void Server::executeCommandMode(int i, std::string channelTarget, std::string op
 {
 	if (opr == "+o")
 	{
+		if (isdigit(user[0]))
+		{
+			std::cout << "Invalid parameter: " << user << std::endl;
+			return ;
+		}
 		//std::cout << _clients[i].getNick() << " is trying to give op to " << user << " in channel " << channelTarget << std::endl;
 		Client *clientToOp = foundInUsers(user);
 		if (!_clients[i].getOp())
@@ -332,6 +337,15 @@ void Server::executeCommandMode(int i, std::string channelTarget, std::string op
 	}
 	else if (opr == "+l")
 	{
+		for (size_t i = 0; i < user.size(); i++)
+		{
+			if (!isdigit(user[i]))
+			{
+				std::cout << "Invalid parameter: " << user << std::endl;
+				return ;
+			}
+		}
+		
 		//std::cout << _clients[i].getNick() << " is trying to set limit in channel " << channelTarget << " to " << user << std::endl;
 		int limit = atoi(user.c_str());
 		if (!_clients[i].getOp())
@@ -495,12 +509,12 @@ void	Server::commandMode(int i, std::string line)
 	int pos = line.find(' ', 0);
 	std::string channelTarget = line.substr(0, pos);
 	std::vector<std::string> opr;
-	std::string user;
+	std::vector<std::string> user;
 	size_t nextPos = pos + 1;
 	if (line.find(' ', nextPos) == std::string::npos)
 	{
 		opr.push_back(line.substr(nextPos, line.size() - nextPos));
-		user = "";
+		user.push_back("");
 	}
 	else
 	{
@@ -511,9 +525,15 @@ void	Server::commandMode(int i, std::string line)
 			opr.push_back(line.substr(nextPos, line.find(' ', nextPos) - nextPos));
 			nextPos = line.find(' ', nextPos) + 1;
 		}
-		std::cout << "NEXTPOS: " << nextPos << std::endl;
+		while (line.find(' ', nextPos) != std::string::npos && nextPos < line.size())
+		{
+			//std::cout << "FOUND EMPTY SPACE" << std::endl;
+			user.push_back(line.substr(nextPos, line.find(' ', nextPos) - nextPos));
+			nextPos = line.find(' ', nextPos) + 1;
+		}
+		//std::cout << "NEXTPOS: " << nextPos << std::endl;
 		if (nextPos)
-			user = (line.substr(nextPos, line.size() - nextPos));
+			user.push_back(line.substr(nextPos, line.size() - nextPos));
 	}
 	/* if (line.find(' ', pos + 1) == std::string::npos)
 		opr = line.substr(pos + 1, line.size() - (pos + 1));
@@ -526,6 +546,8 @@ void	Server::commandMode(int i, std::string line)
 	//std::cout << "Result: " << strcmp(opr.c_str(), "+k") << std::endl;
 	//std::cout << "MODE command received from " << _clients[i].getNick() << " with params: " << line << std::endl;
 	std::cout << "CHANNEL TARGET: " << channelTarget << std::endl;
+	//std::vector<std::string>::iterator userIt = user.begin();
+	int k = 0;
 	for (std::vector<std::string>::iterator it = opr.begin(); it != opr.end(); ++it)
 	{
 		if ((*it).size() > 2)
@@ -536,15 +558,28 @@ void	Server::commandMode(int i, std::string line)
 				singleOpr += (*it)[0];
 				singleOpr += (*it)[j];
 				std::cout << "OPR PART: " << singleOpr <<  std::endl;
-				executeCommandMode(i, channelTarget, singleOpr, user);
-			}	
+				std::cout << "USER PART: " << user.at(k) <<  std::endl;
+				executeCommandMode(i, channelTarget, singleOpr, user.at(k));
+				if (k < user.size())
+				{
+					k++;
+				}
+			}
 		}
 		else
-			executeCommandMode(i, channelTarget, *it, user);
-		std::cout << "OPR: " << *it <<  std::endl;
+		{
+			executeCommandMode(i, channelTarget, *it, user.at(k));
+			std::cout << "OPR: " << *it <<  std::endl;
+			std::cout << "USER: " << user.at(k) <<  std::endl;
+		}
+		if (k < user.size())
+		{
+			k++;
+		}
 		//executeCommandMode(i, channelTarget, *it, user);
 	}
-	std::cout << "USER: " << user << std::endl;
+	
+	//std::cout << "USER: " << user << std::endl;
 	
 	//mode logic here
 	//sendToClient(i, "MODE command received with params: " + line);
