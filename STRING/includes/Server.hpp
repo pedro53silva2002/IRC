@@ -67,6 +67,7 @@ class Server
 		//utils
 		int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
 		Client*	foundInUsers(std::string name);
+		void 	executeCommandMode(int i, std::string channelTarget, std::string opr, std::string user);
 		
 
 		//just for testing

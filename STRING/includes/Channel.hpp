@@ -3,6 +3,18 @@
 # include "Client.hpp"
 # include "Colours.hpp"
 # include "Server.hpp"
+# include <iostream>
+# include <sys/types.h>
+# include <unistd.h>
+# include <sys/socket.h>
+# include <netdb.h>
+# include <arpa/inet.h>
+# include <string.h>
+# include <string>
+# include <vector>
+# include <poll.h>
+# include <stdlib.h>//atoi
+# include <algorithm>
 
 //todo I NEED TO BE SURE TO REMOVE CLIENTS THAT CLOSED SOCKET FROM THIS VECTOR
 class Channel
@@ -13,6 +25,8 @@ class Channel
 		std::string			_name;
 		int				    _maxClients;
 		int 				_nbrClients;
+		bool				_inviteOnly;
+		std::string			_channelKey;
 
 		std::vector<int>	_clientsInChannel;
 	public:
@@ -21,6 +35,10 @@ class Channel
 			_name = name;
 			_maxClients = 0;//default meaning unlimited
 			_nbrClients = 0;
+			_inviteOnly = 0;
+			_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());
+			_name.erase(std::remove(_name.begin(),_name.end(), '\r'),_name.end());
+			_channelKey = "";
 		}
 
 		Channel() {
@@ -37,10 +55,13 @@ class Channel
 		}
 		int				getId() { return (_id); }
 		std::string		getName() { return (_name); }
+		bool			getInviteMode() { return (_inviteOnly); }
+		std::string		getChannelKey() { return (_channelKey); }
 		
 		void			setId(int id) { _id = id; }
 		void			setName(std::string name) { _name = name; }
-
+		void			setInviteMode(bool value) { _inviteOnly = value; }
+		void			setChannelKey(std::string key) { _channelKey = key; }
 		int			getNbrClients() { return (_nbrClients); }
 		int			getMaxClients() { return (_maxClients); }
 

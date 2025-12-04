@@ -95,10 +95,12 @@ class Client
 		void	setNick(std::string nick) { _nick = nick; }
 		void	setRealname(std::string realname) { _realname = realname; }
 		void	setChannelId(int channelId) { _channelId = channelId; }
-		void	setchannelName(std::string channelName) { 
+		void	setchannelName(std::string channelName) {
+
 			if (_channelName == "")
 			{
 				channelName.erase(std::remove(channelName.begin(),channelName.end(), '\n'),channelName.end());
+				channelName.erase(std::remove(channelName.begin(),channelName.end(), '\r'),channelName.end());
 				_channelName = channelName;
 			}
 			else

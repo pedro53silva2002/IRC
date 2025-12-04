@@ -74,24 +74,47 @@ void	Server::commandQuit(int i, std::string str)
 
 int		Server::findOrCreateChannel(int i, std::string name)
 {
+	std::string channelTarget = name.substr(0, name.find(' ', 0));
+	std::string channelKey;
+	if (name.find(' ', 0) != std::string::npos)
+		channelKey = name.substr(name.find(' ', 0) + 1);
+	std::cout << "Channel: " << channelTarget << "\tKEY: " << channelKey << std::endl;
 	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 	{
-		if (name == channelIt->getName())//change to use subster of the getName
-			return (channelIt->getId());//Found an existing channel
+		if (channelTarget == channelIt->getName())//change to use subster of the getName
+		{	
+			if (channelIt->getChannelKey() == "" || channelIt->getChannelKey() == channelKey)
+				return (channelIt->getId());//Found an existing channel
+			else
+				return -1; //wrong key
+		}
 	}
-	Channel temp(name);
+	Channel temp(channelTarget);
 	_channels.push_back(temp);
 	_clients[i].setOp(true);
 	std::cout << _channels.rbegin()->getName() << " has been created" << std::endl;
 	return (_channels.rbegin()->getId());
 }
+
 void	Server::commandJoin(int i, std::string name)//parse so that only #channel is allowed
 {
 	int channelId = findOrCreateChannel(i, name);
+	if (channelId == -1)
+	{
+		std::cout << "Wrong key provided for channel " << name << std::endl;
+		sendToClient(_clients[i].getId(), "cannot join channel " + name + ": wrong key provided");
+		return ;
+	}
 	if (_channels[channelId+1].getNbrClients() >= _channels[channelId+1].getMaxClients() && _channels[channelId+1].getMaxClients() != 0)
 	{
 		std::cout << "Channel " << _channels[channelId].getName() << " is full. Cannot join." << std::endl;
 		sendToClient(_clients[i].getId(), "cannot join channel " + _channels[channelId].getName() + ": channel is full");
+		return ;
+	}
+	else if (_channels[channelId].getInviteMode())
+	{
+		std::cout << "Channel " << _channels[channelId].getName() << " is invite-only. Cannot join." << std::endl;
+		sendToClient(_clients[i].getId(), "cannot join channel " + _channels[channelId].getName() + ": channel is invite-only");
 		return ;
 	}
 	_clients[i].setChannelId(channelId + 1);
@@ -157,6 +180,7 @@ bool hasInUserChannels(Client client, std::string name)
 {
 	std::vector<std::string> channelsInside;
 	std::string line(client.getChannelName());
+	//std::cout << "CLIENT CHANNEL NAMES: " << line << std::endl;
 	size_t pos = 0;
 	if (line == "")
 		return (0);
@@ -177,6 +201,7 @@ bool hasInUserChannels(Client client, std::string name)
 	}
 	for (std::vector<std::string>::iterator insideIt = channelsInside.begin(); insideIt != channelsInside.end(); ++insideIt)
 	{
+		//std::cout << "MINE: " << name << "\tCHECKING CHANNEL: " << *insideIt << "\nResult: " << strcmp(name.c_str(), (*insideIt).c_str()) << std::endl;
 		if (name == *insideIt)
 		{
 			//std::cout << "FOUND CHANNEL: " << *insideIt << std::endl;
@@ -227,6 +252,7 @@ void	Server::commandInvite(int i, std::string name)
 {
 	std::string userToInvite = name.substr(0, name.find(' ', 0));
 	std::string channelToGet = name.substr(name.find(' ', 0) + 1);
+	int index;
 	size_t pos = 0;
 	int UserToInviteId;
 
@@ -242,27 +268,27 @@ void	Server::commandInvite(int i, std::string name)
 		if (userToInvite == _clients[i].getNick())
 			UserToInviteId = i;
 	}
+	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+	{
+		if (channelToGet == channelIt->getName())//change to use subster of the getName
+		{
+			index = channelIt - _channels.begin();
+			break ;
+		}
+	}
 	/* else
 		std::cout << "Didnt found the channel to invite " << std::endl; */
 	//std::cout << "USER TO INVITE: " << userToInvite << "(" << _clients[UserToInviteId].getNick() << ")\t" << " CHANNEL TO GET: " << channelToGet << std::endl;
-	commandJoin(UserToInviteId, channelToGet);
+	//std::cout << "CHANNEL TO INVITE: " << index << std::endl;
+	if (_channels[index].getChannelKey() != "")
+		commandJoin(UserToInviteId, (channelToGet + " " + _channels[index].getChannelKey()));
+	else
+		commandJoin(UserToInviteId, (channelToGet));
+	//commandJoin(UserToInviteId, (channelToGet + " " + _channels[index].getChannelKey()));
 }
 
-void	Server::commandMode(int i, std::string line)
+void Server::executeCommandMode(int i, std::string channelTarget, std::string opr, std::string user)
 {
-	int pos = line.find(' ', 0);
-	std::string channelTarget = line.substr(0, pos);
-	std::string opr;
-	std::string user;
-	if (line.find(' ', pos + 1) == std::string::npos)
-		opr = line.substr(pos + 1, line.size() - (pos + 1));
-	else
-	{
-		opr = line.substr(pos + 1, line.find(' ', pos + 1) - (pos + 1));
-		user = line.substr(line.find(' ', pos + 1) + 1, line.size() - line.find(' ', pos + 1));
-	}
-	std::cout << "CHANNEL TARGET: " << channelTarget << "\nOPR: " << opr << "\nUSER: " << user << std::endl;
-	std::cout << "MODE command received from " << _clients[i].getNick() << " with params: " << line << std::endl;
 	if (opr == "+o")
 	{
 		//std::cout << _clients[i].getNick() << " is trying to give op to " << user << " in channel " << channelTarget << std::endl;
@@ -286,7 +312,23 @@ void	Server::commandMode(int i, std::string line)
 	}
 	else if (opr == "-o")
 	{
-		/////TO UNDERSTAND AND TO DO
+		Client *clientToOp = foundInUsers(user);
+		if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to give op without being op" << std::endl;
+		else if (strcmp(user.c_str(), _clients[i].getNick().c_str()) == 0)
+			std::cout << _clients[i].getNick() << " tried to give himself ops -_-" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to op someone in " << channelTarget << std::endl;
+		else if (!clientToOp)
+			std::cout << "Client to op not found" << std::endl;
+		else if (!hasInUserChannels(*clientToOp, channelTarget))
+			std::cout << clientToOp->getNick() << " is not in the cshannel to be opped in " << channelTarget << std::endl;
+		else
+		{
+			clientToOp->setOp(false);
+			std::cout << clientToOp->getNick() << " has been given op by " << _clients[i].getNick() << std::endl;
+			sendToClient(clientToOp->getId(), "you have been given op in channel " + channelTarget + " by " + _clients[i].getNick());
+		}
 	}
 	else if (opr == "+l")
 	{
@@ -318,12 +360,12 @@ void	Server::commandMode(int i, std::string line)
 	}
 	else if (opr == "-l")
 	{
-		if (user != "")
+		/* if (user != "")
 		{
 			std::cout << "Cannot have extra parameter " << user << " for -l mode" << std::endl;
 			return ;
-		}
-		else if (!_clients[i].getOp())
+		} */
+		if (!_clients[i].getOp())
 			std::cout << _clients[i].getNick() << " tried to take out user limit without being op" << std::endl;
 		else if (!hasInUserChannels(_clients[i], channelTarget))
 			std::cout << _clients[i].getNick() << " is not in the channel to take out user limit in " << channelTarget << std::endl;
@@ -338,8 +380,172 @@ void	Server::commandMode(int i, std::string line)
 				}
 			}
 		}
-
 	}
+	else if (opr == "+i")
+	{
+		/* if (user != "")
+		{
+			std::cout << "Cannot have extra parameter " << user << " for +i mode" << std::endl;
+			return ;
+		} */
+		if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to enable invite only without being op" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to enable invite only in " << channelTarget << std::endl;
+		else
+		{
+			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+			{
+				std::cout << "MINE: " << channelTarget << "\tCHECKING CHANNEL: " << channelIt->getName() << "\nResult: " << strcmp(channelTarget.c_str(), channelIt->getName().c_str()) << std::endl;
+				if (channelTarget == channelIt->getName())
+				{
+					channelIt->setInviteMode(1);
+					std::cout << "INVITE MODE SET TO " << channelIt->getInviteMode() << std::endl;
+					std::cout << "Channel " << channelIt->getName() << " invite-only mode has been enabled by " << _clients[i].getNick() << std::endl;
+				}
+			}
+		}
+	}
+	else if (opr == "-i")
+	{
+		/* if (user != "")
+		{
+			std::cout << "Cannot have extra parameter " << user << " for -i mode" << std::endl;
+			return ;
+		} */
+		if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to disable invite only without being op" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to disable invite only in " << channelTarget << std::endl;
+		else
+		{
+			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+			{
+				if (channelTarget == channelIt->getName())
+				{
+					channelIt->setInviteMode(0);
+					std::cout << "Channel " << channelIt->getName() << " invite-only mode has been disabled by " << _clients[i].getNick() << std::endl;
+				}
+			}
+		}
+	}
+	else if (opr == "+k")
+	{
+		/* if (user == "")
+		{
+			std::cout << "Need to give me the pass name." << std::endl;
+			return ;
+		} */
+		if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to give a key without being op" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to give a key in " << channelTarget << std::endl;
+		else
+		{
+			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+			{
+				if (channelTarget == channelIt->getName())
+				{
+					channelIt->setChannelKey(user);
+					std::cout << "Channel " << channelIt->getName() << " got a key cause of " << _clients[i].getNick() << std::endl;
+				}
+			}
+		}
+		//std::cout << "Channel key mode +k not implemented yet" << std::endl;
+	}
+	else if (opr == "-k")
+	{
+		/* if (user == "")
+		{
+			std::cout << "Need to give me the pass name." << std::endl;
+			return ;
+		} */
+		if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to take a key being op" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to take a key in " << channelTarget << std::endl;
+		else
+		{
+			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+			{
+				if (channelTarget == channelIt->getName())
+				{
+					if (channelIt->getChannelKey() != user)
+					{
+						std::cout << "Cannot remove channel key, wrong key provided." << std::endl;
+						sendToClient(i, "cannot remove channel key, wrong key provided");
+						return ;
+					}
+					channelIt->setChannelKey("");
+					std::cout << "Channel " << channelIt->getName() << " doesn't have a key cause of " << _clients[i].getNick() << std::endl;
+				}
+			}
+		}
+		//std::cout << "Channel key mode -k not implemented yet" << std::endl;
+	}
+	else
+	{
+		std::cout << "Unknown mode operation: " << opr << std::endl;
+		sendToClient(i, "unknown mode operation: " + opr);
+	}
+}
+
+void	Server::commandMode(int i, std::string line)
+{
+	int pos = line.find(' ', 0);
+	std::string channelTarget = line.substr(0, pos);
+	std::vector<std::string> opr;
+	std::string user;
+	size_t nextPos = pos + 1;
+	if (line.find(' ', nextPos) == std::string::npos)
+	{
+		opr.push_back(line.substr(nextPos, line.size() - nextPos));
+		user = "";
+	}
+	else
+	{
+		while (line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] == '+' || line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] == '-')
+		{
+			/* if (line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] != '+' && line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] != '-')
+				break ; */
+			opr.push_back(line.substr(nextPos, line.find(' ', nextPos) - nextPos));
+			nextPos = line.find(' ', nextPos) + 1;
+		}
+		std::cout << "NEXTPOS: " << nextPos << std::endl;
+		if (nextPos)
+			user = (line.substr(nextPos, line.size() - nextPos));
+	}
+	/* if (line.find(' ', pos + 1) == std::string::npos)
+		opr = line.substr(pos + 1, line.size() - (pos + 1));
+	else
+	{
+		opr = line.substr(pos + 1, line.find(' ', pos + 1) - (pos + 1));
+		user = line.substr(line.find(' ', pos + 1) + 1, line.size() - line.find(' ', pos + 1));
+	} */
+	//std::cout << "CHANNEL TARGET: " << channelTarget << "\nOPR: " << opr << "\nUSER: " << user << std::endl;
+	//std::cout << "Result: " << strcmp(opr.c_str(), "+k") << std::endl;
+	//std::cout << "MODE command received from " << _clients[i].getNick() << " with params: " << line << std::endl;
+	std::cout << "CHANNEL TARGET: " << channelTarget << std::endl;
+	for (std::vector<std::string>::iterator it = opr.begin(); it != opr.end(); ++it)
+	{
+		if ((*it).size() > 2)
+		{
+			for (size_t j = 1; j < (*it).size(); j++)
+			{
+				std::string singleOpr;
+				singleOpr += (*it)[0];
+				singleOpr += (*it)[j];
+				std::cout << "OPR PART: " << singleOpr <<  std::endl;
+				executeCommandMode(i, channelTarget, singleOpr, user);
+			}	
+		}
+		else
+			executeCommandMode(i, channelTarget, *it, user);
+		std::cout << "OPR: " << *it <<  std::endl;
+		//executeCommandMode(i, channelTarget, *it, user);
+	}
+	std::cout << "USER: " << user << std::endl;
+	
 	//mode logic here
 	//sendToClient(i, "MODE command received with params: " + line);
 }
@@ -401,11 +607,25 @@ bool	Server::handleClientPoll(int i)
 		return (false);
 	}
 
-	buf[bytesRecv] = 0;
+	/* buf[bytesRecv] = 0;
 	
 	//todo HERE I NEED TO DIVIDE OR SKIP \n AND \r
 	//!stupid temporary fix for new line after input
-	buf[bytesRecv - 1] = 0;
+	if (buf[bytesRecv - 1] == '\n' || buf[bytesRecv - 1] == '\r')
+		buf[bytesRecv - 1] = 0; */
+	for (size_t i = 1; i < bytesRecv - 1; i++)
+	{
+		if (buf[bytesRecv - i] == '\r' || buf[bytesRecv - i] == '\n')
+		{
+			buf[bytesRecv - i] = 0;
+			break ;
+		}
+		else
+			break ;
+		i++;
+	}
+
+	
 
 /* 
 	ok big news. Apparently hexchat sends PASS USER and NICK all at the same time
@@ -417,6 +637,8 @@ bool	Server::handleClientPoll(int i)
 	// if (line.empty() || line == "\n" || line == "\r" || line == "\r\n")//stupid fix
 	// 	return true;
 	std::string line(buf);
+	line.erase(std::remove(line.begin(),line.end(), '\n'),line.end());
+	line.erase(std::remove(line.begin(),line.end(), '\r'),line.end());
 
 	processCommand(i, line);
 	return (true);
@@ -501,7 +723,7 @@ void	Server::srvRun()
 			_clients.push_back(Client(temp));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			// testClients();
+			testClients();
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)//*loop through clients
