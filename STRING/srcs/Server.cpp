@@ -567,6 +567,7 @@ void	Server::processCommand(int i, std::string line)
 
 
 	//*Registration commands
+
 	if (line.compare(0, 5, "PASS ") == 0)//fix for without space, not enough parameters
 		commandPass(i, line.substr(5));
 	else if (line.compare(0, 5, "USER ") == 0)//fix for without space, not enough parameters
@@ -575,7 +576,7 @@ void	Server::processCommand(int i, std::string line)
 		commandNick(i, line.substr(5));
 
 	
-	else if (!_clients[i].isRegistered())
+	else if (!_clients[i].isRegistered())//temporary, will be called by every function
 		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK");
 	
 	
