@@ -497,6 +497,42 @@ void Server::executeCommandMode(int i, std::string channelTarget, std::string op
 		}
 		//std::cout << "Channel key mode -k not implemented yet" << std::endl;
 	}
+	else if (opr == "+t")
+	{
+		if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to enable topic restriction without being op" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to enable topic restriction in " << channelTarget << std::endl;
+		else
+		{
+			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+			{
+				if (channelTarget == channelIt->getName())
+				{
+					channelIt->setTopicSet(true);
+					std::cout << "Channel " << channelIt->getName() << " topic restriction has been enabled by " << _clients[i].getNick() << std::endl;
+				}
+			}
+		}
+	}
+	else if (opr == "-t")
+	{
+		if (!_clients[i].getOp())
+			std::cout << _clients[i].getNick() << " tried to disabled topic restriction without being op" << std::endl;
+		else if (!hasInUserChannels(_clients[i], channelTarget))
+			std::cout << _clients[i].getNick() << " is not in the channel to disabled topic restriction in " << channelTarget << std::endl;
+		else
+		{
+			for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+			{
+				if (channelTarget == channelIt->getName())
+				{
+					channelIt->setTopicSet(false);
+					std::cout << "Channel " << channelIt->getName() << " topic restriction has been disabled by " << _clients[i].getNick() << std::endl;
+				}
+			}
+		}
+	}
 	else
 	{
 		std::cout << "Unknown mode operation: " << opr << std::endl;
@@ -545,7 +581,7 @@ void	Server::commandMode(int i, std::string line)
 	//std::cout << "CHANNEL TARGET: " << channelTarget << "\nOPR: " << opr << "\nUSER: " << user << std::endl;
 	//std::cout << "Result: " << strcmp(opr.c_str(), "+k") << std::endl;
 	//std::cout << "MODE command received from " << _clients[i].getNick() << " with params: " << line << std::endl;
-	std::cout << "CHANNEL TARGET: " << channelTarget << std::endl;
+	//std::cout << "CHANNEL TARGET: " << channelTarget << std::endl;
 	//std::vector<std::string>::iterator userIt = user.begin();
 	int k = 0;
 	for (std::vector<std::string>::iterator it = opr.begin(); it != opr.end(); ++it)
@@ -557,8 +593,8 @@ void	Server::commandMode(int i, std::string line)
 				std::string singleOpr;
 				singleOpr += (*it)[0];
 				singleOpr += (*it)[j];
-				std::cout << "OPR PART: " << singleOpr <<  std::endl;
-				std::cout << "USER PART: " << user.at(k) <<  std::endl;
+				/* std::cout << "OPR PART: " << singleOpr <<  std::endl;
+				std::cout << "USER PART: " << user.at(k) <<  std::endl; */
 				executeCommandMode(i, channelTarget, singleOpr, user.at(k));
 				if (k < user.size())
 				{
@@ -569,8 +605,8 @@ void	Server::commandMode(int i, std::string line)
 		else
 		{
 			executeCommandMode(i, channelTarget, *it, user.at(k));
-			std::cout << "OPR: " << *it <<  std::endl;
-			std::cout << "USER: " << user.at(k) <<  std::endl;
+			/* std::cout << "OPR: " << *it <<  std::endl;
+			std::cout << "USER: " << user.at(k) <<  std::endl; */
 		}
 		if (k < user.size())
 		{
@@ -585,6 +621,34 @@ void	Server::commandMode(int i, std::string line)
 	//sendToClient(i, "MODE command received with params: " + line);
 }
 
+
+void	Server::commandTopic(int i, std::string line)
+{
+	size_t pos = line.find(' ', 0);
+	std::string channelTarget = line.substr(0, pos);
+	std::string topic;
+	topic = line.substr(pos + 1);
+	/* if (pos != std::string::npos)
+		topic = line.substr(pos + 1);
+	else
+		topic = ""; */
+	std::cout << "CHANNEL TARGET: " << channelTarget << "\nTOPIC: " << topic << std::endl;
+	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+	{
+		if (channelTarget == channelIt->getName())
+		{
+			if (channelIt->getTopicSet() && !_clients[i].getOp())
+			{
+				std::cout << _clients[i].getNick() << " tried to set topic without being op in channel " << channelTarget << std::endl;
+				sendToClient(i, "you cannot set topic in channel " + channelTarget + ": topic is restricted to ops");
+				return ;
+			}
+			channelIt->setTopic(topic);
+			std::cout << "Channel " << channelIt->getName() << " topic has been set to \"" << channelIt->getTopic() << "\" by " << _clients[i].getNick() << std::endl;
+			sendToClient(i, "you have set the topic in channel " + channelTarget + " to: " + topic);
+		}
+	}
+}
 
 
 
@@ -623,6 +687,8 @@ void	Server::processCommand(int i, std::string line)
 		commandInvite(i, line.substr(7));
 	else if (line.compare(0, 5, "MODE ") == 0)
 		commandMode(i, line.substr(5));
+	else if (line.compare(0, 6, "TOPIC ") == 0)
+		commandTopic(i, line.substr(6));
 	else if (line.compare(0, 4, "QUIT") == 0)//move this down
 		return (commandQuit(i, "hardcoded quit"));
 	else

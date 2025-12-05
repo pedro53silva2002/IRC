@@ -27,6 +27,8 @@ class Channel
 		int 				_nbrClients;
 		bool				_inviteOnly;
 		std::string			_channelKey;
+		bool				_topicSet;
+		std::string			_topic;
 
 		std::vector<int>	_clientsInChannel;
 	public:
@@ -39,6 +41,7 @@ class Channel
 			_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());
 			_name.erase(std::remove(_name.begin(),_name.end(), '\r'),_name.end());
 			_channelKey = "";
+			_topicSet = true;
 		}
 
 		Channel() {
@@ -57,11 +60,15 @@ class Channel
 		std::string		getName() { return (_name); }
 		bool			getInviteMode() { return (_inviteOnly); }
 		std::string		getChannelKey() { return (_channelKey); }
+		bool 			getTopicSet() { return (_topicSet); }
+		std::string		getTopic() { return (_topic); }
 		
 		void			setId(int id) { _id = id; }
 		void			setName(std::string name) { _name = name; }
 		void			setInviteMode(bool value) { _inviteOnly = value; }
 		void			setChannelKey(std::string key) { _channelKey = key; }
+		void			setTopicSet(bool value) { _topicSet = value; }
+		void			setTopic(std::string topic) { _topic = topic; }
 		int			getNbrClients() { return (_nbrClients); }
 		int			getMaxClients() { return (_maxClients); }
 
