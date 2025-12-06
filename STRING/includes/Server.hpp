@@ -54,8 +54,20 @@ class Server
 
 		void	commandKick(int i, std::string toKick);
 
-		void	commandInvite(int i, std::string name);
+		//*MODES
 		void	commandMode(int i, std::string line);
+		void 	executeCommandMode(int i, std::string channelTarget, std::string opr, std::string user);
+
+		void	modeInviteOnly(int i,std::string channelTarget, std::string user, bool inviteOnlyOrNot);
+		void	modeTopicRestriction(int i,std::string channelTarget, std::string user, bool opOnlyOrNot);
+		void	modeKey(int i,std::string channelTarget, std::string user, bool setKey);//setKey is to know if its +k or -k
+		//key mode
+		void	modeOp(int i,std::string channelTarget, std::string user, bool opOrNot);
+		void	modeLim(int i,std::string channelTarget, std::string user);
+
+
+
+		void	commandInvite(int i, std::string name);
 		void	commandTopic(int i, std::string line);
 		void	commandQuit(int i, std::string str);//disconnect client
 
@@ -68,7 +80,6 @@ class Server
 		//utils
 		int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
 		Client*	foundInUsers(std::string name);
-		void 	executeCommandMode(int i, std::string channelTarget, std::string opr, std::string user);
 		
 
 		//just for testing
