@@ -98,6 +98,11 @@ int		Server::findOrCreateChannel(int i, std::string name)
 	return (_channels.rbegin()->getId());
 }
 
+
+//ERR_CHANNELISFULL, +l
+//ERR_INVITEONLYCHAN, +i
+//ERR_INVALIDKEY, +k
+//ERR_BADCHANNELKEY, +k
 void	Server::commandJoin(int i, std::string name)//parse so that only #channel is allowed
 {
 	int channelId = findOrCreateChannel(i, name);
@@ -250,6 +255,8 @@ int Server::findChannel(Client client, std::vector<Channel> channels,std::string
 	return (1);
 }
 
+//ERR_USERONCHANNEL
+//ERR_CHANNELISFULL, +l
 void	Server::commandInvite(int i, std::string name)
 {
 	std::string userToInvite = name.substr(0, name.find(' ', 0));
@@ -291,196 +298,154 @@ void	Server::commandInvite(int i, std::string name)
 
 
 //*MODES
-//*MODES
-//*MODES
+//todo have a function that returns the channelTarget, that way it gets simpler
 
-//todo check outputs of all functions
-void	Server::modeInviteOnly(int i,std::string channelTarget, std::string user, bool inviteOnlyOrNot)
+//!big todo list: sendToClient calls will be changed to also recieve the numeric and the strings of what is needed
+//! sendToAllClientsInChannel needs to be called where its needed
+
+//todo done except outputs and parsing, and sendToAllClients all changes that happen
+void	Server::modeInviteOnly(int i, std::string channelTarget, bool inviteOnlyOrNot)
 {
-	/* if (user != "")
+	//todo check extra parameters and parsing
+	
+	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 	{
-		std::cout << "Cannot have extra parameter " << user << " for +i mode" << std::endl;
-		return ;
-	} */
-	if (!_clients[i].getOp())
-		std::cout << _clients[i].getNick() << " tried to enable invite only without being op" << std::endl;
-	else if (!hasInUserChannels(_clients[i], channelTarget))
-		std::cout << _clients[i].getNick() << " is not in the channel to enable invite only in " << channelTarget << std::endl;
-	else
-	{
-		for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-		{
-			std::cout << "MINE: " << channelTarget << "\tCHECKING CHANNEL: " << channelIt->getName() << "\nResult: " << strcmp(channelTarget.c_str(), channelIt->getName().c_str()) << std::endl;
-			if (channelTarget == channelIt->getName())
-			{
-				channelIt->setInviteMode(inviteOnlyOrNot);
-				std::cout << "INVITE MODE SET TO " << channelIt->getInviteMode() << std::endl;
-				std::cout << "Channel " << channelIt->getName() << " invite-only mode has been enabled by " << _clients[i].getNick() << std::endl;
-			}
+		if (channelTarget == channelIt->getName()) {
+			channelIt->setInviteMode(inviteOnlyOrNot);
+			// serverLog(_clients[i].getNick(), channelTarget + " invite mode has been changed LOG IT TO SAY WHAT CHANGED");
+			// sendToClientsInChannel(i, "channel invite mode changed");//todo check output
 		}
 	}
 }
-
-
-void	Server::modeTopicRestriction(int i,std::string channelTarget, std::string user, bool opOnlyOrNot)
+void	Server::modeTopicRestriction(int i,std::string channelTarget, bool opOnlyOrNot)
 {
-	if (!_clients[i].getOp())
-		std::cout << _clients[i].getNick() << " tried to enable topic restriction without being op" << std::endl;
-	else if (!hasInUserChannels(_clients[i], channelTarget))
-		std::cout << _clients[i].getNick() << " is not in the channel to enable topic restriction in " << channelTarget << std::endl;
-	else
+	//todo check extra parameters and parsing
+		
+	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 	{
-		for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-		{
-			if (channelTarget == channelIt->getName())
-			{
-				channelIt->setTopicSet(opOnlyOrNot);
-				std::cout << "Channel " << channelIt->getName() << " topic restriction has been enabled by " << _clients[i].getNick() << std::endl;
-			}
+		if (channelTarget == channelIt->getName()) {
+			channelIt->setTopicSet(opOnlyOrNot);
+			// serverLog(_clients[i].getNick(), channelTarget + " topic restrictions have been changed LOG IT TO SAY WHAT CHANGED");
+			// sendToClientsInChannel(i, "channel topic restrictions changed");//todo check output
 		}
 	}
-}
-void	Server::modeKey(int i, std::string channelTarget, std::string user, bool setKey)
-{
-	/* if (user == "")
-	{
-		std::cout << "Need to give me the pass name." << std::endl;
-		return ;
-	} */
-	if (!_clients[i].getOp())
-		std::cout << _clients[i].getNick() << " tried to take a key being op" << std::endl;
-	else if (!hasInUserChannels(_clients[i], channelTarget))
-		std::cout << _clients[i].getNick() << " is not in the channel to take a key in " << channelTarget << std::endl;
-	else
-	{
-		for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-		{
-			if (channelTarget == channelIt->getName())
-			{
-				//if (RemoveKey == true) //do all of this
-				if (setKey == false) {
-					if (channelIt->getChannelKey() != user)
-					{
-						std::cout << "Cannot remove channel key, wrong key provided." << std::endl;
-						sendToClient(i, "cannot remove channel key, wrong key provided");
-						return ;
-					}
-					channelIt->setChannelKey("");
-					std::cout << "Channel " << channelIt->getName() << " doesn't have a key cause of " << _clients[i].getNick() << std::endl;
-				}
-				else {
-					channelIt->setChannelKey(user);
-					std::cout << "Channel " << channelIt->getName() << " got a key cause of " << _clients[i].getNick() << std::endl;
-
-				}
-			}
-		}
-	}
-	//std::cout << "Channel key mode -k not implemented yet" << std::endl;
 }
 void	Server::modeOp(int i, std::string channelTarget, std::string user, bool opOrNot)
 {
-	if (isdigit(user[0]))
+	//todo check extra parameters and parsing
+	Client *clientToOp = foundInUsers(user);
+	if (!clientToOp)//todo THIS IS BAD
 	{
-		std::cout << "Invalid parameter: " << user << std::endl;
+		std::cout << "Client to op not found" << std::endl;
 		return ;
 	}
-	Client *clientToOp = foundInUsers(user);
-	if (!_clients[i].getOp())
-		std::cout << _clients[i].getNick() << " tried to give op without being op" << std::endl;
-	else if (strcmp(user.c_str(), _clients[i].getNick().c_str()) == 0)
-		std::cout << _clients[i].getNick() << " tried to give himself ops -_-" << std::endl;
-	else if (!hasInUserChannels(_clients[i], channelTarget))
-		std::cout << _clients[i].getNick() << " is not in the channel to op someone in " << channelTarget << std::endl;
-	else if (!clientToOp)
-		std::cout << "Client to op not found" << std::endl;
-	else if (!hasInUserChannels(*clientToOp, channelTarget))
-		std::cout << clientToOp->getNick() << " is not in the cshannel to be opped in " << channelTarget << std::endl;
-	else
-	{
-		clientToOp->setOp(opOrNot);
-		std::cout << clientToOp->getNick() << " has been given op by " << _clients[i].getNick() << std::endl;
-		sendToClient(clientToOp->getId(), "you have been given op in channel " + channelTarget + " by " + _clients[i].getNick());
-	}
+
+	if (_clients[i].getNick() == user)
+		return (sendToClient(i, "you cannot op yourself"));//todo check output
+		// serverLog(_clients[i].getNick(), "tried to op themselves -_-");
+	
+	
+
+	if (!hasInUserChannels(*clientToOp, channelTarget))
+		return (sendToClient(i, clientToOp->getNick() + ERR_USERNOTINCHANNEL));//todo check output, send the nick as well
+		// serverLog(_clients[i].getNick(), "tried to op user not in the channel");
+
+	clientToOp->setOp(opOrNot);
+	sendToClient(clientToOp->getId(), "you have been given op in channel " + channelTarget + " by " + _clients[i].getNick());//todo check output
 }
-void	Server::modeLim(int i, std::string channelTarget, std::string user)
+void	Server::modeLim(int i, std::string channelTarget, std::string limitStr)
 {
-	for (size_t i = 0; i < user.size(); i++)
+	//todo check extra parameters and parsing
+		
+	int limit = atoi(limitStr.c_str());
+	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 	{
-		if (!isdigit(user[i]))
+		if (channelTarget == channelIt->getName())
 		{
-			std::cout << "Invalid parameter: " << user << std::endl;
-			return ;
+			//probably should allow limit to be smaller than users in channel, but dont let new users join, like discord
+			if (channelIt->getNbrClients() > limit && limit != 0)
+			{
+				sendToClient(i, "cannot set limit to " + limitStr + " because there are already smaller than the number of users in the channel");//todo check output
+				return ;
+			}
+			channelIt->setMaxClients(limit);
+			break ;
 		}
 	}
-		
-	//std::cout << _clients[i].getNick() << " is trying to set limit in channel " << channelTarget << " to " << user << std::endl;
-	int limit = atoi(user.c_str());
-	if (!_clients[i].getOp())
-		std::cout << _clients[i].getNick() << " tried to set limit without being op" << std::endl;
-	else if (!hasInUserChannels(_clients[i], channelTarget))
-		std::cout << _clients[i].getNick() << " is not in the channel to set limit in " << channelTarget << std::endl;
+	if (limit == 0)
+		sendToClient(i, "channel limit has been removed");//todo check output
 	else
+		sendToClient(i, "you have set the channel " + channelTarget + " limit to " + limitStr);//todo check output
+}
+
+
+//doing, coletes help
+void	Server::modeKey(int i, std::string channelTarget, std::string key, bool setKey)
+{
+	//todo check extra parameters and parsing
+	
+	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
 	{
-		for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
+		if (channelTarget == channelIt->getName())
 		{
-			if (channelTarget == channelIt->getName())
-			{
-				if (limit == 0) {
-					channelIt->setMaxClients(0);
-					std::cout << "Channel " << channelIt->getName() << " limit has been removed by " << _clients[i].getNick() << std::endl;
+			//if (RemoveKey == true) //do all of this
+			if (setKey == false) {
+				if (channelIt->getChannelKey() != key)
+				{
+					std::cout << "Cannot remove channel key, wrong key provided." << std::endl;
+					sendToClient(i, "cannot remove channel key, wrong key provided");
+					return ;
 				}
-				else {
-					if (channelIt->getNbrClients() > limit)
-					{
-						std::cout << "Cannot set limit to " << limit << " because there are already " << channelIt->getNbrClients() << " users in the channel" << std::endl;
-						sendToClient(i, "cannot set limit to " + user + " because there are already smaller than the number of users in the channel");
-						return ;
-					}
-					std::cout << "You have " << channelIt->getNbrClients() << " users out of max " << channelIt->getMaxClients() << std::endl;
-					channelIt->setMaxClients(limit);
-					std::cout << "Channel " << channelIt->getName() << " limit has been set to " << channelIt->getMaxClients() << " by " << _clients[i].getNick() << std::endl;
-					sendToClient(i, "you have set the channel " + channelTarget + " limit to " + user);
-				}
+				channelIt->setChannelKey("");
+				std::cout << "Channel " << channelIt->getName() << " doesn't have a key cause of " << _clients[i].getNick() << std::endl;
+			}
+			else {
+				channelIt->setChannelKey(key);
+				std::cout << "Channel " << channelIt->getName() << " got a key cause of " << _clients[i].getNick() << std::endl;
+
 			}
 		}
 	}
+	//std::cout << "Channel key mode k not implemented yet" << std::endl;
 }
 
-void Server::executeCommandMode(int i, std::string channelTarget, std::string opr, std::string user)
+
+//ERR_INVITEONLYCHAN
+
+void Server::executeCommandMode(int i, std::string channelTarget, std::string opr, std::string args)//user more like arguments
 {
-	if (opr == "+i")
-		modeInviteOnly(i, channelTarget, user, true);
-	else if (opr == "-i")
-		modeInviteOnly(i, channelTarget, user, false);
+	//todo make sure its well parsed
+	if (!hasInUserChannels(_clients[i], channelTarget))
+		return (sendToClient(i, ERR_NOTONCHANNEL + channelTarget));//todo check output, order is bad
+		// serverLog(_clients[i].getNick(), " is not in the channel");
 	
-	else if (opr == "+t")
-		modeTopicRestriction(i, channelTarget, user, true);
-	else if (opr == "-t")
-		modeTopicRestriction(i, channelTarget, user, false);
+	if (!_clients[i].getOp())
+		return (sendToClient(i, ERR_NOPRIVILEGES));//send opr as well//todo check output
+		// serverLog(_clients[i].getNick(), " is not op" + opr);
 	
-	else if (opr == "+k")
-		modeKey(i, channelTarget, user, true);
-	else if (opr == "-k")
-		modeKey(i, channelTarget, user, false);	
-
-	else if (opr == "+o")
-		modeOp(i, channelTarget, user, true);
-
-	else if (opr == "-o")
-		modeOp(i, channelTarget, user, false);
-
-	
-	else if (opr == "+l")
-		modeLim(i, channelTarget, user);//can be for both
-	else if (opr == "-l")
-		modeLim(i, channelTarget, user);
-
-		
-	else
+	char sign = opr[0];
+	bool enable = (sign == '+');//rename
+	char mode = opr[1];
+	switch (mode)
 	{
-		std::cout << "Unknown mode operation: " << opr << std::endl;
-		sendToClient(i, "unknown mode operation: " + opr);
+		case 'i':
+			modeInviteOnly(i, channelTarget, enable);
+			break ;
+		case 't':
+			modeTopicRestriction(i, channelTarget, enable);
+			break ;
+		case 'k':
+			modeKey(i, channelTarget, args, enable);
+			break ;
+		case 'o':
+			modeOp(i, channelTarget, args, enable);
+			break ;
+		case 'l':
+			modeLim(i, channelTarget, args);
+			break ;
+		default:
+			sendToClient(i, ERR_UMODEWUNKNOWNFLAG + opr);
+			break ;
 	}
 }
 
@@ -567,8 +532,9 @@ void	Server::commandMode(int i, std::string line)
 }
 
 //*MODES END
-//*MODES END
-//*MODES END
+
+
+
 
 void	Server::commandTopic(int i, std::string line)
 {
@@ -602,6 +568,7 @@ void	Server::commandTopic(int i, std::string line)
 
 //compares can be called without inputing size
 
+//ERR_UNKNOWNCOMMAND
 void	Server::processCommand(int i, std::string line)
 {
 	std::cout << YELLOW("Client ") << _clients[i].getNick()<< " said: " << line << std::endl;

@@ -56,14 +56,13 @@ class Server
 
 		//*MODES
 		void	commandMode(int i, std::string line);
-		void 	executeCommandMode(int i, std::string channelTarget, std::string opr, std::string user);
+		void 	executeCommandMode(int i, std::string channelTarget, std::string opr, std::string args);
 
-		void	modeInviteOnly(int i,std::string channelTarget, std::string user, bool inviteOnlyOrNot);
-		void	modeTopicRestriction(int i,std::string channelTarget, std::string user, bool opOnlyOrNot);
-		void	modeKey(int i,std::string channelTarget, std::string user, bool setKey);//setKey is to know if its +k or -k
-		//key mode
+		void	modeInviteOnly(int i,std::string channelTarget, bool inviteOnlyOrNot);
+		void	modeTopicRestriction(int i,std::string channelTarget, bool opOnlyOrNot);
+		void	modeKey(int i,std::string channelTarget, std::string key, bool setKey);//setKey is to know if its +k or -k
 		void	modeOp(int i,std::string channelTarget, std::string user, bool opOrNot);
-		void	modeLim(int i,std::string channelTarget, std::string user);
+		void	modeLim(int i,std::string channelTarget, std::string limitStr);
 
 
 

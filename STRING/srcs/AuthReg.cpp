@@ -108,6 +108,8 @@ void	Server::commandUser(int i, std::string line)
 	checkRegistration(i);
 }
 
+//ERR_NICKNAMEINUSE
+//ERR_NONICKNAMEGIVEN
 void	Server::commandNick(int i, std::string line)
 {
 	// if (ft_NickComand(_clients[i].getBuf()))//!COLETES FIX
