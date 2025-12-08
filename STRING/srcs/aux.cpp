@@ -16,6 +16,15 @@ void	Server::exitServer()
 }
 
 
+
+//*SENDERS
+void	Server::sendToClient(int i, std::string str) {
+	std::string reply = str + "\r\n";//todo maybe its just \n
+	serverLog(_clients[i].getNick(), "received string: [" + str + "]");
+	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
+}
+
+//! THIS FUNCTION ONLY EXISTS FOR SENDTOCLIENTSINCHANNEL
 void	Server::sendToClient(int id, std::string sender, std::string str)
 {
 	std::string reply = sender + " :" + str + "\r\n";
@@ -29,12 +38,6 @@ void	Server::sendToClient(int id, std::string sender, std::string str)
 			}
 		}
 }
-void	Server::sendToClient(int i, std::string str) {
-
-	std::string reply = _clients[i].getNick() + " :" + str + "\r\n";
-	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
-}
-
 void	Server::sendToClientsInChannel(int i, std::string str)
 {
 	int	channelId = _clients[i].getChannelId();

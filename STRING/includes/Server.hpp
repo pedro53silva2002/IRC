@@ -59,7 +59,7 @@ class Server
 		void 	executeCommandMode(int i, std::string channelTarget, std::string opr, std::string args);
 
 		void	modeInviteOnly(int i,std::string channelTarget, bool inviteOnlyOrNot);
-		void	modeTopicRestriction(int i,std::string channelTarget, bool opOnlyOrNot);
+		void	modeTopicRestriction(int i,std::string channelTarget, bool topicRestrict);
 		void	modeKey(int i,std::string channelTarget, std::string key, bool setKey);//setKey is to know if its +k or -k
 		void	modeOp(int i,std::string channelTarget, std::string user, bool opOrNot);
 		void	modeLim(int i,std::string channelTarget, std::string limitStr);

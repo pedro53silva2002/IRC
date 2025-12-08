@@ -23,25 +23,26 @@ class Channel
 		static int			_globalChannelId;
 		int					_id;
 		std::string			_name;
-		int				    _maxClients;
+		
 		int 				_nbrClients;
-		bool				_inviteOnly;
 		std::string			_channelKey;
-		bool				_topicSet;
+		int				    _limit;
 		std::string			_topic;
+		bool				_isInviteOnly;
+		bool				_isTopicRestricted;
 
 		std::vector<int>	_clientsInChannel;
 	public:
 		Channel(std::string name) {
-			_id = _globalChannelId++;
+			_id = ++_globalChannelId;
 			_name = name;
-			_maxClients = 0;//default meaning unlimited
-			_nbrClients = 0;
-			_inviteOnly = 0;
-			_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());
+			_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());//wqhat??
 			_name.erase(std::remove(_name.begin(),_name.end(), '\r'),_name.end());
+			_limit = 0;//default meaning unlimited
+			_nbrClients = 0;
 			_channelKey = "";
-			_topicSet = true;
+			_isInviteOnly = false;
+			_isTopicRestricted = true;//check
 		}
 
 		Channel() {
@@ -58,26 +59,23 @@ class Channel
 		}
 		int				getId() { return (_id); }
 		std::string		getName() { return (_name); }
-		bool			getInviteMode() { return (_inviteOnly); }
 		std::string		getChannelKey() { return (_channelKey); }
-		bool 			getTopicSet() { return (_topicSet); }
 		std::string		getTopic() { return (_topic); }
+		bool			isInviteOnly() { return (_isInviteOnly); }
+		bool 			isTopicRestricted() { return (_isTopicRestricted); }
 		
 		void			setId(int id) { _id = id; }
 		void			setName(std::string name) { _name = name; }
-		void			setInviteMode(bool value) { _inviteOnly = value; }
 		void			setChannelKey(std::string key) { _channelKey = key; }
-		void			setTopicSet(bool value) { _topicSet = value; }
 		void			setTopic(std::string topic) { _topic = topic; }
-		int			getNbrClients() { return (_nbrClients); }
-		int			getMaxClients() { return (_maxClients); }
+		void			setInviteMode(bool value) { _isInviteOnly = value; }
+		void			setTopicRestriction(bool value) { _isTopicRestricted = value; }
+		int				getNbrClients() { return (_nbrClients); }
+		int				getLimit() { return (_limit); }
 
-		void		incrementNbrClients() { 
-			//std::cout << "INCREMENTING NBR CLIENTS FROM " << _nbrClients;
-			_nbrClients++;}
-			//std::cout << " TO " << _nbrClients << std::endl;}
+		void		incrementNbrClients() { _nbrClients++; }
 		void		decrementNbrClients() { _nbrClients--; }
-		void		setMaxClients(int max) { _maxClients = max; }
+		void		setLimit(int limit) { _limit = limit; }
 
 
 

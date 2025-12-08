@@ -1,29 +1,36 @@
 #ifndef DEFINES_HPP
 # define DEFINES_HPP
 
-/* 
-    all of these need also to send like this
-    :<Server Name> <Error code> <Nickname> :<Error Message>
-    
-*/
-
-//check the number
-//prob gonna call the numeric in the string itself, and not here, so that <client> and <nick> and <channel> can be sent as well 
-#define ERR_USERNOTINCHANNEL "441 :They aren't on that channel"//"<client> <nick> <channel> :They aren't on that channel"
-#define ERR_NOTONCHANNEL "442 :You're not on that channel"//"<client> <channel> :You're not on that channel"
-
-#define ERR_NEEDMOREPARAMS "461 :Not enough parameters"
-#define ERR_ALREADYREGISTERED "462 :You may not reregister"
-#define ERR_PASSWDMISMATCH "464 :Password incorrect"
-
-#define ERR_CHANNELISFULL "471 :Cannot join channel (+l)"//"<client> <channel> :Cannot join channel (+l)"
+// :<Server Name> <Numeric> <Nickname> :<Error Message>
+//SERVER PREFIX MISSING
+#define ERR_USERNOTINCHANNEL(client, nick, channel) ("441 " + client + " " + nick + " " + channel + " :They aren't on that channel")//*done
+#define ERR_NOTONCHANNEL(client, channel) ("442 " + client + " " + channel + " :You're not on that channel")//*done
+#define ERR_NEEDMOREPARAMS(client, command) ("461 " + client + " " + command + " :Not enough parameters")//*done
+#define ERR_ALREADYREGISTERED(client) ("462 " + client + " :You may not reregister")//*done
+#define ERR_PASSWDMISMATCH(client) ("464 " + client + " :Password incorrect")//*done
+#define ERR_CHANNELISFULL(client, channel) ("471 " + client + " " + channel + " :Cannot join channel (+l)")//*done
 //unknown mode 472
-#define ERR_INVITEONLYCHAN "473 :Cannot join channel (+i)"//"<client> <channel> :Cannot join channel (+i)"
-#define ERR_NOPRIVILEGES "481 :Permission Denied- You're not an IRC operator"
-
-#define ERR_UMODEWUNKNOWNFLAG "501 :Unknown MODE flag"
+#define ERR_INVITEONLYCHAN(client, channel) ("473 " + client + " " + channel + " :Cannot join channel (+i)")//*done
+#define ERR_BADCHANNELKEY(client, channel) ("475 " + client + " " + channel + " :Cannot join channel (+K)")//*done
+#define ERR_NOPRIVILEGES(client) ("481 " + client + " :Permission Denied- You're not an IRC operator")//*done
+#define ERR_UMODEWUNKNOWNFLAG "501 :Unknown MODE flag"//TODO
 
 //todo fix
 #define ERR_NOTAUTH "Not authenticated FIX LATER"
+
+//join
+#define JOINED(client, channel) (client + " joined " + channel)//*done
+#define RPL_TOPIC(client, channel, topic) ("332 " + client + " " + channel + " :" + topic)//*done
+
+//MODE +o
+#define OPERATOR(client, channel, nick) (client + " MODE " + channel + " +o " + nick)//*done
+
+
+
+
+
+
+
+
 
 #endif

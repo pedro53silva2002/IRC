@@ -66,19 +66,16 @@ void	Server::commandPass(int i, std::string line)
 {
 	// if (!ft_PassComand(_clients[i].getBuf()))//!COLETES FIX
 
-	if (_clients[i].isAuthenticated())
-		return (sendToClient(i, ERR_ALREADYREGISTERED));
-		// serverLog(_clients[i].getNick(), "already authenticated");
+	if (_clients[i].isAuthenticated())//CHECK ORDER OF NEEDMOREPARAMS VS ALREADYREGISTERED VS PASSWDMISMATCH
+		return (sendToClient(i, ERR_ALREADYREGISTERED(_clients[i].getNick())));
 
 	//todo to check for empty messages
 	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS));
-		// serverLog(_clients[i].getNick(), "didnt input password");
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PASS")));
 	
 	
 	if (line.compare(_pass))
-		return (sendToClient(i, ERR_PASSWDMISMATCH));
-		// serverLog(_clients[i].getNick(), "guessed the password wrong");
+		return (sendToClient(i, ERR_PASSWDMISMATCH(_clients[i].getNick())));
 	
 	//*pass correct
 	_clients[i].setAuthenticated(true);
@@ -91,15 +88,12 @@ void	Server::commandUser(int i, std::string line)
 
 	if (!_clients[i].isAuthenticated())//todo might not be needed to be here, check with Dot
 		return (sendToClient(i, ERR_NOTAUTH));
-		// serverLog(_clients[i].getNick(), "NOT AUTHENTICATED");
 
 	if (!_clients[i].getUsername().empty() && !_clients[i].getRealname().empty())
-		return (sendToClient(i, ERR_ALREADYREGISTERED));
-		// serverLog(_clients[i].getNick(), "already registered user");
+		return (sendToClient(i, ERR_ALREADYREGISTERED(_clients[i].getNick())));
 
 	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS));
-		// serverLog(_clients[i].getNick(), "didnt input username");
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "USER")));
 
 	std::cout << _clients[i].getNick() << " set their username to: ";
 	_clients[i].setUsername(getUsername(line));
@@ -116,15 +110,14 @@ void	Server::commandNick(int i, std::string line)
 
 	if (!_clients[i].isAuthenticated())//todo might not be needed to be here, check with Dot
 		return (sendToClient(i, ERR_NOTAUTH));
-		// serverLog(_clients[i].getNick(), "NOT AUTHENTICATED");
 
 	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS));
-		// serverLog(_clients[i].getNick(), "didnt input nickname");
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "NICK")));
 	
 	std::cout << _clients[i].getNick() << " set their nick to: ";
 	_clients[i].setNick(getNick(line));
 	std::cout << _clients[i].getNick() << std::endl;
+	//todo if statement for switching NICKS all of a sudden
 	checkRegistration(i);
 }
 
