@@ -3,8 +3,10 @@
 //What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
 //also, when a client that was op leaves his channel, and joins another, need to take op from him
 
-//in if else if statements, change for switch
+//check order of parsing, like isOp, isInChannel
+//handle sendtoallclientsinchannel in parameters, dont create strings to send
 
+//! try replacing iterator client and channel loops for FOR loops
 //*CONSTRUCTORS
 Server::Server(char *port, char *pass) {
 	_name = "MyIRC";
@@ -63,6 +65,7 @@ void	Server::setPfds()
 }
 
 //*Disconnect client when client exits
+//! NEEDS TO REMOVE CLIENT FROM CHANNELS
 void	Server::commandQuit(int i, std::string str)
 {
 	serverLog(_clients[i].getNick(), "has disconnected");
@@ -73,7 +76,7 @@ void	Server::commandQuit(int i, std::string str)
 }
 
 
-
+//todo output something about creating channel
 int		Server::findOrCreateChannel(int i, std::string name)
 {
 	std::string channelTarget = name.substr(0, name.find(' ', 0));
@@ -97,20 +100,17 @@ int		Server::findOrCreateChannel(int i, std::string name)
 	return (_channels.rbegin()->getId());
 }
 
-//
-//ERR_CHANNELISFULL, +l
-//ERR_INVITEONLYCHAN, +i
-//ERR_INVALIDKEY, +k
-//ERR_BADCHANNELKEY, +k
+
 //todo send a message to client about channel having been created
+//RPL_JOIN for everyone
 void	Server::commandJoin(int i, std::string name)//parse so that only #channel input is allowed
 {
 	int channelId = findOrCreateChannel(i, name);
 
-	std::string nick = _clients[i].getNick();//maybe stupid
-	std::string chName = _channels[channelId].getName();//maybe stupid
-	//todo check
-	if (channelId == -1)
+	std::string nick = _clients[i].getNick();
+	std::string chName = _channels[channelId].getName();
+
+	if (channelId == -1)//todo to check
 		return (sendToClient(i, ERR_BADCHANNELKEY(nick, chName)));
 
 	if (_channels[channelId].getNbrClients() >= _channels[channelId].getLimit() && _channels[channelId].getLimit() != 0)
@@ -126,46 +126,17 @@ void	Server::commandJoin(int i, std::string name)//parse so that only #channel i
 	_channels[_clients[i].getChannelId()].incrementNbrClients();
 
 	//*OTHER MEMBERS OF CHANNEL KNOWING CLIENT JOINED
-	// std::string strToSend = "JOIN " + _clients[i].getChannelName();
-	// sendToClientsInChannel(i, strToSend);
+	std::string strToSend = nick + " joined " + _clients[i].getChannelName();
+	sendToClientsInChannel(i, strToSend);
 
-	sendToClient(i, JOINED(nick, chName));
+
 	//if (topic != empty)
 	sendToClient(i, RPL_TOPIC(nick, chName, "TEMP TOPIC"));
 
-	//*WELCOME MESSAGE TO CLIENT
-	// std::string welcomeMessage =  "Welcome to the channel: " + _clients[i].getChannelName() + ", today's MOTD: temp motd!";//check if this is whats supposed to be said
-	// sendToClient(i, welcomeMessage);
-}
-
-
-
-void	Server::commandKick(int i, std::string toKick)
-{
-	if (!_clients[i].getOp()) {
-		std::cout << _clients[i].getNick() << " tried to Kick without being op" << std::endl;
-		return ;
-	}
-	toKick = toKick.substr(0, toKick.size());
-	if (toKick == _clients[i].getNick()) {
-		std::cout << _clients[i].getNick() << " cannot kick themselves" << std::endl;
-		sendToClient(_clients[i].getId(), "you cannot kick yourself from channel");//!check the actual output
-		return ;
-	}
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-	{
-		if (toKick == it->getNick() && it->getChannelId() == _clients[i].getChannelId()) {
-			std::cout << _clients[i].getNick() << " kicked " << it->getNick() << " from " 
-						<< _clients[i].getChannelName() << std::endl;
-			it->setChannelId(-1);
-			sendToClient(it->getId() + 1, "you have been kicked");//!check the actual output
-			//!also why is this a +1 again? i thought i had solved this, check it when you want
-		}
-	}
 }
 
 template<typename T>
-bool hasInChannels(std::vector<T> channels, std::string name)
+bool hasInChannels(std::vector<T> channels, std::string name)//just changed places
 {
 	for (typename std::vector<T>::iterator channelIt = channels.begin(); channelIt != channels.end(); ++channelIt)
 	{
@@ -173,6 +144,48 @@ bool hasInChannels(std::vector<T> channels, std::string name)
 			return (true);
 	}
 	return (false);
+}
+
+void	Server::commandPart(int i, std::string name)
+{
+	if (!hasInChannels(_channels, name))
+		return (sendToClient(i, ERR_NOSUCHCHANNEL(_clients[i].getNick(), name)));
+	
+	sendToClient(i, "You have left channel " + name);//!check the actual output
+	std::string strToSend = _clients[i].getNick() + " left " + name;
+	sendToClientsInChannel(i, strToSend);
+	_clients[i].setChannelId(-1);
+	_clients[i].setchannelName("");
+}
+
+
+
+
+void	Server::commandKick(int i, std::string args)
+{
+	if (!_clients[i].getOp())//todo put back
+		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));
+	
+
+	std::string chName = args.substr(0, args.find(' '));//!PARSE
+	std::string toKick = args.substr(args.find(' ') + 1);//!PARSE
+	// std::cout << RED("channel name: ") << chName << RED(", toKick name: ") << toKick << std::endl;
+	if (toKick == _clients[i].getNick())
+		return (sendToClient(i, " you cannot kick yourself FIX THIS STILL"));//todo fix output
+
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		if (toKick == it->getNick()) {
+			//check toKick is in channel
+			if (it->getChannelId() != _clients[i].getChannelId())
+				return (sendToClient(i, ERR_USERNOTINCHANNEL(_clients[i].getNick(), toKick, chName)));
+			sendToClientsInChannel(i, _clients[i].getNick() + " KICK " + chName + " " + toKick);//todo + prefix
+			it->setChannelId(-1);
+			it->setchannelName("");
+		}
+	}
+
+
 }
 
 bool hasInUserChannels(Client client, std::string name)
@@ -303,6 +316,7 @@ void	Server::modeInviteOnly(int i, std::string channelTarget, bool inviteOnlyOrN
 	{
 		if (channelTarget == channelIt->getName()) {
 			channelIt->setInviteMode(inviteOnlyOrNot);
+			//!outputs
 			serverLog(_clients[i].getNick(), channelTarget + " changed invite only restrictions");
 		}
 	}
@@ -315,6 +329,7 @@ void	Server::modeTopicRestriction(int i,std::string channelTarget, bool topicRes
 	{
 		if (channelTarget == channelIt->getName()) {
 			channelIt->setTopicRestriction(topicRestrict);
+			//!outputs
 			serverLog(_clients[i].getNick(), channelTarget + "LOG IT TO SAY WHAT CHANGED");
 			// serverLog(_clients[i].getNick(), channelTarget + " topic restrictions have been changed LOG IT TO SAY WHAT CHANGED");
 			// sendToClientsInChannel(i, "channel topic restrictions changed");//todo check output
@@ -339,6 +354,7 @@ void	Server::modeOp(int i, std::string channelTarget, std::string user, bool opO
 
 	clientToOp->setOp(opOrNot);
 	//todo this isnt sendToClient, its sendToAllClientsInChannel
+	//!outputs
 	sendToClient(i, OPERATOR(_clients[i].getNick(), channelTarget, clientToOp->getNick()));
 }
 void	Server::modeLim(int i, std::string channelTarget, std::string limitStr)//shouldnt accept +l 0
@@ -353,6 +369,7 @@ void	Server::modeLim(int i, std::string channelTarget, std::string limitStr)//sh
 			//probably should allow limit to be smaller than users in channel, but dont let new users join, like discord
 			if (channelIt->getNbrClients() > limit && limit != 0)
 			{
+				//!outputs
 				serverLog(_clients[i].getNick(), "limit cannot be set to " + limitStr + ": too many people already");
 				return ;
 			}
@@ -360,8 +377,10 @@ void	Server::modeLim(int i, std::string channelTarget, std::string limitStr)//sh
 			break ;
 		}
 	}
+	//!outputs
 	if (limit == 0)//change for -1 so default is simpler to understand
 		serverLog(_clients[i].getNick(), "channel limit has been removed");
+	//!outputs
 	else
 		serverLog(_clients[i].getNick(), " set " + channelTarget + " limit to " + limitStr);
 }
@@ -376,13 +395,7 @@ void	Server::modeKey(int i, std::string channelTarget, std::string key, bool set
 	{
 		if (channelTarget == channelIt->getName())
 		{
-			//if (RemoveKey == true) //do all of this
 			if (setKey == false) {
-				if (channelIt->getChannelKey() != key)
-				{
-					serverLog(_clients[i].getNick(), "cannot remove key from " + channelIt->getName() + ", wrong key was input");
-					return ;
-				}
 				channelIt->setChannelKey("");
 				serverLog(_clients[i].getNick(), channelIt->getName() + " doesnt neet key anymore");
 			}
@@ -395,8 +408,6 @@ void	Server::modeKey(int i, std::string channelTarget, std::string key, bool set
 	//std::cout << "Channel key mode k not implemented yet" << std::endl;
 }
 
-
-//ERR_INVITEONLYCHAN
 
 void Server::executeCommandMode(int i, std::string channelTarget, std::string opr, std::string args)//user more like arguments
 {
@@ -433,7 +444,7 @@ void Server::executeCommandMode(int i, std::string channelTarget, std::string op
 	}
 }
 
-//needs better parsing
+//todo parse
 void	Server::commandMode(int i, std::string line)
 {
 	int pos = line.find(' ', 0);
@@ -519,7 +530,6 @@ void	Server::commandMode(int i, std::string line)
 
 
 
-
 void	Server::commandTopic(int i, std::string line)
 {
 	size_t pos = line.find(' ', 0);
@@ -548,22 +558,38 @@ void	Server::commandTopic(int i, std::string line)
 	}
 }
 
+//parse for finding the ':' before inputting the text
+void	Server::commandPrivmsg(int i, std::string line)//dms arent done, just channels
+{
+	int	channelId = _clients[i].getChannelId();
+	if (channelId == -1)
+		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), line.substr(0, line.find(' ')))));
+	
+	std::string prefix = ":temp@localhost";//getPrefix(), //TODO is the ':' hardcoded?
+	std::string message = line.substr(_channels[channelId].getName().length() + 1);
+	std::string toSend = prefix + " PRIVMSG " + _channels[channelId].getName() + " " + message;
+	
+	for (std::vector<Client>::iterator clientIt = _clients.begin(); clientIt != _clients.end(); ++clientIt) {
+		if (clientIt->getChannelId() == channelId && clientIt->getId() != _clients[i].getId())
+			sendToClient(clientIt->getId() + 1, toSend);
+	}
+}
+
 
 //ERR_UNKNOWNCOMMAND
 //ERR_NEEDMOREPARAMS FOR EVERY COMMAND
 void	Server::processCommand(int i, std::string line)
 {
-	// std::cout << YELLOW("Client ") << _clients[i].getNick()<< " said: " << line << std::endl;
-	// sendToClient(i, line);
+	if (line.compare(0, 4, "test") == 0) {
+		sendToClientsInChannel(i, "THIS IS A TEST MESSAGE");
+	}
 
-		
+	
 	//testing only
 	if (line.compare(0, 4, "exit") == 0)
 		exitServer();
 
-
 	//*Registration commands
-
 	if (line.compare(0, 5, "PASS ") == 0)//fix for without space, not enough parameters
 		commandPass(i, line.substr(5));
 	else if (line.compare(0, 5, "USER ") == 0)//fix for without space, not enough parameters
@@ -572,12 +598,16 @@ void	Server::processCommand(int i, std::string line)
 		commandNick(i, line.substr(5));
 
 	
-	else if (!_clients[i].isRegistered())//temporary, will be called by every function
+	else if (!_clients[i].isRegistered())//temporary, will be called by every function?
 		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK");
 	
 	
 	else if (line.compare(0, 5, "JOIN ") == 0)
 		commandJoin(i, line.substr(5));
+	else if (line.compare(0, 5, "PART ") == 0)
+		commandPart(i, line.substr(5));
+	else if (line.compare(0, 8, "PRIVMSG ") == 0)
+		commandPrivmsg(i, line.substr(8));
 	else if (line.compare(0, 5, "KICK ") == 0)
 		commandKick(i, line.substr(5));
 	else if (line.compare(0, 7, "INVITE ") == 0)
@@ -588,11 +618,9 @@ void	Server::processCommand(int i, std::string line)
 		commandTopic(i, line.substr(6));
 	else if (line.compare(0, 4, "QUIT") == 0)//move this down
 		return (commandQuit(i, "hardcoded quit"));
-	else
-		sendToClientsInChannel(i, line);
-	
-	// else THIS WILL BE A PRIVMSG COMMAND
+	// else
 	// 	sendToClientsInChannel(i, line);
+	
 
 }
 
@@ -678,8 +706,8 @@ void	Server::testClients()
 		_clients[1].setUsername("First");
 		_clients[1].setRealname("First");
 		// _clients[1].setPrefix(setPrefixTemp(1));
-		// _clients[1].setChannelId(1);
-		// _channels.push_back(Channel("FIRST"));
+		_clients[1].setChannelId(1);
+		_channels.push_back(Channel("FIRST"));
 		welcomeClient(1);
 	}
 	else if (_clients.size() == 3) {
@@ -690,7 +718,7 @@ void	Server::testClients()
 		_clients[2].setUsername("Second");
 		_clients[2].setRealname("Second");
 		// _clients[2].setPrefix(setPrefixTemp(2));
-		// _clients[2].setChannelId(1);
+		_clients[2].setChannelId(1);
 		// Channel temp("SecondChannel");
 		// _channels.push_back(temp);
 		welcomeClient(2);

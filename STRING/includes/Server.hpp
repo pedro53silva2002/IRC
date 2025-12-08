@@ -50,20 +50,22 @@ class Server
 		
 		
 		void	commandJoin(int i, std::string name);
+		void	commandPart(int i, std::string name);
+		void	commandPrivmsg(int i, std::string line);
+		void	commandKick(int i, std::string args);
+
 		int		findOrCreateChannel(int i, std::string name);
 
-		void	commandKick(int i, std::string toKick);
 
 		//*MODES
 		void	commandMode(int i, std::string line);
 		void 	executeCommandMode(int i, std::string channelTarget, std::string opr, std::string args);
-
 		void	modeInviteOnly(int i,std::string channelTarget, bool inviteOnlyOrNot);
 		void	modeTopicRestriction(int i,std::string channelTarget, bool topicRestrict);
 		void	modeKey(int i,std::string channelTarget, std::string key, bool setKey);//setKey is to know if its +k or -k
 		void	modeOp(int i,std::string channelTarget, std::string user, bool opOrNot);
 		void	modeLim(int i,std::string channelTarget, std::string limitStr);
-
+		//*MODES
 
 
 		void	commandInvite(int i, std::string name);

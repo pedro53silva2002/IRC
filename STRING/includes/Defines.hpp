@@ -3,6 +3,7 @@
 
 // :<Server Name> <Numeric> <Nickname> :<Error Message>
 //SERVER PREFIX MISSING
+#define ERR_NOSUCHCHANNEL(client, channel) ("403 " + client + " "  + channel + " :No such channel")//*done
 #define ERR_USERNOTINCHANNEL(client, nick, channel) ("441 " + client + " " + nick + " " + channel + " :They aren't on that channel")//*done
 #define ERR_NOTONCHANNEL(client, channel) ("442 " + client + " " + channel + " :You're not on that channel")//*done
 #define ERR_NEEDMOREPARAMS(client, command) ("461 " + client + " " + command + " :Not enough parameters")//*done

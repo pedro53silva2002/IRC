@@ -43,18 +43,17 @@ void	Server::sendToClientsInChannel(int i, std::string str)
 	int	channelId = _clients[i].getChannelId();
 	if (channelId == -1)
 		return ;
-	std::string		channelName = _channels[channelId].getName();
 
 	for (std::vector<Client>::iterator clientIt = _clients.begin();
 		clientIt != _clients.end(); ++clientIt)//
-		{
-			if (clientIt->getChannelId() == channelId 
-				&& clientIt->getId() != _clients[i].getId())
-				{
-					std::string sender = channelName + " :" + _clients[i].getNick();
-					sendToClient(clientIt->getId(), sender, str);
-				}
-		}
+	{
+		if (clientIt->getChannelId() == channelId 
+			/*&& clientIt->getId() != _clients[i].getId()*/)
+			{
+				std::string sender = _channels[channelId].getName() + " :" + _clients[i].getNick();
+				sendToClient(clientIt->getId(), sender, str);
+			}
+	}
 }
 
 
