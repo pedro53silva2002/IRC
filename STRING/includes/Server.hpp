@@ -39,7 +39,7 @@ class Server
 
 		
 		//*Commands
-		void	processCommand(int i, std::string line);
+		void		processCommand(int i, std::string line);
 		
 		//*Registration commands, mostly done, needs more parsing still
 		void	commandPass(int i, std::string line);

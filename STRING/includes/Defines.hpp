@@ -1,9 +1,12 @@
-#ifndef DEFINES_HPP
+#ifndef DEFINES_HPP	
 # define DEFINES_HPP
 
 // :<Server Name> <Numeric> <Nickname> :<Error Message>
 //SERVER PREFIX MISSING
 #define ERR_NOSUCHCHANNEL(client, channel) ("403 " + client + " "  + channel + " :No such channel")//*done
+#define ERR_UNKNOWNCOMMAND(client, command) ("421 " + client + " "  + command + " :Unknown command")//*done
+#define ERR_NONICKNAMEGIVEN(client) ("431 " + client + " :No nickname given")//*done
+#define ERR_ERRONEUSNICKNAME(client, nick) ("432 " + client + " " + nick + " :Erroneus nickname")//*done
 #define ERR_USERNOTINCHANNEL(client, nick, channel) ("441 " + client + " " + nick + " " + channel + " :They aren't on that channel")//*done
 #define ERR_NOTONCHANNEL(client, channel) ("442 " + client + " " + channel + " :You're not on that channel")//*done
 #define ERR_NEEDMOREPARAMS(client, command) ("461 " + client + " " + command + " :Not enough parameters")//*done

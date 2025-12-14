@@ -62,22 +62,16 @@ std::string getNick(const std::string &line) {
 
 
 //*Registration Commands
-void	Server::commandPass(int i, std::string line)
+void	Server::commandPass(int i, std::string line)//*1 thing left
 {
-	// if (!ft_PassComand(_clients[i].getBuf()))//!COLETES FIX
-
-	if (_clients[i].isAuthenticated())//CHECK ORDER OF NEEDMOREPARAMS VS ALREADYREGISTERED VS PASSWDMISMATCH
+	//just check for PASS <1st string> <2nd string>
+	//CHECK ORDER OF NEEDMOREPARAMS VS ALREADYREGISTERED VS PASSWDMISMATCH
+	if (_clients[i].isAuthenticated())
 		return (sendToClient(i, ERR_ALREADYREGISTERED(_clients[i].getNick())));
-
-	//todo to check for empty messages
 	if (line.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PASS")));
-	
-	
 	if (line.compare(_pass))
 		return (sendToClient(i, ERR_PASSWDMISMATCH(_clients[i].getNick())));
-	
-	//*pass correct
 	_clients[i].setAuthenticated(true);
 	serverLog(_clients[i].getNick(), "has authenticated");
 }
@@ -103,52 +97,50 @@ void	Server::commandUser(int i, std::string line)
 }
 
 //ERR_NICKNAMEINUSE
-//ERR_NONICKNAMEGIVEN
+
+bool	isValidNick(std::string line)
+{
+	int pos = 0;
+	int newpos = 0;
+	std::vector<std::string>	params;
+	while (line.find(' ', pos) != std::string::npos)//remake this
+	{
+		newpos = line.find(' ', pos + 1);
+		if (pos == 0)
+			params.push_back(line.substr(pos, newpos));
+		else
+			params.push_back(line.substr(pos + 1, newpos - pos));
+		pos = newpos;
+	}
+	if (params.size() == 2)	
+		return (true);
+	return (false);
+}
+
 void	Server::commandNick(int i, std::string line)
 {
-	// if (ft_NickComand(_clients[i].getBuf()))//!COLETES FIX
 
 	if (!_clients[i].isAuthenticated())//todo might not be needed to be here, check with Dot
 		return (sendToClient(i, ERR_NOTAUTH));
-
 	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "NICK")));
+		return (sendToClient(i, ERR_NONICKNAMEGIVEN(_clients[i].getNick())));
+	if (!isValidNick(line))
+		return (sendToClient(i, ERR_ERRONEUSNICKNAME(_clients[i].getNick(), line)));
+	//if (nick in channel) -> ERR_NICKNAMEINUSE
 	
 	std::cout << _clients[i].getNick() << " set their nick to: ";
 	_clients[i].setNick(getNick(line));
 	std::cout << _clients[i].getNick() << std::endl;
-	//todo if statement for switching NICKS all of a sudden
+	//todo if statement for switching NICK after registering
 	checkRegistration(i);
-}
 
 
-bool	ft_NickComand(char *buf)
-{
-	int pos = 0;
-	int newpos = 0;
-	std::string line(buf);
-	std::vector<std::string>	params;
-	if (!strncmp(buf, "NICK ", 5))
-	{
-		while (line.find(' ', pos) != std::string::npos)
-		{
-			newpos = line.find(' ', pos + 1);
-			if (pos == 0)
-				params.push_back(line.substr(pos, newpos));
-			else
-				params.push_back(line.substr(pos + 1, newpos - pos));
-			pos = newpos;
-		}
-		/* std::cout << "PARAMS: size " << params.size() << std::endl;
-		for (size_t i = 0; i < params.size(); i++)
-		{
-			std::cout << params[i] << "\n";
-		} */
-		if (params.size() == 2)	
-			return (true);
-	}
-	return (false);
+	/* 
+		if NICK is set at registration, run checkRegistration
+		if it is after that and the client is in a channel, sendtoclientsinchannel("<old> changed nick to <new>")
+	*/
 }
+
 bool	ft_PassComand(char *buf)
 {
 	int pos = 0;

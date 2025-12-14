@@ -6,7 +6,8 @@
 //check order of parsing, like isOp, isInChannel
 //handle sendtoallclientsinchannel in parameters, dont create strings to send
 
-//! try replacing iterator client and channel loops for FOR loops
+//todo PART AND QUIT need to remove client from channel in channel-side object
+
 //*CONSTRUCTORS
 Server::Server(char *port, char *pass) {
 	_name = "MyIRC";
@@ -105,6 +106,13 @@ int		Server::findOrCreateChannel(int i, std::string name)
 //RPL_JOIN for everyone
 void	Server::commandJoin(int i, std::string name)//parse so that only #channel input is allowed
 {
+	//todo get numeric
+	if (!_clients[i].isRegistered())
+		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+	if (name.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "JOIN")));
+	//todo find the # in the command
+	
 	int channelId = findOrCreateChannel(i, name);
 
 	std::string nick = _clients[i].getNick();
@@ -148,6 +156,13 @@ bool hasInChannels(std::vector<T> channels, std::string name)//just changed plac
 
 void	Server::commandPart(int i, std::string name)
 {
+	//todo get numeric
+	if (!_clients[i].isRegistered())
+		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+	if (name.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PART")));
+
+	
 	if (!hasInChannels(_channels, name))
 		return (sendToClient(i, ERR_NOSUCHCHANNEL(_clients[i].getNick(), name)));
 	
@@ -161,8 +176,16 @@ void	Server::commandPart(int i, std::string name)
 
 
 
+//todo NEEDMOREPARAMS CAUSE YOU NEED "PRIVMSG <client> <channel>", check order
 void	Server::commandKick(int i, std::string args)
 {
+	//todo get numeric
+	if (!_clients[i].isRegistered())
+		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+	if (args.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "KICK")));
+
+	
 	if (!_clients[i].getOp())//todo put back
 		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));
 	
@@ -262,8 +285,17 @@ int Server::findChannel(Client client, std::vector<Channel> channels,std::string
 
 //ERR_USERONCHANNEL
 //ERR_CHANNELISFULL, +l
+//todo NEEDMOREPARAMS CAUSE YOU NEED "PRIVMSG <client> <channel>", check order
 void	Server::commandInvite(int i, std::string name)
 {
+	//todo get numeric
+	if (!_clients[i].isRegistered())
+		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+	//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
+	if (name.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "INVITE")));
+
+	
 	std::string userToInvite = name.substr(0, name.find(' ', 0));
 	std::string channelToGet = name.substr(name.find(' ', 0) + 1);
 	int index;
@@ -444,9 +476,16 @@ void Server::executeCommandMode(int i, std::string channelTarget, std::string op
 	}
 }
 
-//todo parse
 void	Server::commandMode(int i, std::string line)
 {
+	//todo get numeric
+	if (!_clients[i].isRegistered())
+		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+		//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
+	if (line.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "MODE")));
+
+	
 	int pos = line.find(' ', 0);
 	std::string channelTarget = line.substr(0, pos);
 	std::vector<std::string> opr;
@@ -529,9 +568,17 @@ void	Server::commandMode(int i, std::string line)
 //*MODES END
 
 
-
+//todo broken if client has left the channel
 void	Server::commandTopic(int i, std::string line)
 {
+	//todo get numeric
+	if (!_clients[i].isRegistered())
+		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+		//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
+	if (line.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "TOPIC")));
+
+	
 	size_t pos = line.find(' ', 0);
 	std::string channelTarget = line.substr(0, pos);
 	std::string topic;
@@ -558,9 +605,17 @@ void	Server::commandTopic(int i, std::string line)
 	}
 }
 
-//parse for finding the ':' before inputting the text
+//todo NEEDMOREPARAMS CAUSE YOU NEED "PRIVMSG <channel> <message>"
 void	Server::commandPrivmsg(int i, std::string line)//dms arent done, just channels
 {
+	//todo get numeric
+	if (!_clients[i].isRegistered())
+		return (serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL"));
+	//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
+	if (line.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PRIVMSG")));
+
+	
 	int	channelId = _clients[i].getChannelId();
 	if (channelId == -1)
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), line.substr(0, line.find(' ')))));
@@ -576,118 +631,79 @@ void	Server::commandPrivmsg(int i, std::string line)//dms arent done, just chann
 }
 
 
-//ERR_UNKNOWNCOMMAND
-//ERR_NEEDMOREPARAMS FOR EVERY COMMAND
+std::string parseLine(std::string line)
+{
+	int pos = line.find(' ');
+	if (pos == std::string::npos)
+		return ("");
+	std::string arguments = line.substr(pos + 1);
+	return (arguments);
+}
+
 void	Server::processCommand(int i, std::string line)
 {
-	if (line.compare(0, 4, "test") == 0) {
-		sendToClientsInChannel(i, "THIS IS A TEST MESSAGE");
-	}
+	//todo i dont like the line.compare()	
 
+	//*other commands
+	if (line.compare(0, 11, "CAP LS 302") == 0)
+		return ;//ignoring this one
 	
-	//testing only
-	if (line.compare(0, 4, "exit") == 0)
+	if (line.compare(0, 4, "QUIT") == 0)
+		commandQuit(i, "HARDCODED");
+	else if (line.compare(0, 4, "exit") == 0)
 		exitServer();
-
+	else if (line.compare(0, 4, "test") == 0)
+		sendToClientsInChannel(i, "THIS IS A TEST MESSAGE");
 	//*Registration commands
-	if (line.compare(0, 5, "PASS ") == 0)//fix for without space, not enough parameters
-		commandPass(i, line.substr(5));
-	else if (line.compare(0, 5, "USER ") == 0)//fix for without space, not enough parameters
-		commandUser(i, line.substr(5));
-	else if (line.compare(0, 5, "NICK ") == 0)//fix for without space, not enough parameters
-		commandNick(i, line.substr(5));
-
-	
-	else if (!_clients[i].isRegistered())//temporary, will be called by every function?
-		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK");
-	
-	
-	else if (line.compare(0, 5, "JOIN ") == 0)
-		commandJoin(i, line.substr(5));
-	else if (line.compare(0, 5, "PART ") == 0)
-		commandPart(i, line.substr(5));
-	else if (line.compare(0, 8, "PRIVMSG ") == 0)
-		commandPrivmsg(i, line.substr(8));
-	else if (line.compare(0, 5, "KICK ") == 0)
-		commandKick(i, line.substr(5));
-	else if (line.compare(0, 7, "INVITE ") == 0)
-		commandInvite(i, line.substr(7));
-	else if (line.compare(0, 5, "MODE ") == 0)
-		commandMode(i, line.substr(5));
-	else if (line.compare(0, 6, "TOPIC ") == 0)
-		commandTopic(i, line.substr(6));
-	else if (line.compare(0, 4, "QUIT") == 0)//move this down
-		return (commandQuit(i, "hardcoded quit"));
-	// else
-	// 	sendToClientsInChannel(i, line);
-	
-
+	else if (line.compare(0, 4, "PASS") == 0)
+		commandPass(i, parseLine(line));
+	else if (line.compare(0, 4, "USER") == 0)
+		commandUser(i, parseLine(line));
+	else if (line.compare(0, 4, "NICK") == 0)
+		commandNick(i, parseLine(line));
+	//*CHANNEL commands
+	else if (line.compare(0, 4, "JOIN") == 0)
+		commandJoin(i, parseLine(line));
+	else if (line.compare(0, 4, "PART") == 0)
+		commandPart(i, parseLine(line));
+	else if (line.compare(0, 7, "PRIVMSG") == 0)
+		commandPrivmsg(i, parseLine(line));
+	else if (line.compare(0, 4, "KICK") == 0)
+		commandKick(i, parseLine(line));
+	else if (line.compare(0, 6, "INVITE") == 0)
+		commandInvite(i, parseLine(line));
+	else if (line.compare(0, 4, "MODE") == 0)
+		commandMode(i, parseLine(line));
+	else if (line.compare(0, 5, "TOPIC") == 0)
+		commandTopic(i, parseLine(line));
+	else
+		sendToClient(i, ERR_UNKNOWNCOMMAND(_clients[i].getNick(), line));
 }
 
 bool	Server::handleClientPoll(int i)
 {
-	char buf[512];
-	memset(buf, 0, sizeof(buf));//new
+	char		buf[512];
+	std::string	recv_buffer;
+
+	memset(buf, 0, sizeof(buf));
 	int bytesRecv = myRecv(_pfds[i].fd, buf, sizeof(buf), 0);
 	if (bytesRecv == 0) {
 		commandQuit(i, "");
 		return (false);
 	}
+	buf[bytesRecv] = 0;
+	recv_buffer += buf;
 
-	/* buf[bytesRecv] = 0;
-	
-	//todo HERE I NEED TO DIVIDE OR SKIP \n AND \r
-	//!stupid temporary fix for new line after input
-	if (buf[bytesRecv - 1] == '\n' || buf[bytesRecv - 1] == '\r')
-		buf[bytesRecv - 1] = 0; */
-	for (size_t i = 1; i < bytesRecv - 1; i++)
-	{
-		if (buf[bytesRecv - i] == '\r' || buf[bytesRecv - i] == '\n')
-		{
-			buf[bytesRecv - i] = 0;
-			break ;
-		}
-		else
-			break ;
-		i++;
+	size_t pos;
+	while ((pos = recv_buffer.find("\r\n")) != std::string::npos) {
+		std::string line = recv_buffer.substr(0, pos);
+		recv_buffer.erase(0, pos + 2);
+
+		if (!line.empty())
+			processCommand(i, line);
 	}
-
-	
-
-/* 
-	ok big news. Apparently hexchat sends PASS USER and NICK all at the same time
-	this means i need to find a way to skip each command?
-	cause it it sends
-	PASS <pass> USER <user> NICK <nick>
-	all in the same poll, how do i split it?????
-*/
-	// if (line.empty() || line == "\n" || line == "\r" || line == "\r\n")//stupid fix
-	// 	return true;
-	std::string line(buf);
-	line.erase(std::remove(line.begin(),line.end(), '\n'),line.end());
-	line.erase(std::remove(line.begin(),line.end(), '\r'),line.end());
-
-	processCommand(i, line);
 	return (true);
 }
-
-/* char buf[512];
-int bytes = recv(sock, buf, sizeof(buf)-1, 0);
-if (bytes <= 0) return;
-
-buf[bytes] = 0;
-recv_buffer += buf;
-
-// Process all complete lines
-size_t pos;
-while ((pos = recv_buffer.find("\r\n")) != std::string::npos) {
-    std::string line = recv_buffer.substr(0, pos);
-    recv_buffer.erase(0, pos + 2);
-
-    if (!line.empty()) {
-        handleCommand(line);
-    }
-} */
 
 //todo to be put in client
 std::string	Server::setPrefixTemp(int i)//!THIS NEEDS TO BE CALLED MANUALLY, FIX LATER, CAUSE NOW ITS ONLY IN HARDCODED
@@ -706,8 +722,8 @@ void	Server::testClients()
 		_clients[1].setUsername("First");
 		_clients[1].setRealname("First");
 		// _clients[1].setPrefix(setPrefixTemp(1));
-		_clients[1].setChannelId(1);
-		_channels.push_back(Channel("FIRST"));
+		// _clients[1].setChannelId(1);
+		// _channels.push_back(Channel("FIRST"));
 		welcomeClient(1);
 	}
 	else if (_clients.size() == 3) {
@@ -718,7 +734,7 @@ void	Server::testClients()
 		_clients[2].setUsername("Second");
 		_clients[2].setRealname("Second");
 		// _clients[2].setPrefix(setPrefixTemp(2));
-		_clients[2].setChannelId(1);
+		// _clients[2].setChannelId(1);
 		// Channel temp("SecondChannel");
 		// _channels.push_back(temp);
 		welcomeClient(2);
@@ -749,7 +765,7 @@ void	Server::srvRun()
 			_clients.push_back(Client(temp));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			testClients();
+			// testClients();
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)//*loop through clients
