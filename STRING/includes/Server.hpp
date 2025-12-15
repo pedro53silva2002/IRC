@@ -43,8 +43,9 @@ class Server
 		
 		//*Registration commands, mostly done, needs more parsing still
 		void	commandPass(int i, std::string line);
-		void	commandUser(int i, std::string line);
 		void	commandNick(int i, std::string line);
+		bool	isNickInUse(std::string toFind);
+		void	commandUser(int i, std::string line);
 		void	checkRegistration(int i);
 		void	welcomeClient(int i);
 		

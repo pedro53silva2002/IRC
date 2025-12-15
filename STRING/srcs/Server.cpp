@@ -77,6 +77,11 @@ void	Server::commandQuit(int i, std::string str)
 }
 
 
+void testString(std::string line)
+{
+	std::cout << RED("[") << line << RED("]\n");
+}
+
 //todo output something about creating channel
 int		Server::findOrCreateChannel(int i, std::string name)
 {
@@ -567,7 +572,6 @@ void	Server::commandMode(int i, std::string line)
 
 //*MODES END
 
-
 //todo broken if client has left the channel
 void	Server::commandTopic(int i, std::string line)
 {
@@ -631,6 +635,7 @@ void	Server::commandPrivmsg(int i, std::string line)//dms arent done, just chann
 }
 
 
+//todo i should skip all whitespaces
 std::string parseLine(std::string line)
 {
 	int pos = line.find(' ');
@@ -640,44 +645,31 @@ std::string parseLine(std::string line)
 	return (arguments);
 }
 
+
 void	Server::processCommand(int i, std::string line)
 {
-	//todo i dont like the line.compare()	
-
-	//*other commands
-	if (line.compare(0, 11, "CAP LS 302") == 0)
-		return ;//ignoring this one
-	
+	if (line.compare(0, 11, "CAP LS 302") == 0)//todo figure out what to do
+		return ;
 	if (line.compare(0, 4, "QUIT") == 0)
-		commandQuit(i, "HARDCODED");
+		return commandQuit(i, "HARDCODED");
 	else if (line.compare(0, 4, "exit") == 0)
-		exitServer();
+		return exitServer();
 	else if (line.compare(0, 4, "test") == 0)
-		sendToClientsInChannel(i, "THIS IS A TEST MESSAGE");
-	//*Registration commands
-	else if (line.compare(0, 4, "PASS") == 0)
-		commandPass(i, parseLine(line));
-	else if (line.compare(0, 4, "USER") == 0)
-		commandUser(i, parseLine(line));
-	else if (line.compare(0, 4, "NICK") == 0)
-		commandNick(i, parseLine(line));
-	//*CHANNEL commands
-	else if (line.compare(0, 4, "JOIN") == 0)
-		commandJoin(i, parseLine(line));
-	else if (line.compare(0, 4, "PART") == 0)
-		commandPart(i, parseLine(line));
-	else if (line.compare(0, 7, "PRIVMSG") == 0)
-		commandPrivmsg(i, parseLine(line));
-	else if (line.compare(0, 4, "KICK") == 0)
-		commandKick(i, parseLine(line));
-	else if (line.compare(0, 6, "INVITE") == 0)
-		commandInvite(i, parseLine(line));
-	else if (line.compare(0, 4, "MODE") == 0)
-		commandMode(i, parseLine(line));
-	else if (line.compare(0, 5, "TOPIC") == 0)
-		commandTopic(i, parseLine(line));
-	else
-		sendToClient(i, ERR_UNKNOWNCOMMAND(_clients[i].getNick(), line));
+		return sendToClientsInChannel(i, "THIS IS A TEST MESSAGE");
+	
+	typedef void (Server::*funcs)(int, std::string);
+	std::string commands[] = {"PASS", "USER", "NICK", "JOIN", "PART", "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", "QUIT"};
+
+	funcs function[] = {&Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin, &Server::commandPart,
+	&Server::commandPrivmsg, &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, &Server::commandQuit};
+	std::string temp = line.substr(0, line.find(' '));
+	for (int j = 0; j < 11; j++) {
+		if (commands[j] == temp) {
+			(this->*function[j])(i, parseLine(line));
+			return ;
+		}
+	}
+	sendToClient(i, ERR_UNKNOWNCOMMAND(_clients[i].getNick(), line));
 }
 
 bool	Server::handleClientPoll(int i)
