@@ -35,30 +35,39 @@ class Server
 		std::string		setPrefixTemp(int i);
 		void			setPfds();
 		bool			handleClientPoll(int i);
+		void			processCommand(int i, std::string line);
 		
 
 		
-		//*Commands
-		void		processCommand(int i, std::string line);
 		
-		//*Registration commands, mostly done, needs more parsing still
+		void	sendToClientsInChannel(int i, std::string str);
+		void	sendToClient(int id, std::string sender, std::string str);
+		void	sendToClient(int i, std::string str);
+
+
+		//*REGISTRATION
+		//*pass
 		void	commandPass(int i, std::string line);
+		//*nick
 		void	commandNick(int i, std::string line);
 		bool	isNickInUse(std::string toFind);
+		//*user
 		void	commandUser(int i, std::string line);
+		//*others
 		void	checkRegistration(int i);
 		void	welcomeClient(int i);
 		
-		
-		void	commandJoin(int i, std::string name);
-		void	commandPart(int i, std::string name);
+		//*CHANNEL COMMANDS
+		//*privmsg
+		bool	isValidPrivmsg(std::string line);
 		void	commandPrivmsg(int i, std::string line);
+		//*join
+		void	commandJoin(int i, std::string args);
+		//*part
+		void	commandPart(int i, std::string name);
+		//*kick
 		void	commandKick(int i, std::string args);
-
-		int		findOrCreateChannel(int i, std::string name);
-
-
-		//*MODES
+		//*mode
 		void	commandMode(int i, std::string line);
 		void 	executeCommandMode(int i, std::string channelTarget, std::string opr, std::string args);
 		void	modeInviteOnly(int i,std::string channelTarget, bool inviteOnlyOrNot);
@@ -66,22 +75,19 @@ class Server
 		void	modeKey(int i,std::string channelTarget, std::string key, bool setKey);//setKey is to know if its +k or -k
 		void	modeOp(int i,std::string channelTarget, std::string user, bool opOrNot);
 		void	modeLim(int i,std::string channelTarget, std::string limitStr);
-		//*MODES
-
-
+		//*invite
 		void	commandInvite(int i, std::string name);
+		//*topic
 		void	commandTopic(int i, std::string line);
+		//*quit
 		void	commandQuit(int i, std::string str);//disconnect client
 
 
-		void	sendToClientsInChannel(int i, std::string str);
-		void	sendToClient(int id, std::string sender, std::string str);
-		void	sendToClient(int i, std::string str);
-
-
-		//utils
+		//utils, find out where to put these to be grouped
 		int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
 		Client*	foundInUsers(std::string name);
+		int		findOrCreateChannel(int i, std::string name);
+		bool	hasInChannels(std::string name);
 		
 
 		//just for testing

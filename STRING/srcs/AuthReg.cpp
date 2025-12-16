@@ -100,6 +100,7 @@ void	Server::commandNick(int i, std::string line)
 //*Registration
 void	Server::welcomeClient(int i)
 {
+	//remove this function, put it inside checkReg
 	std::string welcome = "Welcome to the " + _name + " Network ";
 		// + _clients[i].getNick() + "[!" + _clients[i].getUsername() 
 		// + "@"+ "host" + "]";//hardcoded

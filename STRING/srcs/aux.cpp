@@ -24,35 +24,12 @@ void	Server::sendToClient(int i, std::string str) {
 	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
 }
 
-//! THIS FUNCTION ONLY EXISTS FOR SENDTOCLIENTSINCHANNEL
-void	Server::sendToClient(int id, std::string sender, std::string str)
-{
-	std::string reply = sender + " :" + str + "\r\n";
-
-	for (std::vector<Client>::iterator clientIt = _clients.begin();
-		clientIt != _clients.end(); ++clientIt)
-		{
-			if (clientIt->getId() == id) {
-				send(clientIt->getSocket(), reply.c_str(), reply.size(), 0);
-				return ;
-			}
-		}
-}
+//todo getPrefix() before this, but it needs to be sent as parameter
 void	Server::sendToClientsInChannel(int i, std::string str)
 {
-	int	channelId = _clients[i].getChannelId();
-	if (channelId == -1)
-		return ;
-
-	for (std::vector<Client>::iterator clientIt = _clients.begin();
-		clientIt != _clients.end(); ++clientIt)//
-	{
-		if (clientIt->getChannelId() == channelId 
-			/*&& clientIt->getId() != _clients[i].getId()*/)
-			{
-				std::string sender = _channels[channelId].getName() + " :" + _clients[i].getNick();
-				sendToClient(clientIt->getId(), sender, str);
-			}
+	for (int j = 0; j < _clients.size(); j++) {
+		if (_clients[i].getChannelId() == _clients[j].getChannelId() && i != j)
+			sendToClient(j, str);
 	}
 }
 

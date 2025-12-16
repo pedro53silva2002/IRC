@@ -4,8 +4,16 @@
 //also, when a client that was op leaves his channel, and joins another, need to take op from him
 
 //check order of parsing, like isOp, isInChannel
-//handle sendtoallclientsinchannel in parameters, dont create strings to send
 
+//prefix needs to be sent as str before calling sendtoclientsinchannel
+//calling commands without being registered, need to fix that
+
+//replace every for loop that uses iterators to just run through the vector
+
+//change getNick in sendtoclients to a var nick
+//change args var name to line
+
+//*HARDCODE CHANNELS WITH DIFFERENT MODES TO TEST EVERYTHING
 //todo PART AND QUIT need to remove client from channel in channel-side object
 
 //*CONSTRUCTORS
@@ -82,23 +90,24 @@ void testString(std::string line)
 	std::cout << RED("[") << line << RED("]\n");
 }
 
-//todo output something about creating channel
+
+//*NEED TO DOUBLE CHECK KEY AND PARSING, HARDCODE A CHANNEL WITH A KEY IF NEEDED
+void	setJoin(std::string args, std::string *chName, std::string *key)
+{
+	int pos = args.find(' ');
+	*chName = args.substr(0, pos);
+	if (pos != std::string::npos)
+		*key = args.substr(pos + 1);
+}
+
 int		Server::findOrCreateChannel(int i, std::string name)
 {
 	std::string channelTarget = name.substr(0, name.find(' ', 0));
-	std::string channelKey;
-	if (name.find(' ', 0) != std::string::npos)
-		channelKey = name.substr(name.find(' ', 0) + 1);
-	// std::cout << "WHY ARE KEYS BEING TESTED HERE: Channel: " << channelTarget << "\tKEY: " << channelKey << std::endl;
-	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-	{
-		if (channelTarget == channelIt->getName())//change to use subster of the getName
-		{	
-			if (channelIt->getChannelKey() == "" || channelIt->getChannelKey() == channelKey)//use line.compare()
-				return (channelIt->getId());//Found an existing channel
-			else
-				return -1; //wrong key
-		}
+
+
+	for (int j = 0; j < _channels.size(); j++) {
+		if (channelTarget == _channels[j].getName())
+			return (_channels[j].getId());
 	}
 	_channels.push_back(Channel(channelTarget));
 	_clients[i].setOp(true);
@@ -106,54 +115,63 @@ int		Server::findOrCreateChannel(int i, std::string name)
 	return (_channels.rbegin()->getId());
 }
 
-
-//todo send a message to client about channel having been created
-//RPL_JOIN for everyone
-void	Server::commandJoin(int i, std::string name)//parse so that only #channel input is allowed
+void	Server::commandJoin(int i, std::string args)
 {
-	//todo get numeric
 	if (!_clients[i].isRegistered())
-		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
-	if (name.empty())
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
+	//todo parse: find the #; find if there is a key, and test it
+	if (args.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "JOIN")));
-	//todo find the # in the command
+	if (args[0] != '#')
+		return (sendToClient(i, ERR_BADCHANMASK(_clients[i].getNick(), args)));
+
+	std::string chName, key;
+	setJoin(args, &chName, &key);
+
 	
-	int channelId = findOrCreateChannel(i, name);
-
-	std::string nick = _clients[i].getNick();
-	std::string chName = _channels[channelId].getName();
-
-	if (channelId == -1)//todo to check
-		return (sendToClient(i, ERR_BADCHANNELKEY(nick, chName)));
-
+	int channelId = findOrCreateChannel(i, args);
+	if (key != _channels[channelId].getChannelKey())
+		return (sendToClient(i, ERR_BADCHANNELKEY(_clients[i].getNick(), chName)));
 	if (_channels[channelId].getNbrClients() >= _channels[channelId].getLimit() && _channels[channelId].getLimit() != 0)
-		return (sendToClient(i, ERR_CHANNELISFULL(nick, chName)));
-
-
+		return (sendToClient(i, ERR_CHANNELISFULL(_clients[i].getNick(), chName)));
 	if (_channels[channelId].isInviteOnly())
-		return (sendToClient(i, ERR_INVITEONLYCHAN(nick, chName)));
+		return (sendToClient(i, ERR_INVITEONLYCHAN(_clients[i].getNick(), chName)));
 
 
 	_clients[i].setChannelId(channelId);
 	_clients[i].setchannelName( _channels[_clients[i].getChannelId()].getName());//!does client really need the name?
 	_channels[_clients[i].getChannelId()].incrementNbrClients();
 
+	sendToClient(i, "You have joined channel " + chName);
+
+	//outputs
+//RPL_TOPIC
+//RPL_NAMREPLAY
+//send list of names
+//RPL_JOIN for everyone
 	//*OTHER MEMBERS OF CHANNEL KNOWING CLIENT JOINED
-	std::string strToSend = nick + " joined " + _clients[i].getChannelName();
-	sendToClientsInChannel(i, strToSend);
-
-
+	// std::string strToSend = nick + " joined " + _clients[i].getChannelName();
+	// sendToClientsInChannel(i, strToSend);
 	//if (topic != empty)
-	sendToClient(i, RPL_TOPIC(nick, chName, "TEMP TOPIC"));
+	// sendToClient(i, RPL_TOPIC(nick, chName, "TEMP TOPIC"));
 
 }
 
-template<typename T>
-bool hasInChannels(std::vector<T> channels, std::string name)//just changed places
-{
-	for (typename std::vector<T>::iterator channelIt = channels.begin(); channelIt != channels.end(); ++channelIt)
+/* divide into string chName and string Key, if key isnt empty, check key
+
+	int pos = args.find(' ');
+	if (pos != std::string::npos)// "<channel> " or "<channel> <key>"
 	{
-		if (name == channelIt->getName())
+		std::string key = args.substr(pos + 1);
+		if (key.empty());
+			//ignore
+	}
+*/
+
+bool Server::hasInChannels(std::string name)
+{
+	for (int i = 0; i < _channels.size(); i++) {
+		if (name == _channels[i].getName())
 			return (true);
 	}
 	return (false);
@@ -161,14 +179,12 @@ bool hasInChannels(std::vector<T> channels, std::string name)//just changed plac
 
 void	Server::commandPart(int i, std::string name)
 {
-	//todo get numeric
 	if (!_clients[i].isRegistered())
-		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
 	if (name.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PART")));
 
-	
-	if (!hasInChannels(_channels, name))
+	if (!hasInChannels(name))//remake this function
 		return (sendToClient(i, ERR_NOSUCHCHANNEL(_clients[i].getNick(), name)));
 	
 	sendToClient(i, "You have left channel " + name);//!check the actual output
@@ -184,9 +200,8 @@ void	Server::commandPart(int i, std::string name)
 //todo NEEDMOREPARAMS CAUSE YOU NEED "PRIVMSG <client> <channel>", check order
 void	Server::commandKick(int i, std::string args)
 {
-	//todo get numeric
 	if (!_clients[i].isRegistered())
-		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
 	if (args.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "KICK")));
 
@@ -270,7 +285,7 @@ int Server::findChannel(Client client, std::vector<Channel> channels,std::string
 		std::cout <<"User to invite was not found in the list of users" << std::endl;
 		return (0);
 	}
-	else if (!hasInChannels(channels, channelToGet))
+	else if (!hasInChannels(channelToGet))
 	{
 		std::cout <<"This channel was not found int the list of channels" << std::endl;
 		return (0);
@@ -290,12 +305,10 @@ int Server::findChannel(Client client, std::vector<Channel> channels,std::string
 
 //ERR_USERONCHANNEL
 //ERR_CHANNELISFULL, +l
-//todo NEEDMOREPARAMS CAUSE YOU NEED "PRIVMSG <client> <channel>", check order
 void	Server::commandInvite(int i, std::string name)
 {
-	//todo get numeric
 	if (!_clients[i].isRegistered())
-		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
 	//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
 	if (name.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "INVITE")));
@@ -483,9 +496,8 @@ void Server::executeCommandMode(int i, std::string channelTarget, std::string op
 
 void	Server::commandMode(int i, std::string line)
 {
-	//todo get numeric
 	if (!_clients[i].isRegistered())
-		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
 		//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
 	if (line.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "MODE")));
@@ -575,9 +587,8 @@ void	Server::commandMode(int i, std::string line)
 //todo broken if client has left the channel
 void	Server::commandTopic(int i, std::string line)
 {
-	//todo get numeric
 	if (!_clients[i].isRegistered())
-		return serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL");
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
 		//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
 	if (line.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "TOPIC")));
@@ -609,29 +620,42 @@ void	Server::commandTopic(int i, std::string line)
 	}
 }
 
-//todo NEEDMOREPARAMS CAUSE YOU NEED "PRIVMSG <channel> <message>"
-void	Server::commandPrivmsg(int i, std::string line)//dms arent done, just channels
-{
-	//todo get numeric
-	if (!_clients[i].isRegistered())
-		return (serverLog(_clients[i].getNick(), "ISNT REGISTERED CANT TALK, GET NUMERIC STILLLLLLLLLL"));
-	//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
-	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PRIVMSG")));
 
+
+
+
+//*mostly done
+bool	Server::isValidPrivmsg(std::string line)
+{
+	int pos = line.find(' ');
+	if (pos == std::string::npos || line.substr(pos + 1).empty())
+		return (false);
+	return (true);
+}
+void	setPrivmsg(std::string line, std::string *channel, std::string *message)
+{
+	int pos = line.find(' ');
+	*channel = line.substr(0, pos);
+	std::string rest = line.substr(pos + 1);
+	if (rest[0] == ':')
+		*message = rest.substr(1);
+	else
+		*message = rest.substr(0, rest.find(' '));
+}
+void	Server::commandPrivmsg(int i, std::string line)
+{
+	if (!_clients[i].isRegistered())
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
+	if (line.empty() || !isValidPrivmsg(line))
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PRIVMSG")));
 	
-	int	channelId = _clients[i].getChannelId();
-	if (channelId == -1)
-		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), line.substr(0, line.find(' ')))));
-	
-	std::string prefix = ":temp@localhost";//getPrefix(), //TODO is the ':' hardcoded?
-	std::string message = line.substr(_channels[channelId].getName().length() + 1);
-	std::string toSend = prefix + " PRIVMSG " + _channels[channelId].getName() + " " + message;
-	
-	for (std::vector<Client>::iterator clientIt = _clients.begin(); clientIt != _clients.end(); ++clientIt) {
-		if (clientIt->getChannelId() == channelId && clientIt->getId() != _clients[i].getId())
-			sendToClient(clientIt->getId() + 1, toSend);
-	}
+	std::string channel, message;
+	setPrivmsg(line, &channel, &message);
+	if (_clients[i].getChannelId() == -1 || _clients[i].getChannelName() != channel)
+		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), channel)));
+	std::string toSend = _clients[i].getPrefix() + " PRIVMSG " + channel + " :" + message;
+
+	sendToClientsInChannel(i, toSend);
 }
 
 
@@ -656,6 +680,9 @@ void	Server::processCommand(int i, std::string line)
 		return exitServer();
 	else if (line.compare(0, 4, "test") == 0)
 		return sendToClientsInChannel(i, "THIS IS A TEST MESSAGE");
+
+
+
 	
 	typedef void (Server::*funcs)(int, std::string);
 	std::string commands[] = {"PASS", "USER", "NICK", "JOIN", "PART", "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", "QUIT"};
@@ -713,8 +740,9 @@ void	Server::testClients()
 		_clients[1].setNick("First");
 		_clients[1].setUsername("First");
 		_clients[1].setRealname("First");
-		// _clients[1].setPrefix(setPrefixTemp(1));
+		_clients[1].setPrefix(setPrefixTemp(1));
 		// _clients[1].setChannelId(1);
+		// _clients[1].setchannelName("FIRST");
 		// _channels.push_back(Channel("FIRST"));
 		welcomeClient(1);
 	}
@@ -725,8 +753,9 @@ void	Server::testClients()
 		_clients[2].setNick("Second");
 		_clients[2].setUsername("Second");
 		_clients[2].setRealname("Second");
-		// _clients[2].setPrefix(setPrefixTemp(2));
+		_clients[2].setPrefix(setPrefixTemp(2));
 		// _clients[2].setChannelId(1);
+		// _clients[2].setchannelName("FIRST");
 		// Channel temp("SecondChannel");
 		// _channels.push_back(temp);
 		welcomeClient(2);
@@ -737,7 +766,7 @@ void	Server::testClients()
 		_clients[3].setNick("Third");
 		_clients[3].setUsername("Third");
 		_clients[3].setRealname("Third");
-		_clients[3].setChannelId(1);
+		// _clients[3].setChannelId(1);
 		// Channel temp("FirstChannel");
 		// _channels.push_back(temp);
 			welcomeClient(3);
@@ -751,13 +780,13 @@ void	Server::srvRun()
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		
-		if (_pfds[0].revents & POLLIN)//* Client Connecting
+		if (_pfds[0].revents & POLLIN)//*Client Connecting
 		{
 			int temp = acceptClient();
 			_clients.push_back(Client(temp));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			// testClients();
+			testClients();
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)//*loop through clients
