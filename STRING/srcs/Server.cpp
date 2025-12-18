@@ -13,6 +13,17 @@
 //change getNick in sendtoclients to a var nick
 //change args var name to line
 
+/*
+	PASS USER NICK 		done
+	JOIN  PRIVMSG		almost done, double check
+	PART 				//todo
+	KICK 				//todo
+	INVITE				//todo
+	MODE 				almost done
+	TOPIC 				//todo
+	QUIT				almost done, parsing, outputs, and leave channels channel-side
+*/
+
 //*HARDCODE CHANNELS WITH DIFFERENT MODES TO TEST EVERYTHING
 //todo PART AND QUIT need to remove client from channel in channel-side object
 
@@ -127,7 +138,6 @@ void	Server::commandJoin(int i, std::string args)
 
 	std::string chName, key;
 	setJoin(args, &chName, &key);
-
 	
 	int channelId = findOrCreateChannel(i, args);
 	if (key != _channels[channelId].getChannelKey())
