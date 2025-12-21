@@ -167,17 +167,6 @@ void	Server::commandJoin(int i, std::string args)
 
 }
 
-/* divide into string chName and string Key, if key isnt empty, check key
-
-	int pos = args.find(' ');
-	if (pos != std::string::npos)// "<channel> " or "<channel> <key>"
-	{
-		std::string key = args.substr(pos + 1);
-		if (key.empty());
-			//ignore
-	}
-*/
-
 bool Server::hasInChannels(std::string name)
 {
 	for (int i = 0; i < _channels.size(); i++) {
@@ -285,7 +274,7 @@ Client* Server::foundInUsers(std::string name)
 	}
 	return (0);
 }
-
+//this is used by invite
 int Server::findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet)
 {
 	Client *invitedClient;
@@ -368,6 +357,7 @@ void	Server::commandInvite(int i, std::string name)
 // sendToAllClientsInChannel needs to be called where its needed
 
 //todo done except outputs and parsing, and sendToAllClients all changes that happen
+//check numerics and sendtoallclients outputs
 void	Server::modeInviteOnly(int i, std::string channelTarget, bool inviteOnlyOrNot)
 {
 	//todo check extra parameters and parsing
