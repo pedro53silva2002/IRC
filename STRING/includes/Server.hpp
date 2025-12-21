@@ -114,6 +114,10 @@ class Server
 		//command from dan:			PRIVMSG #coolpeople :Hi everyone!
 		//sendtoClientinChannel:	:dan!~h@localhost PRIVMSG #coolpeople :Hi everyone!
 
+//!THIS IS BAD TO BE HERE
+bool hasInUserChannels(Client client, std::string name);
+//!THIS IS BAD TO BE HERE
+
 void	serverLog(std::string nick, std::string str);
 
 //*myFunctions
