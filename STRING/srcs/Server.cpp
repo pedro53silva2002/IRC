@@ -6,12 +6,7 @@
 //check order of parsing, like isOp, isInChannel
 
 //prefix needs to be sent as str before calling sendtoclientsinchannel
-//calling commands without being registered, need to fix that
-
-//replace every for loop that uses iterators to just run through the vector
-
-//change getNick in sendtoclients to a var nick
-//change args var name to line
+//output for running commands when not registered
 
 /*
 	PASS USER NICK 		done
