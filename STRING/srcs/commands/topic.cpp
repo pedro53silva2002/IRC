@@ -3,6 +3,15 @@
 //todo REDOOOOOOOOOOOOOOOOOOOOO
 //outputs, numerics, parsing
 
+void	Server::noArgsTopic(int i)
+{
+	if (_channels[_clients[i].getChannelId()].getTopic().empty())//	wtf...
+		return (sendToClient(i, RPL_NOTOPIC(_clients[i].getNick(), _channels[_clients[i].getChannelId()].getName())));//todo check output
+	return (sendToClient(i, RPL_TOPIC(_clients[i].getNick(), _channels[_clients[i].getChannelId()].getName(),  _channels[_clients[i].getChannelId()].getTopic())));//todo check output
+}
+
+//CHANOPRIVSNEEDED
+
 //broken if client has left the channel (mightve been fixed now with the quit and part changes)
 void	Server::commandTopic(int i, std::string line)
 {
@@ -11,30 +20,35 @@ void	Server::commandTopic(int i, std::string line)
 		//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
 	if (line.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "TOPIC")));
+	//todo parse
+	/*
+		TOPIC <channel> [<topic>]
+		if <topic> is not given, RPL_TOPIC or RPL_NOTOPIC
+		else if topicRestricted, only op can edit topic
+		else user edits topic
 
+		valid:
+		TOPIC #channel :<topic
+		TOPIC #channel :					(clears channel)
+		TOPIC #cannel
+	*/
 	
 	size_t pos = line.find(' ', 0);
 	std::string channelTarget = line.substr(0, pos);
-	std::string topic;
-	topic = line.substr(pos + 1);
-	/* if (pos != std::string::npos)
-		topic = line.substr(pos + 1);
-	else
-		topic = ""; */
-	std::cout << "CHANNEL TARGET: " << channelTarget << "\nTOPIC: " << topic << std::endl;
-	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-	{
-		if (channelTarget == channelIt->getName())
-		{
-			if (channelIt->isTopicRestricted() && !_clients[i].getOp())
-			{
-				std::cout << _clients[i].getNick() << " tried to set topic without being op in channel " << channelTarget << std::endl;
-				sendToClient(i, "you cannot set topic in channel " + channelTarget + ": topic is restricted to ops");
-				return ;
-			}
-			channelIt->setTopic(topic);
-			std::cout << "Channel " << channelIt->getName() << " topic has been set to \"" << channelIt->getTopic() << "\" by " << _clients[i].getNick() << std::endl;
-			sendToClient(i, "you have set the topic in channel " + channelTarget + " to: " + topic);
+	if (!hasInUserChannels(_clients[i], channelTarget))
+		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), channelTarget)));//todo check output
+	
+	std::string topic = line.substr(pos + 1);
+	if (pos == std::string::npos || topic.empty())
+		noArgsTopic(i);
+	else 
+		std::cout << "SET TOPIC\n";
+	for (int j = 0; j < _channels.size(); j++) {
+		if (_channels[j].getName() == channelTarget) {
+			if (_channels[j].isTopicRestricted() && _clients[i].getOp())
+				return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), _channels[j].getName())));
+			_channels[i].setTopic(topic);
+			sendToClient(i, RPL_TOPIC(_clients[i].getNick(), _channels[j].getName(), topic));
 		}
 	}
 }

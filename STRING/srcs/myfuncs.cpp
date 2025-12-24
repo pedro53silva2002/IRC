@@ -1,4 +1,4 @@
-#include "../includes/Server.hpp"//have a library for all the includes?
+#include "../includes/Server.hpp"
 
 //*HELPERS
 int		mySocket(int __domain, int __type, int __protocol) // noexcept(true)

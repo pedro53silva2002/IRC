@@ -1,8 +1,15 @@
 #ifndef DEFINES_HPP	
 # define DEFINES_HPP
 
+//*RPLs
+#define RPL_NOTOPIC(client, channel) ("331 " + client + " " + channel + " :No topic is set")
+#define RPL_TOPIC(client, channel, topic) ("332 " + client + " " + channel + " :" + topic)
+
+
+
 //SERVER PREFIX MISSING
 //also, check all outputs and numerics
+//*ERRORS
 #define ERR_NOSUCHCHANNEL(client, channel) ("403 " + client + " "  + channel + " :No such channel")
 #define ERR_UNKNOWNCOMMAND(client, command) ("421 " + client + " "  + command + " :Unknown command")
 #define ERR_NONICKNAMEGIVEN(client) ("431 " + client + " :No nickname given")
@@ -20,6 +27,7 @@
 #define ERR_BADCHANNELKEY(client, channel) ("475 " + client + " " + channel + " :Cannot join channel (+K)")
 #define ERR_BADCHANMASK(client, channel) ("476 " + client + " " + channel + " :Bad Channel Mask")
 #define ERR_NOPRIVILEGES(client) ("481 " + client + " :Permission Denied- You're not an IRC operator")
+#define ERR_CHANOPRIVSNEEDED(client, channel) ("482 " + client + " " + channel + " :You're not channel operator")
 #define ERR_UMODEWUNKNOWNFLAG "501 :Unknown MODE flag"//TODO
 
 //todo fix

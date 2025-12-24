@@ -79,6 +79,7 @@ class Server
 		void	commandInvite(int i, std::string name);
 		//*topic
 		void	commandTopic(int i, std::string line);
+		void	noArgsTopic(int i);
 		//*quit
 		void	commandQuit(int i, std::string str);//disconnect client
 
