@@ -9,8 +9,7 @@
 # include <arpa/inet.h>
 # include <string.h>
 # include <string>
-# include <vector>//maybe not needed
-# include <map>
+# include <vector>
 # include <poll.h>
 # include <stdlib.h>//atoi
 # include "Colours.hpp"
@@ -36,8 +35,10 @@ class Client
 		std::string _nick;
 		std::string	_realname;
 
-		std::map<int, std::string> _chans;
+		int			_channelId;//check if this is good
+		std::string	_channelName;//check if this is good
 
+		bool		_isOp;
 		std::string	_host;
 		std::string	_prefix;
 		
@@ -51,10 +52,13 @@ class Client
 			_pfd.revents = 0;
 			_authenticated = false;
 			_registered = false;
+			// _capped = false;
 			_username = "";
 			_nick = "*";
 			_realname = "";
-			_chans[0] = "";
+			_channelId = -1;
+			_channelName = "";
+			_isOp = false;
 			_host = "";
 			_prefix = "";
 		}
@@ -62,7 +66,9 @@ class Client
 		Client() {
 			_id = -1;
 			_socket = 0;
-			_chans[0] = "";
+			_channelId = -1;
+			_channelName = "";
+			_isOp = false;
 		}//DUMMY
 
 		//*GETTERS
@@ -71,50 +77,38 @@ class Client
 		pollfd		&getPfd() { return (_pfd); }//why &
 		bool		isAuthenticated() { return (_authenticated); }
 		bool		isRegistered() { return (_registered); }
-		std::string	getPrefix() { return (_prefix); }
-		std::string	getHost() { return (_host); }
-
+		// bool		isCapped() { return (_capped); }
 		std::string	getUsername() { return (_username); }
 		std::string	getNick() { return (_nick); }
 		std::string	getRealname() { return (_realname); }
-
-		std::string	getChannelNameNew(int id) { return (_chans[id]); }//rename
-		int			getChannelIdNew(std::string chName) {//rename
-			for (std::map<int, std::string>::iterator it = _chans.begin(); it != _chans.end(); it++) {
-				if (it->second == chName)
-					return (it->first);
-			}
-			return (-1);//HOPEFULLY THIS WORKS
-		}
+		bool		getOp() { return (_isOp); }
+		int			getChannelId() { return (_channelId); }
+		std::string	getChannelName() { return (_channelName); }
+		std::string	getPrefix() { return (_prefix); }
+		std::string	getHost() { return (_host); }
 
 		//*SETTERS
 		void	setAuthenticated(bool auth) { _authenticated = auth; }
 		void	setRegistered(bool auth) { _registered = auth; }
-		void	setPrefix(std::string prefix) { _prefix = prefix; }
-		void	setHost(std::string host) { _host = host; }
-
+		// void	setCapped(bool auth) { _capped = auth; }
 		void	setUsername(std::string username) { _username = username; }
 		void	setNick(std::string nick) { _nick = nick; }
 		void	setRealname(std::string realname) { _realname = realname; }
+		void	setChannelId(int channelId) { _channelId = channelId; }
+		void	setchannelName(std::string channelName) {
 
-		void	setChannel(int id, std::string chName) {
-			_chans.insert(std::make_pair(id, chName));
+			if (_channelName == "")
+			{
+				channelName.erase(std::remove(channelName.begin(),channelName.end(), '\n'),channelName.end());
+				channelName.erase(std::remove(channelName.begin(),channelName.end(), '\r'),channelName.end());
+				_channelName = channelName;
+			}
+			else
+				_channelName += ";" + channelName; 
 		}
-
-
-
-		// void	setChannelId(int channelId) { _channelId = channelId; }
-		// void	setchannelName(std::string channelName) {
-		// 	if (_channelName == "")
-		// 	{
-		// 		channelName.erase(std::remove(channelName.begin(),channelName.end(), '\n'),channelName.end());
-		// 		channelName.erase(std::remove(channelName.begin(),channelName.end(), '\r'),channelName.end());
-		// 		_channelName = channelName;
-		// 	}
-		// 	else
-		// 		_channelName += ";" + channelName; 
-		// }
-
+		void	setOp(bool op) { _isOp = op; }
+		void	setPrefix(std::string prefix) { _prefix = prefix; }
+		void	setHost(std::string host) { _host = host; }
 
 
 

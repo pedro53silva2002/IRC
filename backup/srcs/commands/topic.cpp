@@ -45,7 +45,7 @@ void	Server::commandTopic(int i, std::string line)
 		std::cout << "SET TOPIC\n";
 	for (int j = 0; j < _channels.size(); j++) {
 		if (_channels[j].getName() == channelTarget) {
-			if (_channels[j].isTopicRestricted() && _channels[_clients[i].getChannelId()].getOp(_clients[i].getId()))
+			if (_channels[j].isTopicRestricted() && _clients[i].getOp())
 				return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), _channels[j].getName())));
 			_channels[i].setTopic(topic);
 			sendToClient(i, RPL_TOPIC(_clients[i].getNick(), _channels[j].getName(), topic));

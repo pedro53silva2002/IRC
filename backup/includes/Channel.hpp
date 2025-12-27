@@ -32,12 +32,11 @@ class Channel
 		bool				_isTopicRestricted;
 
 		std::vector<int>	_clientsInChannel;
-		std::vector<int>	_ops;
 	public:
 		Channel(std::string name) {
 			_id = ++_globalChannelId;
 			_name = name;
-			_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());//what??
+			_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());//wqhat??
 			_name.erase(std::remove(_name.begin(),_name.end(), '\r'),_name.end());
 			_limit = 0;//default meaning unlimited
 			_nbrClients = 0;
@@ -50,7 +49,14 @@ class Channel
 			_id = -1;
 		}//DUMMY
 		
+		std::vector<int> getClientsInChannel() {
+			return (_clientsInChannel);
+		}
 
+		//todo hardcoded
+		void	clientJoin(int id) {
+			_clientsInChannel.push_back(id);
+		}
 		int				getId() { return (_id); }
 		std::string		getName() { return (_name); }
 		std::string		getChannelKey() { return (_channelKey); }
@@ -71,18 +77,7 @@ class Channel
 		void		decrementNbrClients() { _nbrClients--; }
 		void		setLimit(int limit) { _limit = limit; }
 
-		//todo operators
-		void		setOp(int id, bool opOrNot) {
-			if (opOrNot == true) 
-				_ops.push_back(id);
-			else
-				_ops.erase(find(_ops.begin(), _ops.end(), id));
-		}
-		bool		getOp(int id) {
-			if (find(_ops.begin(), _ops.end(), id) == _ops.end())
-				return (false);
-			return (true);
-		}
+
 
 };
 

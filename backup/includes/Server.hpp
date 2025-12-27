@@ -40,7 +40,8 @@ class Server
 
 		
 		
-		void	sendToClientsInChannel(int i, std::string chName, std::string str);
+		void	sendToClientsInChannel(int i, std::string str);
+		void	sendToClient(int id, std::string sender, std::string str);
 		void	sendToClient(int i, std::string str);
 
 

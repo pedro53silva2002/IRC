@@ -9,9 +9,9 @@ void	Server::commandKick(int i, std::string args)
 	if (args.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "KICK")));
 
-	if (!_channels[_clients[i].getChannelId()].getOp(_clients[i].getId()))
+	
+	if (!_clients[i].getOp())//todo put back
 		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));
-
 	
 
 	std::string chName = args.substr(0, args.find(' '));//!PARSE

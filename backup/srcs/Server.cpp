@@ -9,10 +9,30 @@
 //output for running commands when not registered
 
 //!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
 /*
 	BASICALLY A CLIENT ONLY KNOWS IF HIMSELF IS OP,
 	INSTEAD, THE CHANNEL IS THE ONE THAT NEEDS TO HAVE SAVED WHICH CLIENTS ARE OP
 */
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
+//!THE ENTIRE OP LOGIC IS SO BAD
 //!THE ENTIRE OP LOGIC IS SO BAD
 
 //check using a non existent channel as a parameter of a command "MODE <nonexistent> +l 100"
@@ -103,16 +123,16 @@ void	Server::processCommand(int i, std::string line)
 	else if (line.compare(0, 4, "exit") == 0)
 		return exitServer();
 	else if (line.compare(0, 4, "test") == 0)
-		return sendToClientsInChannel(i, "FIRST", "THIS IS A TEST MESSAGE");
+		return sendToClientsInChannel(i, "THIS IS A TEST MESSAGE");
 
 
 
 	
 	typedef void (Server::*funcs)(int, std::string);
-	std::string commands[] = {"PASS", "USER", "NICK", "JOIN"/* , "PART" */, "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", "QUIT"};
+	std::string commands[] = {"PASS", "USER", "NICK", "JOIN", "PART", "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", "QUIT"};
 
-	funcs function[] = {&Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin, /* &Server::commandPart ,*/
-	&Server::commandPrivmsg/* , &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, &Server::commandQuit */};
+	funcs function[] = {&Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin, &Server::commandPart,
+	&Server::commandPrivmsg, &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, &Server::commandQuit};
 	std::string temp = line.substr(0, line.find(' '));
 	for (int j = 0; j < 11; j++) {
 		if (commands[j] == temp) {
@@ -165,7 +185,8 @@ void	Server::testClients()
 		_clients[1].setUsername("First");
 		_clients[1].setRealname("First");
 		_clients[1].setPrefix(setPrefixTemp(1));
-		_clients[1].setChannel(1, "FIRST");
+		_clients[1].setChannelId(1);
+		_clients[1].setchannelName("FIRST");
 		_channels.push_back(Channel("FIRST"));
 		welcomeClient(1);
 	}
@@ -177,7 +198,10 @@ void	Server::testClients()
 		_clients[2].setUsername("Second");
 		_clients[2].setRealname("Second");
 		_clients[2].setPrefix(setPrefixTemp(2));
-		_clients[2].setChannel(1, "FIRST");
+		_clients[2].setChannelId(1);
+		_clients[2].setchannelName("FIRST");
+		// Channel temp("SecondChannel");
+		// _channels.push_back(temp);
 		welcomeClient(2);
 	}
 	else if (_clients.size() == 4) {
@@ -186,9 +210,10 @@ void	Server::testClients()
 		_clients[3].setNick("Third");
 		_clients[3].setUsername("Third");
 		_clients[3].setRealname("Third");
-		_clients[3].setPrefix(setPrefixTemp(3));
-		_clients[3].setChannel(1, "FIRST");
-		welcomeClient(3);
+		// _clients[3].setChannelId(1);
+		// Channel temp("FirstChannel");
+		// _channels.push_back(temp);
+			welcomeClient(3);
 	}
 }
 

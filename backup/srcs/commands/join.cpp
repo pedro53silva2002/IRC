@@ -15,20 +15,16 @@ int		Server::findOrCreateChannel(int i, std::string name)
 {
 	std::string channelTarget = name.substr(0, name.find(' ', 0));
 
+
 	for (int j = 0; j < _channels.size(); j++) {
 		if (channelTarget == _channels[j].getName())
-			return (_channels[j].getId());//found a channel, not gonna create one
+			return (_channels[j].getId());
 	}
 	_channels.push_back(Channel(channelTarget));
-	int chId = _channels.rbegin()->getId();
-	_channels[chId].setOp(_clients[i].getId(), true);
+	_clients[i].setOp(true);
 	std::cout << _channels.rbegin()->getName() << " has been created" << std::endl;
-	return (chId);
+	return (_channels.rbegin()->getId());
 }
-
-//!MULTIPLE CHANNELS PER CLIENT
-//!MULTIPLE CHANNELS PER CLIENT
-//!MULTIPLE CHANNELS PER CLIENT
 
 void	Server::commandJoin(int i, std::string args)
 {
@@ -39,8 +35,8 @@ void	Server::commandJoin(int i, std::string args)
 
 	if (args.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "JOIN")));
-	// if (args[0] != '#')
-	// 	return (sendToClient(i, ERR_BADCHANMASK(_clients[i].getNick(), args)));
+	if (args[0] != '#')
+		return (sendToClient(i, ERR_BADCHANMASK(_clients[i].getNick(), args)));
 
 	std::string chName, key;
 	setJoin(args, &chName, &key);
@@ -54,9 +50,9 @@ void	Server::commandJoin(int i, std::string args)
 		return (sendToClient(i, ERR_INVITEONLYCHAN(_clients[i].getNick(), chName)));
 
 
-	
-	_clients[i].setChannel(channelId, chName);
-	_channels[_clients[i].getChannelIdNew(chName)].incrementNbrClients();
+	_clients[i].setChannelId(channelId);
+	_clients[i].setchannelName( _channels[_clients[i].getChannelId()].getName());//!does client really need the name?
+	_channels[_clients[i].getChannelId()].incrementNbrClients();
 
 	sendToClient(i, "You have joined channel " + chName);
 

@@ -49,7 +49,7 @@ void	Server::modeOp(int i, std::string channelTarget, std::string user, bool opO
 	if (!hasInUserChannels(*clientToOp, channelTarget))
 		return (sendToClient(i, ERR_USERNOTINCHANNEL(_clients[i].getNick(), clientToOp->getNick(), channelTarget)));
 
-	_channels[clientToOp->getChannelId()].setOp(clientToOp->getId(), opOrNot);
+	clientToOp->setOp(opOrNot);
 	//todo this isnt sendToClient, its sendToAllClientsInChannel
 	//!outputs
 	sendToClient(i, OPERATOR(_clients[i].getNick(), channelTarget, clientToOp->getNick()));
@@ -112,7 +112,7 @@ void Server::executeCommandMode(int i, std::string channelTarget, std::string op
 	if (!hasInUserChannels(_clients[i], channelTarget))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), channelTarget)));//todo check output
 	
-	if (!_channels[_clients[i].getChannelId()].getOp(_clients[i].getId()))
+	if (!_clients[i].getOp())
 		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));//save nick in var
 	
 	char sign = opr[0];

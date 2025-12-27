@@ -36,18 +36,17 @@ void	Server::sendToClient(int i, std::string str) {
 	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
 }
 
-//!CHANNEL TARGET NEEDS TO BE SENT AS PARAMETER TO BE USED BY GETCHANNELID
-void	Server::sendToClientsInChannel(int i, std::string chName, std::string str)
+//todo getPrefix() before this, but it needs to be sent as parameter
+void	Server::sendToClientsInChannel(int i, std::string str)
 {
 	for (int j = 0; j < _clients.size(); j++) {
-		if (_clients[i].getChannelIdNew(chName) == _clients[j].getChannelIdNew(chName) && i != j)
+		if (_clients[i].getChannelId() == _clients[j].getChannelId() && i != j)
 			sendToClient(j, str);
 	}
 }
 
 
 //* CHANNEL LOGIC
-/*
 bool Server::hasInChannels(std::string name)
 {
 	for (int i = 0; i < _channels.size(); i++) {
@@ -129,4 +128,3 @@ int Server::findChannel(Client client, std::vector<Channel> channels,std::string
 	return (1);
 }
 
-*/
