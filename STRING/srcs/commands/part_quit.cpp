@@ -14,18 +14,30 @@
 	sendToClient(i, "You have left channel " + name);//!check the actual output
 	std::string strToSend = _clients[i].getNick() + " left " + name;
 	sendToClientsInChannel(i, strToSend);
-	_channels[_clients[i].getChannelId()].decrementNbrClients();
+	int chId = _clients[i].getChannelIdNew(name);
+
+
+	_channels[chId].decrementNbrClients();
 	_clients[i].setChannelId(-1);
 	_clients[i].setchannelName("");
 } */
 
-//*Disconnect client when client exits
+
+
+//*QUIT
+void	Server::leaveChannels(int i)//hopefully this works
+{
+	for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); it != _clients[i].getChannels().end(); i++) {
+		_channels[it->first].decrementNbrClients();
+	}
+}
+
+//calling QUIT asks for reason, ctrl+c doesnt need reason
 void	Server::commandQuit(int i, std::string str)
 {
 	serverLog(_clients[i].getNick(), "has disconnected");
-	//calling QUIT asks for reason, ctrl+c doesnt need reason
 	sendToClient(i, "QUIT :" + str);
-	// _channels[_clients[i].getChannelId()].decrementNbrClients();//!UNCOMMENT
+	leaveChannels(i);
 	close (_pfds[i].fd);
 	_clients.erase(_clients.begin() + i);
 }

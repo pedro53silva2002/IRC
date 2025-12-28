@@ -78,6 +78,7 @@ class Client
 		std::string	getNick() { return (_nick); }
 		std::string	getRealname() { return (_realname); }
 
+		std::map<int, std::string>	getChannels() { return (_chans); }
 		std::string	getChannelNameNew(int id) { return (_chans[id]); }//rename
 		int			getChannelIdNew(std::string chName) {//rename
 			for (std::map<int, std::string>::iterator it = _chans.begin(); it != _chans.end(); it++) {
@@ -100,24 +101,9 @@ class Client
 		void	setChannel(int id, std::string chName) {
 			_chans.insert(std::make_pair(id, chName));
 		}
-
-
-
-		// void	setChannelId(int channelId) { _channelId = channelId; }
-		// void	setchannelName(std::string channelName) {
-		// 	if (_channelName == "")
-		// 	{
-		// 		channelName.erase(std::remove(channelName.begin(),channelName.end(), '\n'),channelName.end());
-		// 		channelName.erase(std::remove(channelName.begin(),channelName.end(), '\r'),channelName.end());
-		// 		_channelName = channelName;
-		// 	}
-		// 	else
-		// 		_channelName += ";" + channelName; 
-		// }
-
-
-
-
+		void	leaveChannel(int id) {
+			
+		}
 
 
 };

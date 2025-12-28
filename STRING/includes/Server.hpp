@@ -80,7 +80,8 @@ class Server
 		void	commandTopic(int i, std::string line);
 		void	noArgsTopic(int i);
 		//*quit
-		void	commandQuit(int i, std::string str);//disconnect client
+		void	commandQuit(int i, std::string str);
+		void	leaveChannels(int i);
 
 
 		//utils, find out where to put these to be grouped

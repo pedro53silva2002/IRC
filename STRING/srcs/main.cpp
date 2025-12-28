@@ -20,14 +20,6 @@ int		main(int ac, char **av)
 	return 0;
 }
 
-
-/** @brief Initiates the process of spliting the string into an array of words
- * 	@param result - array of words
- * 	@param str - string
- * 	@param c - separator
- *  @return Returns an array of words
-*/
-
 /*
 	Client needs to register itself in server before using stuff like JOIN or PRIVMSG
 	client should send info:

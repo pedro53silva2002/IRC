@@ -1,21 +1,9 @@
 #include "../includes/Server.hpp"
 
 //What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
-//also, when a client that was op leaves his channel, and joins another, need to take op from him
-
 //check order of parsing, like isOp, isInChannel
-
-//prefix needs to be sent as str before calling sendtoclientsinchannel
-//output for running commands when not registered
-
-//!THE ENTIRE OP LOGIC IS SO BAD
-/*
-	BASICALLY A CLIENT ONLY KNOWS IF HIMSELF IS OP,
-	INSTEAD, THE CHANNEL IS THE ONE THAT NEEDS TO HAVE SAVED WHICH CLIENTS ARE OP
-*/
-//!THE ENTIRE OP LOGIC IS SO BAD
-
 //check using a non existent channel as a parameter of a command "MODE <nonexistent> +l 100"
+//*HARDCODE CHANNELS WITH DIFFERENT MODES TO TEST EVERYTHING
 
 /*
 	PASS USER NICK 		done
@@ -27,10 +15,6 @@
 	TOPIC 				//todo
 	QUIT				almost done, parsing, outputs, and leave channels channel-side
 */
-
-//*HARDCODE CHANNELS WITH DIFFERENT MODES TO TEST EVERYTHING
-//todo PART AND QUIT need to remove client from channel in channel-side object
-
 
 //*CONSTRUCTORS
 Server::Server(char *port, char *pass) {
@@ -58,7 +42,7 @@ Server::Server(char *port, char *pass) {
 	_srvPfd.revents = 0;
 
 	_clients.push_back(Client());//This is so that we dont have to work with _clients[i - 1]
-	_channels.push_back(Channel());//This is so that we dont have to work with _channel[i - 1]
+	_channels.push_back(Channel());//This is so that we dont have to work with _channel[j - 1]
 }
 
 //*Accepting client
@@ -73,7 +57,7 @@ int		Server::acceptClient()
 	tempSocket = accept(_socket, (sockaddr*)&clientAddr, &clientSize);
 	if (tempSocket == -1)
 		throw (std::runtime_error("Problem with client connecting"));
-	memset(host, 0, NI_MAXHOST);//useless?
+	memset(host, 0, NI_MAXHOST);
 	
 	inet_ntop(AF_INET, &clientAddr.sin_addr, host, NI_MAXHOST);
 	std::cout << host << " manually connected on " << ntohs(clientAddr.sin_port) << std::endl;
@@ -81,9 +65,7 @@ int		Server::acceptClient()
 }
 
 
-
-
-//todo i should skip all whitespaces
+//todo skip all whitespaces
 std::string parseLine(std::string line)
 {
 	int pos = line.find(' ');
