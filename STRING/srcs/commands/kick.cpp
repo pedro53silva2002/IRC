@@ -26,7 +26,7 @@ void	Server::commandKick(int i, std::string args)
 			//check toKick is in channel
 			if (it->getChannelId() != _clients[i].getChannelId())
 				return (sendToClient(i, ERR_USERNOTINCHANNEL(_clients[i].getNick(), toKick, chName)));
-			sendToClientsInChannel(i, _clients[i].getNick() + " KICK " + chName + " " + toKick);//todo + prefix
+			clientBroadcast(i, _clients[i].getNick() + " KICK " + chName + " " + toKick);//todo + prefix
 			it->setChannelId(-1);
 			it->setchannelName("");
 		}

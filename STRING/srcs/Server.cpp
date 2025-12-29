@@ -7,13 +7,14 @@
 
 /*
 	PASS USER NICK 		done
-	JOIN  PRIVMSG		almost done, double check
+	JOIN				//*redone, check key parsing and outputs
+	PRIVMSG				//!doing
 	PART 				//todo
 	KICK 				//todo
 	INVITE				//todo
-	MODE 				almost done
+	MODE 				//todo
 	TOPIC 				//todo
-	QUIT				almost done, parsing, outputs, and leave channels channel-side
+	QUIT				//todo
 */
 
 //*CONSTRUCTORS
@@ -85,7 +86,7 @@ void	Server::processCommand(int i, std::string line)
 	else if (line.compare(0, 4, "exit") == 0)
 		return exitServer();
 	else if (line.compare(0, 4, "test") == 0)
-		return sendToClientsInChannel(i, "FIRST", "THIS IS A TEST MESSAGE");
+		return clientBroadcast(i, "FIRST", "THIS IS A TEST MESSAGE");
 
 
 
@@ -159,19 +160,19 @@ void	Server::testClients()
 		_clients[2].setUsername("Second");
 		_clients[2].setRealname("Second");
 		_clients[2].setPrefix(setPrefixTemp(2));
-		_clients[2].setChannel(1, "FIRST");
+		// _clients[2].setChannel(1, "FIRST");
 		welcomeClient(2);
 	}
-	else if (_clients.size() == 4) {
-		_clients[3].setAuthenticated(true);
-		_clients[3].setRegistered(true);
-		_clients[3].setNick("Third");
-		_clients[3].setUsername("Third");
-		_clients[3].setRealname("Third");
-		_clients[3].setPrefix(setPrefixTemp(3));
-		_clients[3].setChannel(1, "FIRST");
-		welcomeClient(3);
-	}
+	// else if (_clients.size() == 4) {
+	// 	_clients[3].setAuthenticated(true);
+	// 	_clients[3].setRegistered(true);
+	// 	_clients[3].setNick("Third");
+	// 	_clients[3].setUsername("Third");
+	// 	_clients[3].setRealname("Third");
+	// 	_clients[3].setPrefix(setPrefixTemp(3));
+	// 	// _clients[3].setChannel(1, "FIRST");
+	// 	welcomeClient(3);
+	// }
 }
 
 void	Server::srvRun()

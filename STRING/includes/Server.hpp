@@ -39,8 +39,9 @@ class Server
 		
 
 		
-		
-		void	sendToClientsInChannel(int i, std::string chName, std::string str);
+		//only difference is it also sends to current user
+		void	serverBroadcast(int i, std::string chName, std::string str);
+		void	clientBroadcast(int i, std::string chName, std::string str);
 		void	sendToClient(int i, std::string str);
 
 
@@ -81,7 +82,6 @@ class Server
 		void	noArgsTopic(int i);
 		//*quit
 		void	commandQuit(int i, std::string str);
-		void	leaveChannels(int i);
 
 
 		//utils, find out where to put these to be grouped

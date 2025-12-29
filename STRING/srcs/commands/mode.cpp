@@ -29,7 +29,7 @@ void	Server::modeTopicRestriction(int i,std::string channelTarget, bool topicRes
 			//!outputs
 			serverLog(_clients[i].getNick(), channelTarget + "LOG IT TO SAY WHAT CHANGED");
 			// serverLog(_clients[i].getNick(), channelTarget + " topic restrictions have been changed LOG IT TO SAY WHAT CHANGED");
-			// sendToClientsInChannel(i, "channel topic restrictions changed");//todo check output
+			// clientBroadcast(i, "channel topic restrictions changed");//todo check output
 		}
 	}
 }

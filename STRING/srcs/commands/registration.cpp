@@ -91,7 +91,7 @@ void	Server::commandNick(int i, std::string line)
 	std::cout << _clients[i].getNick() << std::endl;
 	checkRegistration(i);
 
-	//sendtoClientsInChannel("<old> changed nick to <new>"), only if client is connected to channel
+	//clientBroadcast("<old> changed nick to <new>"), only if client is connected to channel
 }
 
 

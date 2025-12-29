@@ -36,11 +36,20 @@ void	Server::sendToClient(int i, std::string str) {
 	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
 }
 
-//!CHANNEL TARGET NEEDS TO BE SENT AS PARAMETER TO BE USED BY GETCHANNELID
-void	Server::sendToClientsInChannel(int i, std::string chName, std::string str)
+//only difference is it also sends to current user
+void	Server::serverBroadcast(int i, std::string chName, std::string str)
 {
+	int chId = _clients[i].getChannelIdNew(chName);
 	for (int j = 0; j < _clients.size(); j++) {
-		if (_clients[i].getChannelIdNew(chName) == _clients[j].getChannelIdNew(chName) && i != j)
+		if (chId == _clients[j].getChannelIdNew(chName))
+			sendToClient(j, str);
+	}
+}
+void	Server::clientBroadcast(int i, std::string chName, std::string str)
+{
+	int chId = _clients[i].getChannelIdNew(chName);
+	for (int j = 0; j < _clients.size(); j++) {
+		if (chId == _clients[j].getChannelIdNew(chName) && i != j)
 			sendToClient(j, str);
 	}
 }

@@ -101,9 +101,6 @@ class Client
 		void	setChannel(int id, std::string chName) {
 			_chans.insert(std::make_pair(id, chName));
 		}
-		void	leaveChannel(int id) {
-			
-		}
 
 
 };

@@ -38,5 +38,5 @@ void	Server::commandPrivmsg(int i, std::string line)
 	
 	std::string toSend = _clients[i].getPrefix() + " PRIVMSG " + chName + " :" + message;
 
-	sendToClientsInChannel(i, chName, toSend);
+	clientBroadcast(i, chName, toSend);
 }
