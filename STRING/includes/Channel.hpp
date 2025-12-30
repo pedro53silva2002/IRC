@@ -78,10 +78,10 @@ class Channel
 			else
 				_ops.erase(find(_ops.begin(), _ops.end(), id));
 		}
-		bool		getOp(int id) {
+		bool		isOp(int id) {
 			if (find(_ops.begin(), _ops.end(), id) == _ops.end())
-				return (false);
-			return (true);
+				return (true);
+			return (false);
 		}
 
 };

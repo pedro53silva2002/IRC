@@ -1,7 +1,6 @@
 #include "../includes/Server.hpp"
 //todo OUTPUTS FOR CLIENT AND TO CHANNEL, PARSING, NUMERICS, DOUBLE CHECK
 
-
 // sendToAllClientsInChannel needs to be called where its needed
 
 //check numerics and sendtoallclients outputs
@@ -106,11 +105,11 @@ void	Server::modeKey(int i, std::string channelTarget, std::string key, bool set
 }
 
 
-void Server::executeCommandMode(int i, std::string channelTarget, std::string opr, std::string args)//user more like arguments
+void Server::executeCommandMode(int i, std::string chName, std::string opr, std::string args)//user more like arguments
 {
 	//todo make sure its well parsed
-	if (!hasInUserChannels(_clients[i], channelTarget))
-		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), channelTarget)));//todo check output
+	if (!hasInUserChannels(_clients[i], chName))
+		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));//todo check output
 	
 	if (!_channels[_clients[i].getChannelId()].getOp(_clients[i].getId()))
 		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));//save nick in var
@@ -121,19 +120,19 @@ void Server::executeCommandMode(int i, std::string channelTarget, std::string op
 	switch (mode)
 	{
 		case 'i':
-			modeInviteOnly(i, channelTarget, enable);
+			modeInviteOnly(i, chName, enable);
 			break ;
 		case 't':
-			modeTopicRestriction(i, channelTarget, enable);
+			modeTopicRestriction(i, chName, enable);
 			break ;
 		case 'k':
-			modeKey(i, channelTarget, args, enable);
+			modeKey(i, chName, args, enable);
 			break ;
 		case 'o':
-			modeOp(i, channelTarget, args, enable);
+			modeOp(i, chName, args, enable);
 			break ;
 		case 'l':
-			modeLim(i, channelTarget, args);
+			modeLim(i, chName, args);
 			break ;
 		default:
 			sendToClient(i, ERR_UMODEWUNKNOWNFLAG + opr);
@@ -148,7 +147,6 @@ void	Server::commandMode(int i, std::string line)
 		//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
 	if (line.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "MODE")));
-
 	
 	int pos = line.find(' ', 0);
 	std::string channelTarget = line.substr(0, pos);
@@ -164,8 +162,8 @@ void	Server::commandMode(int i, std::string line)
 	{
 		while (line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] == '+' || line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] == '-')
 		{
-			/* if (line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] != '+' && line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] != '-')
-				break ; */
+			// if (line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] != '+' && line.substr(nextPos, line.find(' ', nextPos) - nextPos)[0] != '-')
+			// 	break ;
 			opr.push_back(line.substr(nextPos, line.find(' ', nextPos) - nextPos));
 			nextPos = line.find(' ', nextPos) + 1;
 		}
@@ -179,13 +177,13 @@ void	Server::commandMode(int i, std::string line)
 		if (nextPos)
 			user.push_back(line.substr(nextPos, line.size() - nextPos));
 	}
-	/* if (line.find(' ', pos + 1) == std::string::npos)
-		opr = line.substr(pos + 1, line.size() - (pos + 1));
-	else
-	{
-		opr = line.substr(pos + 1, line.find(' ', pos + 1) - (pos + 1));
-		user = line.substr(line.find(' ', pos + 1) + 1, line.size() - line.find(' ', pos + 1));
-	} */
+	// if (line.find(' ', pos + 1) == std::string::npos)
+	// 	opr = line.substr(pos + 1, line.size() - (pos + 1));
+	// else
+	// {
+	// 	opr = line.substr(pos + 1, line.find(' ', pos + 1) - (pos + 1));
+	// 	user = line.substr(line.find(' ', pos + 1) + 1, line.size() - line.find(' ', pos + 1));
+	// }
 	//std::cout << "CHANNEL TARGET: " << channelTarget << "\nOPR: " << opr << "\nUSER: " << user << std::endl;
 	//std::cout << "Result: " << strcmp(opr.c_str(), "+k") << std::endl;
 	//std::cout << "MODE command received from " << _clients[i].getNick() << " with params: " << line << std::endl;
@@ -201,8 +199,8 @@ void	Server::commandMode(int i, std::string line)
 				std::string singleOpr;
 				singleOpr += (*it)[0];
 				singleOpr += (*it)[j];
-				/* std::cout << "OPR PART: " << singleOpr <<  std::endl;
-				std::cout << "USER PART: " << user.at(k) <<  std::endl; */
+				// std::cout << "OPR PART: " << singleOpr <<  std::endl;
+				// std::cout << "USER PART: " << user.at(k) <<  std::endl;
 				executeCommandMode(i, channelTarget, singleOpr, user.at(k));
 				if (k < user.size())
 				{
@@ -213,8 +211,8 @@ void	Server::commandMode(int i, std::string line)
 		else
 		{
 			executeCommandMode(i, channelTarget, *it, user.at(k));
-			/* std::cout << "OPR: " << *it <<  std::endl;
-			std::cout << "USER: " << user.at(k) <<  std::endl; */
+			// std::cout << "OPR: " << *it <<  std::endl;
+			// std::cout << "USER: " << user.at(k) <<  std::endl;
 		}
 		if (k < user.size())
 		{

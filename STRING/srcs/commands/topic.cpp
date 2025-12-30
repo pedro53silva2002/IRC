@@ -1,54 +1,55 @@
 #include "../includes/Server.hpp"
 
-//todo REDOOOOOOOOOOOOOOOOOOOOO
-//outputs, numerics, parsing
+//todo parse
+/*
+	TOPIC <channel> [<topic>]
+	if <topic> is not given, RPL_TOPIC or RPL_NOTOPIC
+	else if topicRestricted, only op can edit topic
+	else user edits topic
 
-void	Server::noArgsTopic(int i)
+	valid:
+	TOPIC #channel :<topic?>
+	TOPIC #channel :					(clears channel)//todo
+	TOPIC #channel
+	TOPIC #channel <something>			(does it ignore?)//todo
+*/
+
+void	setTopicArgs(std::string line, std::string *channel, std::string *newTopic)
 {
-	if (_channels[_clients[i].getChannelId()].getTopic().empty())//	wtf...
-		return (sendToClient(i, RPL_NOTOPIC(_clients[i].getNick(), _channels[_clients[i].getChannelId()].getName())));//todo check output
-	return (sendToClient(i, RPL_TOPIC(_clients[i].getNick(), _channels[_clients[i].getChannelId()].getName(),  _channels[_clients[i].getChannelId()].getTopic())));//todo check output
+	int pos = line.find(' ');
+	*channel = line.substr(0, pos);
+	std::string rest = line.substr(pos + 1);
+	*newTopic = rest;
 }
 
-//CHANOPRIVSNEEDED
+void	Server::noArgsTopic(int i, std::string chName)
+{
+	int chId = _clients[i].getChannelIdNew(chName);
+	if (_channels[chId].getTopic().empty())
+		return (sendToClient(i, RPL_NOTOPIC(_clients[i].getNick(), chName)));
+	return (sendToClient(i, RPL_TOPIC(_clients[i].getNick(), chName, _channels[chId].getTopic())));
+}
 
-//broken if client has left the channel (mightve been fixed now with the quit and part changes)
 void	Server::commandTopic(int i, std::string line)
 {
 	if (!_clients[i].isRegistered())
 		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
-		//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
 	if (line.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "TOPIC")));
-	//todo parse
-	/*
-		TOPIC <channel> [<topic>]
-		if <topic> is not given, RPL_TOPIC or RPL_NOTOPIC
-		else if topicRestricted, only op can edit topic
-		else user edits topic
+	
+	std::string chName, newTopic;
+	setTopicArgs(line, &chName, &newTopic);
 
-		valid:
-		TOPIC #channel :<topic
-		TOPIC #channel :					(clears channel)
-		TOPIC #cannel
-	*/
+	int chId = _clients[i].getChannelIdNew(chName);
+	if (chId == -1 || _clients[i].getChannelNameNew(chId) != chName)
+		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	
-	size_t pos = line.find(' ', 0);
-	std::string channelTarget = line.substr(0, pos);
-	if (!hasInUserChannels(_clients[i], channelTarget))
-		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), channelTarget)));//todo check output
-	
-	std::string topic = line.substr(pos + 1);
-	if (pos == std::string::npos || topic.empty())
-		noArgsTopic(i);
-	else 
-		std::cout << "SET TOPIC\n";
-	for (int j = 0; j < _channels.size(); j++) {
-		if (_channels[j].getName() == channelTarget) {
-			if (_channels[j].isTopicRestricted() && _channels[_clients[i].getChannelId()].getOp(_clients[i].getId()))
-				return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), _channels[j].getName())));
-			_channels[i].setTopic(topic);
-			sendToClient(i, RPL_TOPIC(_clients[i].getNick(), _channels[j].getName(), topic));
-		}
-	}
+	if (newTopic.empty())
+		return (noArgsTopic(i, chName));
+
+	if (_channels[chId].isTopicRestricted() && !_channels[chId].isOp(_clients[i].getId()))
+		return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), chName)));
+
+	_channels[chId].setTopic(newTopic);
+	serverBroadcast(i, chName, RPL_TOPIC(_clients[i].getNick(), chName, newTopic));
 }

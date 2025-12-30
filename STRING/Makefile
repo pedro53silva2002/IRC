@@ -5,9 +5,9 @@ SRCS = main.cpp Server.cpp myfuncs.cpp aux.cpp \
 		commands/join.cpp \
 		commands/privmsg.cpp \
 		commands/part_quit.cpp \
+		commands/topic.cpp
 #		commands/kick.cpp \
-#		commands/invite.cpp \
-#		commands/topic.cpp \
+#		commands/invite.cpp
 #		commands/mode.cpp 
 OBJS_DIR = ./objs
 OBJS = $(addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o))

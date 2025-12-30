@@ -69,7 +69,7 @@ class Server
 		void	commandKick(int i, std::string args);
 		//*mode
 		void	commandMode(int i, std::string line);
-		void 	executeCommandMode(int i, std::string channelTarget, std::string opr, std::string args);
+		void 	executeCommandMode(int i, std::string chName, std::string opr, std::string args);
 		void	modeInviteOnly(int i,std::string channelTarget, bool inviteOnlyOrNot);
 		void	modeTopicRestriction(int i,std::string channelTarget, bool topicRestrict);
 		void	modeKey(int i,std::string channelTarget, std::string key, bool setKey);//setKey is to know if its +k or -k
@@ -79,7 +79,7 @@ class Server
 		void	commandInvite(int i, std::string name);
 		//*topic
 		void	commandTopic(int i, std::string line);
-		void	noArgsTopic(int i);
+		void	noArgsTopic(int i, std::string chName);
 		//*quit
 		void	commandQuit(int i, std::string str);
 

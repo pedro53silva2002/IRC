@@ -1,8 +1,5 @@
 #include "../includes/Server.hpp"
-//todo DOUBLE CHECK
 
-
-//*mostly done
 bool	Server::isValidPrivmsg(std::string line)
 {
 	int pos = line.find(' ');
@@ -37,6 +34,5 @@ void	Server::commandPrivmsg(int i, std::string line)
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	
 	std::string toSend = _clients[i].getPrefix() + " PRIVMSG " + chName + " :" + message;
-
 	clientBroadcast(i, chName, toSend);
 }

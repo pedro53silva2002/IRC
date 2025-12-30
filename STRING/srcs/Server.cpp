@@ -8,13 +8,13 @@
 /*
 	PASS USER NICK 		done
 	JOIN				//*redone, check key parsing and outputs
-	PRIVMSG				//!doing
+	PRIVMSG				//*seems done, double check
 	PART 				//todo
 	KICK 				//todo
-	INVITE				//todo
-	MODE 				//todo
-	TOPIC 				//todo
 	QUIT				//todo
+	MODE 				//todo
+	TOPIC 				//*seems done, double check
+	INVITE				//todo
 */
 
 //*CONSTRUCTORS
@@ -92,10 +92,10 @@ void	Server::processCommand(int i, std::string line)
 
 	
 	typedef void (Server::*funcs)(int, std::string);
-	std::string commands[] = {"PASS", "USER", "NICK", "JOIN"/* , "PART" */, "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", "QUIT"};
+	std::string commands[] = {"PASS", "USER", "NICK", "JOIN"/* , "PART" */, "PRIVMSG", /*"KICK", "INVITE", "MODE",*/ "TOPIC", "QUIT"};
 
 	funcs function[] = {&Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin, /* &Server::commandPart ,*/
-	&Server::commandPrivmsg/* , &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, &Server::commandQuit */};
+	&Server::commandPrivmsg, /* , &Server::commandKick, &Server::commandInvite, &Server::commandMode, */ &Server::commandTopic,/* &Server::commandQuit */};
 	std::string temp = line.substr(0, line.find(' '));
 	for (int j = 0; j < 11; j++) {
 		if (commands[j] == temp) {
