@@ -37,8 +37,6 @@
 #define JOINED(client, channel) (client + " joined " + channel)
 #define RPL_TOPIC(client, channel, topic) ("332 " + client + " " + channel + " :" + topic)
 
-//MODE +o
-#define OPERATOR(client, channel, nick) (client + " MODE " + channel + " +o " + nick)
 
 
 

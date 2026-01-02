@@ -70,11 +70,11 @@ class Server
 		//*mode
 		void	commandMode(int i, std::string line);
 		void 	executeCommandMode(int i, std::string chName, std::string opr, std::string args);
-		void	modeInviteOnly(int i,std::string channelTarget, bool inviteOnlyOrNot);
-		void	modeTopicRestriction(int i,std::string channelTarget, bool topicRestrict);
-		void	modeKey(int i,std::string channelTarget, std::string key, bool setKey);//setKey is to know if its +k or -k
-		void	modeOp(int i,std::string channelTarget, std::string user, bool opOrNot);
-		void	modeLim(int i,std::string channelTarget, std::string limitStr);
+		void	modeInviteOnly(int i, int chId, bool inviteOnlyOrNot);
+		void	modeTopicRestriction(int i, int chId, bool topicRestrict);
+		void	modeKey(int i, int chId, std::string key, bool setKey);//setKey is to know if its +k or -k
+		void	modeOp(int i, int chId, std::string user, bool opOrNot);
+		void	modeLim(int i, int chId, std::string limitStr);
 		//*invite
 		void	commandInvite(int i, std::string name);
 		//*topic
@@ -83,12 +83,15 @@ class Server
 		//*quit
 		void	commandQuit(int i, std::string str);
 
+		//!BRUNO UTILS
+		int		getIdFromClients(std::string name);
+		bool	isUserInChannel(int clId, std::string chName);
 
 		//utils, find out where to put these to be grouped
-		int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
-		Client*	foundInUsers(std::string name);
-		int		findOrCreateChannel(int i, std::string name);
-		bool	hasInChannels(std::string name);
+		// int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
+		// int		getIdFromClients(std::string name);
+		// int		findOrCreateChannel(int i, std::string name);
+		// bool	hasInChannels(std::string name);
 		
 
 		//just for testing

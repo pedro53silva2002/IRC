@@ -1,7 +1,6 @@
 #include "../includes/Server.hpp"
 //todo REDOOOOOOOOOOOOOOOOOOOOOOOOO
 
-//NEEDMOREPARAMS CAUSE YOU NEED "PRIVMSG <client> <channel>", check order
 void	Server::commandKick(int i, std::string args)
 {
 	if (!_clients[i].isRegistered())

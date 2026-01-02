@@ -19,11 +19,12 @@ void	Server::commandInvite(int i, std::string name)
 	size_t pos = 0;
 	int UserToInviteId;
 
-	if (_clients[i].getChannelId() == -1) {
-		std::cout << _clients[i].getNick() << " cannot invite users without being in any channel." << std::endl;
-		sendToClient(_clients[i].getId(), "you cannot users without being in any channel");//!check the actual output
-		return ;
-	}
+	//todo pus isto em comentario, tenho de resolver depois
+	// if (_clients[i].getChannelId() == -1) {
+	// 	std::cout << _clients[i].getNick() << " cannot invite users without being in any channel." << std::endl;
+	// 	sendToClient(_clients[i].getId(), "you cannot users without being in any channel");//!check the actual output
+	// 	return ;
+	// }
 	if (findChannel(_clients[i], _channels, name, userToInvite, channelToGet))
 		std::cout << "INVITED: " << userToInvite << " by " << _clients[i].getNick() << std::endl;
 	for (size_t i = 1; i < _clients.size(); i++)

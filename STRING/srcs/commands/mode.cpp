@@ -1,138 +1,96 @@
 #include "../includes/Server.hpp"
-//todo OUTPUTS FOR CLIENT AND TO CHANNEL, PARSING, NUMERICS, DOUBLE CHECK
+//OUTPUTS FOR CLIENT AND TO CHANNEL, PARSING, NUMERICS, DOUBLE CHECK
 
-// sendToAllClientsInChannel needs to be called where its needed
+/*
+	todo parsing for args:
+		op needing a user to Op, 
+		key needing a key or nothing, 
+		limit needing a number or nothing
+*/
 
-//check numerics and sendtoallclients outputs
-void	Server::modeInviteOnly(int i, std::string channelTarget, bool inviteOnlyOrNot)
+//todo sendToAllClientsInChannel needs to be called where its needed
+
+//missing broadcast
+void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 {
-	//todo check extra parameters and parsing
+	_channels[chId].setInviteMode(inviteOnlyOrNot);
+	serverLog(_clients[i].getNick(), _channels[chId].getName() + " INVITE ONLY CHANGED");
+	//!BROADCAST THAT THIS CHANNEL IS INVITE ONLY OR NOT
 
-	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-	{
-		if (channelTarget == channelIt->getName()) {
-			channelIt->setInviteMode(inviteOnlyOrNot);
-			//!outputs
-			serverLog(_clients[i].getNick(), channelTarget + " changed invite only restrictions");
-		}
-	}
 }
-void	Server::modeTopicRestriction(int i,std::string channelTarget, bool topicRestrict)
+//missing broadcast
+void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
 {
-	//todo check extra parameters and parsing
-		
-	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-	{
-		if (channelTarget == channelIt->getName()) {
-			channelIt->setTopicRestriction(topicRestrict);
-			//!outputs
-			serverLog(_clients[i].getNick(), channelTarget + "LOG IT TO SAY WHAT CHANGED");
-			// serverLog(_clients[i].getNick(), channelTarget + " topic restrictions have been changed LOG IT TO SAY WHAT CHANGED");
-			// clientBroadcast(i, "channel topic restrictions changed");//todo check output
-		}
-	}
+	_channels[chId].setTopicRestriction(topicRestrict);
+	serverLog(_clients[i].getNick(), _channels[chId].getName() + " TOPIC RESTRICTION CHANGED");
+	//!BROADCAST THAT THIS CHANNEL IS TOPIC RESTRICTED OR NOT
 }
-void	Server::modeOp(int i, std::string channelTarget, std::string user, bool opOrNot)
+//missing broadcast
+void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 {
-	//todo check extra parameters and parsing
-	Client *clientToOp = foundInUsers(user);
-	if (!clientToOp)//todo THIS IS BAD
-	{
-		std::cout << "Client to op not found" << std::endl;
-		return ;
-	}
-
-	if (_clients[i].getNick() == user)
-		return (sendToClient(i, "you cannot op yourself -_-"));//todo check output
-
-	if (!hasInUserChannels(*clientToOp, channelTarget))
-		return (sendToClient(i, ERR_USERNOTINCHANNEL(_clients[i].getNick(), clientToOp->getNick(), channelTarget)));
-
-	_channels[clientToOp->getChannelId()].setOp(clientToOp->getId(), opOrNot);
-	//todo this isnt sendToClient, its sendToAllClientsInChannel
-	//!outputs
-	sendToClient(i, OPERATOR(_clients[i].getNick(), channelTarget, clientToOp->getNick()));
-}
-void	Server::modeLim(int i, std::string channelTarget, std::string limitStr)//shouldnt accept +l 0
-{
-	//todo check extra parameters and parsing
-		
-	int limit = atoi(limitStr.c_str());
-	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-	{
-		if (channelTarget == channelIt->getName())
-		{
-			//probably should allow limit to be smaller than users in channel, but dont let new users join, like discord
-			if (channelIt->getNbrClients() > limit && limit != 0)
-			{
-				//!outputs
-				serverLog(_clients[i].getNick(), "limit cannot be set to " + limitStr + ": too many people already");
-				return ;
-			}
-			channelIt->setLimit(limit);
-			break ;
-		}
-	}
-	//!outputs
-	if (limit == 0)//change for -1 so default is simpler to understand
-		serverLog(_clients[i].getNick(), "channel limit has been removed");
-	//!outputs
+	if (!setKey)
+		_channels[chId].setChannelKey("");
 	else
-		serverLog(_clients[i].getNick(), " set " + channelTarget + " limit to " + limitStr);
+		_channels[chId].setChannelKey(key);
+	serverLog(_clients[i].getNick(), _channels[chId].getName() + " CHANNEL KEY HAS BEEN CHANGED");
+	//!BROADCAST THAT THE CHANNEL HAS CHANGED OR REMOVED KEY
+}
+//missing broadcast
+void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
+{
+	int toOpId = getIdFromClients(args);
+	if (_clients[i].getNick() == args)
+		return (sendToClient(i, " FIX THIS OUTPUT, you cannot op yourself"));
+
+	if (!isUserInChannel(toOpId, _channels[chId].getName()))
+		return (sendToClient(i, ERR_USERNOTINCHANNEL(_clients[i].getNick(), args, _channels[chId].getName())));
+	
+	_channels[chId].setOp(_clients[toOpId].getId(), opOrNot);
+	
+	serverLog(_clients[i].getNick(), args + " NEW USER HAS BEEN OPED");
+	//!BROADCAST THAT THE CLIENT CALLED IS NOW OP OR NOT
+}
+//missing broadcast,	shouldnt accept +l 0
+void	Server::modeLim(int i, int chId, std::string limitStr)
+{
+	int limit = atoi(limitStr.c_str());
+	//probably should allow limit to be smaller than users in channel, but dont let new users join, like discord
+	if (_channels[chId].getNbrClients() > limit && limit != 0)
+		return serverLog(_clients[i].getNick(), "limit cannot be set to " + limitStr + ": too many people already");
+	_channels[chId].setLimit(limit);
+	serverLog(_clients[i].getNick(), _channels[chId].getName() + " CHANNEL LIMIT CHANGED");
+	//!BROADCAST THE NEW CHANNEL LIMIT
 }
 
 
-//doing, coletes help
-void	Server::modeKey(int i, std::string channelTarget, std::string key, bool setKey)//find a way to remove setKey
+void Server::executeCommandMode(int i, std::string chName, std::string opr, std::string args)
 {
-	//todo check extra parameters and parsing
+	if (!isUserInChannel(i, chName))
+		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	
-	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-	{
-		if (channelTarget == channelIt->getName())
-		{
-			if (setKey == false) {
-				channelIt->setChannelKey("");
-				serverLog(_clients[i].getNick(), channelIt->getName() + " doesnt neet key anymore");
-			}
-			else {
-				channelIt->setChannelKey(key);
-				serverLog(_clients[i].getNick(), channelIt->getName() + " now has key" + key);
-			}
-		}
-	}
-	//std::cout << "Channel key mode k not implemented yet" << std::endl;
-}
+	int chId = _clients[i].getChannelIdNew(chName);
+	if (!_channels[chId].isOp(_clients[i].getId()))
+		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));
 
-
-void Server::executeCommandMode(int i, std::string chName, std::string opr, std::string args)//user more like arguments
-{
-	//todo make sure its well parsed
-	if (!hasInUserChannels(_clients[i], chName))
-		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));//todo check output
-	
-	if (!_channels[_clients[i].getChannelId()].getOp(_clients[i].getId()))
-		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));//save nick in var
-	
 	char sign = opr[0];
 	bool enable = (sign == '+');
 	char mode = opr[1];
 	switch (mode)
 	{
 		case 'i':
-			modeInviteOnly(i, chName, enable);
+			modeInviteOnly(i, chId, enable);
 			break ;
 		case 't':
-			modeTopicRestriction(i, chName, enable);
+			modeTopicRestriction(i, chId, enable);
 			break ;
 		case 'k':
-			modeKey(i, chName, args, enable);
+			modeKey(i, chId, args, enable);
 			break ;
 		case 'o':
-			modeOp(i, chName, args, enable);
+			modeOp(i, chId, args, enable);
 			break ;
 		case 'l':
-			modeLim(i, chName, args);
+			modeLim(i, chId, args);
 			break ;
 		default:
 			sendToClient(i, ERR_UMODEWUNKNOWNFLAG + opr);
