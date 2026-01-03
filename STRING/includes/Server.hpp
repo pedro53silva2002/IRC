@@ -63,6 +63,7 @@ class Server
 		void	commandPrivmsg(int i, std::string line);
 		//*join
 		void	commandJoin(int i, std::string args);
+		int		findOrCreateChannel(int i, std::string name);//todo rename
 		//*part
 		void	commandPart(int i, std::string name);
 		//*kick
@@ -85,12 +86,12 @@ class Server
 
 		//!BRUNO UTILS
 		int		getIdFromClients(std::string name);
+		int		getIdFromChannels(std::string name);
 		bool	isUserInChannel(int clId, std::string chName);
 
 		//utils, find out where to put these to be grouped
 		// int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
 		// int		getIdFromClients(std::string name);
-		// int		findOrCreateChannel(int i, std::string name);
 		// bool	hasInChannels(std::string name);
 		
 

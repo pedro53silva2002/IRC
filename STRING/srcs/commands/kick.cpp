@@ -1,23 +1,56 @@
 #include "../includes/Server.hpp"
-//todo REDOOOOOOOOOOOOOOOOOOOOOOOOO
+//todo PARSING, OUTPUTS CHECK, BROADCAST
 
-void	Server::commandKick(int i, std::string args)
+
+// bool	Server::isValidKick(std::string line)
+// {
+//		todo old
+// 	int pos = line.find(' ');
+// 	if (pos == std::string::npos || line.substr(pos + 1).empty())
+// 		return (false);
+// 	return (true);
+// }
+
+void	setKick(std::string line, std::string *chName, std::string *toKick)
+{
+	int pos = line.find(' ');
+	*chName = line.substr(0, pos);
+	*toKick = line.substr(pos + 1);
+}
+
+void	Server::commandKick(int i, std::string line)
 {
 	if (!_clients[i].isRegistered())
 		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
-	if (args.empty())
+	if (line.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "KICK")));
 
-	if (!_channels[_clients[i].getChannelId()].getOp(_clients[i].getId()))
+	//! PARSE
+	std::string chName, toKick;
+	setKick(line, &chName, &toKick);
+	int chId = _clients[i].getChannelIdNew(chName);
+	if (chId == -1 || _clients[i].getChannelNameNew(chId) != chName)
+		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
+	if (!_channels[chId].isOp(_clients[i].getId()))
 		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));
-
+	if (toKick == _clients[i].getNick())
+		return (sendToClient(i, " you cannot kick yourself FIX THIS STILL"));//!OUTPUT
 	
 
-	std::string chName = args.substr(0, args.find(' '));//!PARSE
-	std::string toKick = args.substr(args.find(' ') + 1);//!PARSE
-	// std::cout << RED("channel name: ") << chName << RED(", toKick name: ") << toKick << std::endl;
-	if (toKick == _clients[i].getNick())
-		return (sendToClient(i, " you cannot kick yourself FIX THIS STILL"));//todo fix output
+	if (chId == toKick.getId())
+//!aaaaaaaaaaaaaaaaaaaaaaaaaa
+//!aaaaaaaaaaaaaaaaaaaaaaaaaa
+//!aaaaaaaaaaaaaaaaaaaaaaaaaa
+//!aaaaaaaaaaaaaaaaaaaaaaaaaa
+//!aaaaaaaaaaaaaaaaaaaaaaaaaa
+//!aaaaaaaaaaaaaaaaaaaaaaaaaa
+//!aaaaaaaaaaaaaaaaaaaaaaaaaa
+//TODO BASICALLY I CHANGED EVERYTHING TO CHANGE THE GETCHANNELID, GETCHANNELNAME, GETCLIENTID, GETCHANNELID FROM SERVER ITSELF WITH PARAMETERES
+
+
+
+
+
 
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{

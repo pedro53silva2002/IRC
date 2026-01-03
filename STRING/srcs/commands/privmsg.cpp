@@ -1,4 +1,5 @@
 #include "../includes/Server.hpp"
+//todo DO PRIVATE MESSAGES
 
 bool	Server::isValidPrivmsg(std::string line)
 {

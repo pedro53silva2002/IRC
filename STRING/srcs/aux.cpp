@@ -66,6 +66,15 @@ int Server::getIdFromClients(std::string name)
 	}
 	return (-1);
 }
+int Server::getIdFromChannels(std::string name)
+{
+	for (size_t i = 1; i < _channels.size(); i++)
+	{
+		if (name == _channels[i].getName())
+			return (i);
+	}
+	return (-1);
+}
 
 bool Server::isUserInChannel(int clId, std::string chName)
 {

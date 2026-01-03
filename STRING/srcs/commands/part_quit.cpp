@@ -32,9 +32,9 @@ void	Server::commandQuit(int i, std::string str)
 {
 	serverLog(_clients[i].getNick(), "has disconnected");
 	sendToClient(i, "QUIT :" + str);
-	// for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); it != _clients[i].getChannels().end(); i++) {
-	// 	_channels[it->first].decrementNbrClients();
-	// }
+	for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); it != _clients[i].getChannels().end(); i++) {
+		_channels[it->first].decrementNbrClients();
+	}
 	close (_pfds[i].fd);
 	_clients.erase(_clients.begin() + i);
 }

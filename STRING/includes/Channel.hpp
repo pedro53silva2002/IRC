@@ -83,7 +83,6 @@ class Channel
 				return (true);
 			return (false);
 		}
-
 };
 
 #endif

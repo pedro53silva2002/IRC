@@ -11,8 +11,8 @@
 	PRIVMSG				//*seems done, double check
 	PART 				//todo
 	KICK 				//todo
-	QUIT				//todo
-	MODE 				//todo
+	QUIT				//*seems done, double check, and broadcast?
+	MODE 				//*redone, parsing and broadcast needed
 	TOPIC 				//*seems done, double check
 	INVITE				//todo
 */
