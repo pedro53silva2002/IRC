@@ -39,18 +39,18 @@ void	Server::commandJoin(int i, std::string args)
 	setJoin(args, &chName, &key);
 	
 	//*Errors
-	int channelId = findOrCreateChannel(i, chName);//can use chName as parameter and directly compare
-	if (key != _channels[channelId].getChannelKey())
+	int chId = findOrCreateChannel(i, chName);
+	if (key != _channels[chId].getChannelKey())
 		return (sendToClient(i, ERR_BADCHANNELKEY(_clients[i].getNick(), chName)));
-	if (_channels[channelId].getNbrClients() >= _channels[channelId].getLimit() && _channels[channelId].getLimit() != 0)
+	if (_channels[chId].getNbrClients() >= _channels[chId].getLimit() && _channels[chId].getLimit() != 0)
 		return (sendToClient(i, ERR_CHANNELISFULL(_clients[i].getNick(), chName)));
-	if (_channels[channelId].isInviteOnly())
+	if (_channels[chId].isInviteOnly())
 		return (sendToClient(i, ERR_INVITEONLYCHAN(_clients[i].getNick(), chName)));
 	//already joined error?
 
 	//*Joins the channel
-	_clients[i].setChannel(channelId, chName);
-	_channels[_clients[i].getChannelIdNew(chName)].incrementNbrClients();
+	_clients[i].setChannel(chId, chName);
+	_channels[chId].incrementNbrClients();
 	std::string strToSend = _clients[i].getPrefix() + " JOIN " + chName;
 	serverBroadcast(i, chName, strToSend);//I THINK ITS SERVER BROADCAST, IDK IF CLIENT JOINING HAS A DIFFERENT OUTPUT
 }

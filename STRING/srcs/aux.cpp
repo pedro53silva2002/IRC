@@ -39,17 +39,17 @@ void	Server::sendToClient(int i, std::string str) {
 //only difference is it also sends to current user
 void	Server::serverBroadcast(int i, std::string chName, std::string str)
 {
-	int chId = _clients[i].getChannelIdNew(chName);
+	int chId = getChannelId(chName);
 	for (int j = 0; j < _clients.size(); j++) {
-		if (chId == _clients[j].getChannelIdNew(chName))
+		if (chId == getChannelId(chName))
 			sendToClient(j, str);
 	}
 }
 void	Server::clientBroadcast(int i, std::string chName, std::string str)
 {
-	int chId = _clients[i].getChannelIdNew(chName);
+	int chId = getChannelId(chName);
 	for (int j = 0; j < _clients.size(); j++) {
-		if (chId == _clients[j].getChannelIdNew(chName) && i != j)
+		if (chId == getChannelId(chName) && i != j)
 			sendToClient(j, str);
 	}
 }
@@ -57,7 +57,7 @@ void	Server::clientBroadcast(int i, std::string chName, std::string str)
 
 //!BRUNO
 
-int Server::getIdFromClients(std::string name)
+int Server::getClientId(std::string name)
 {
 	for (size_t i = 1; i < _clients.size(); i++)
 	{
@@ -66,7 +66,7 @@ int Server::getIdFromClients(std::string name)
 	}
 	return (-1);
 }
-int Server::getIdFromChannels(std::string name)
+int Server::getChannelId(std::string name)
 {
 	for (size_t i = 1; i < _channels.size(); i++)
 	{
@@ -76,12 +76,22 @@ int Server::getIdFromChannels(std::string name)
 	return (-1);
 }
 
-bool Server::isUserInChannel(int clId, std::string chName)
+std::string Server::getClientNick(int id)
 {
-	if (clId == -1)
+	return (_clients[id].getNick());
+}
+
+std::string Server::getChannelName(int id)
+{
+	return (_channels[id].getName());
+}
+
+bool Server::isUserInChannel(int i, int chId)
+{
+	if (i == -1)
 		return (false);
-	for (std::map<int, std::string>::iterator it = _clients[clId].getChannels().begin(); it != _clients[clId].getChannels().end(); it++) {
-		if (chName == it->second)
+	for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); it != _clients[i].getChannels().end(); it++) {
+		if (chId == it->first)
 			return (true);
 	}
 	return (false);

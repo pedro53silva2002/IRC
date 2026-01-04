@@ -30,8 +30,8 @@ void	Server::commandPrivmsg(int i, std::string line)
 	std::string chName, message;
 	setPrivmsg(line, &chName, &message);
 
-	int chId = _clients[i].getChannelIdNew(chName);
-	if (chId == -1 || _clients[i].getChannelNameNew(chId) != chName)
+	int chId = getChannelId(chName);
+	if (!isUserInChannel(i, chId))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	
 	std::string toSend = _clients[i].getPrefix() + " PRIVMSG " + chName + " :" + message;

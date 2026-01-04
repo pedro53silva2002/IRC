@@ -85,9 +85,13 @@ class Server
 		void	commandQuit(int i, std::string str);
 
 		//!BRUNO UTILS
-		int		getIdFromClients(std::string name);
-		int		getIdFromChannels(std::string name);
-		bool	isUserInChannel(int clId, std::string chName);
+		int			getClientId(std::string name);
+		int			getChannelId(std::string name);
+		std::string	getClientNick(int id);
+		std::string	getChannelName(int id);
+
+		
+		bool	isUserInChannel(int i, int chId);
 
 		//utils, find out where to put these to be grouped
 		// int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
