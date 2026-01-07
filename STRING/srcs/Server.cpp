@@ -17,6 +17,13 @@
 	INVITE				//todo
 */
 
+
+/*
+	LEAVECHANNEL() will do:
+		client side leaving the channel, removing the channel from the map
+		server side forgetting the client, removing it from clients connected (decrementNbrClients)
+*/
+
 //*CONSTRUCTORS
 Server::Server(char *port, char *pass) {
 	_name = "MyIRC";
@@ -92,10 +99,10 @@ void	Server::processCommand(int i, std::string line)
 
 	
 	typedef void (Server::*funcs)(int, std::string);
-	std::string commands[] = {"PASS", "USER", "NICK", "JOIN"/* , "PART" */, "PRIVMSG", /*"KICK", "INVITE", "MODE", "TOPIC", "QUIT"*/};
+	std::string commands[] = {"PASS", "USER", "NICK", "JOIN", "PART", "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", "QUIT"};
 
-	funcs function[] = {&Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin, /* &Server::commandPart ,*/
-	&Server::commandPrivmsg, /* , &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, &Server::commandQuit */};
+	funcs function[] = {&Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin, &Server::commandPart ,
+	&Server::commandPrivmsg, &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, &Server::commandQuit};
 	std::string temp = line.substr(0, line.find(' '));
 	for (int j = 0; j < 11; j++) {
 		if (commands[j] == temp) {

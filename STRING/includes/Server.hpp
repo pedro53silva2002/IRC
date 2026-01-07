@@ -78,22 +78,23 @@ class Server
 		void	modeLim(int i, int chId, std::string limitStr);
 		//*invite
 		void	commandInvite(int i, std::string name);
+		bool 	findChannel(std::string nick, std::string chName);
+		bool	hasInChannels(std::string name);
 		//*topic
 		void	commandTopic(int i, std::string line);
 		void	noArgsTopic(int i, std::string chName);
 		//*quit
 		void	commandQuit(int i, std::string str);
 
-		//!BRUNO UTILS
 		int			getClientId(std::string name);
 		int			getChannelId(std::string name);
 		std::string	getClientNick(int id);
 		std::string	getChannelName(int id);
-
-		
+		void	leaveChannel(int i, int chId);
 		bool	isUserInChannel(int i, int chId);
 
-		//utils, find out where to put these to be grouped
+		
+
 		// int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
 		// int		getIdFromClients(std::string name);
 		// bool	hasInChannels(std::string name);
@@ -123,9 +124,6 @@ class Server
 		//command from dan:			PRIVMSG #coolpeople :Hi everyone!
 		//sendtoClientinChannel:	:dan!~h@localhost PRIVMSG #coolpeople :Hi everyone!
 
-//!THIS IS BAD TO BE HERE
-bool hasInUserChannels(Client client, std::string name);
-//!THIS IS BAD TO BE HERE
 
 void	serverLog(std::string nick, std::string str);
 

@@ -55,8 +55,6 @@ void	Server::clientBroadcast(int i, std::string chName, std::string str)
 }
 
 
-//!BRUNO
-
 int Server::getClientId(std::string name)
 {
 	for (size_t i = 1; i < _clients.size(); i++)
@@ -86,6 +84,8 @@ std::string Server::getChannelName(int id)
 	return (_channels[id].getName());
 }
 
+
+
 bool Server::isUserInChannel(int i, int chId)
 {
 	if (i == -1)
@@ -97,42 +97,25 @@ bool Server::isUserInChannel(int i, int chId)
 	return (false);
 }
 
+void	Server::leaveChannel(int i, int chId)
+{
+	int j = 0;
+	for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); it != _clients[i].getChannels().end(); it++)
+	{
+		if (it->first == chId) {
+			_clients[i].getChannels().erase(it);
+			_channels[j].decrementNbrClients();
+			return ;
+		}
+		j++;
+	}
+}
 
-//!BRUNO
-//* CHANNEL LOGIC
-// bool Server::hasInChannels(std::string name)
-// {
-// 	for (int i = 0; i < _channels.size(); i++) {
-// 		if (name == _channels[i].getName())
-// 			return (true);
-// 	}
-// 	return (false);
-// }
-
-// int Server::findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet)
-// {
-// 	Client *invitedClient;
-// 	invitedClient = foundInUsers(userToInvite);
-// 	if (!invitedClient)
-// 	{
-// 		std::cout <<"User to invite was not found in the list of users" << std::endl;
-// 		return (0);
-// 	}
-// 	else if (!hasInChannels(channelToGet))
-// 	{
-// 		std::cout <<"This channel was not found int the list of channels" << std::endl;
-// 		return (0);
-// 	}
-// 	else if (!hasInUserChannels(client, channelToGet))
-// 	{
-// 		std::cout <<"This client is not in the channel" << std::endl;
-// 		return (0);
-// 	}
-// 	else if (hasInUserChannels(*invitedClient, channelToGet))
-// 	{
-// 		std::cout <<"This invited client is already in the channel" << std::endl;
-// 		return (0);
-// 	}
-// 	return (1);
-// }
-
+//LEAVECHANNEL GOES HERE
+/*
+	BASICALLY LEAVECHANNEL WILL RECIEVE:
+		THE CLIENT THATS LEAVING SAID CHANNEL
+		THE chId or chName OF SAID CHANNEL
+	it will have to find either chId or chName with the map that client has
+	and then erase it from the map
+*/

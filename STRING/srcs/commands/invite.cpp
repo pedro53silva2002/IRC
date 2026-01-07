@@ -2,8 +2,30 @@
 
 //todo REDOOOOOOOOOOOOOOOOOOOOOOOOOO
 
+
+bool Server::hasInChannels(std::string name)
+{
+	for (int i = 0; i < _channels.size(); i++) {
+		if (name == _channels[i].getName())
+			return (true);
+	}
+	return (false);
+}
+
+
+bool Server::findChannel(std::string nick, std::string chName)
+{
+	int i = getClientId(nick);
+	int chId = getChannelId(chName);
+	if (chId == -1 || isUserInChannel(i ,chId))
+		return (false);
+	return (true);
+}
+
 //ERR_USERONCHANNEL
 //ERR_CHANNELISFULL, +l
+
+
 void	Server::commandInvite(int i, std::string name)
 {
 	if (!_clients[i].isRegistered())
@@ -25,7 +47,7 @@ void	Server::commandInvite(int i, std::string name)
 	// 	sendToClient(_clients[i].getId(), "you cannot users without being in any channel");//!check the actual output
 	// 	return ;
 	// }
-	if (findChannel(_clients[i], _channels, name, userToInvite, channelToGet))
+	if (findChannel(_clients[i].getNick(), channelToGet))
 		std::cout << "INVITED: " << userToInvite << " by " << _clients[i].getNick() << std::endl;
 	for (size_t i = 1; i < _clients.size(); i++)
 	{

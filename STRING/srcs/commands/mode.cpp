@@ -38,11 +38,11 @@ void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 //missing broadcast
 void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 {
-	int toOpId = getIdFromClients(args);
+	int toOpId = getClientId(args);
 	if (_clients[i].getNick() == args)
 		return (sendToClient(i, " FIX THIS OUTPUT, you cannot op yourself"));
 
-	if (!isUserInChannel(toOpId, _channels[chId].getName()))
+	if (!isUserInChannel(toOpId, chId))
 		return (sendToClient(i, ERR_USERNOTINCHANNEL(_clients[i].getNick(), args, _channels[chId].getName())));
 	
 	_channels[chId].setOp(_clients[toOpId].getId(), opOrNot);
@@ -65,10 +65,10 @@ void	Server::modeLim(int i, int chId, std::string limitStr)
 
 void Server::executeCommandMode(int i, std::string chName, std::string opr, std::string args)
 {
-	if (!isUserInChannel(i, chName))
+	int chId = getChannelId(chName);
+	if (!isUserInChannel(i, chId))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	
-	int chId = _clients[i].getChannelIdNew(chName);
 	if (!_channels[chId].isOp(_clients[i].getId()))
 		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));
 

@@ -24,7 +24,7 @@ void	setTopicArgs(std::string line, std::string *channel, std::string *newTopic)
 
 void	Server::noArgsTopic(int i, std::string chName)
 {
-	int chId = _clients[i].getChannelIdNew(chName);
+	int chId = getChannelId(chName);
 	if (_channels[chId].getTopic().empty())
 		return (sendToClient(i, RPL_NOTOPIC(_clients[i].getNick(), chName)));
 	return (sendToClient(i, RPL_TOPIC(_clients[i].getNick(), chName, _channels[chId].getTopic())));
@@ -40,8 +40,8 @@ void	Server::commandTopic(int i, std::string line)
 	std::string chName, newTopic;
 	setTopicArgs(line, &chName, &newTopic);
 
-	int chId = _clients[i].getChannelIdNew(chName);
-	if (chId == -1 || _clients[i].getChannelNameNew(chId) != chName)
+	int chId = getChannelId(chName);
+	if (chId == -1 || isUserInChannel(i, chId))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	
 	if (newTopic.empty())
