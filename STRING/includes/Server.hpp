@@ -40,7 +40,7 @@ class Server
 
 		
 		//only difference is it also sends to current user
-		void	serverBroadcast(int i, std::string chName, std::string str);
+		void	channelBroadcast(int i, std::string chName, std::string str);
 		void	clientBroadcast(int i, std::string chName, std::string str);
 		void	sendToClient(int i, std::string str);
 
@@ -103,6 +103,7 @@ class Server
 		//just for testing
 		void	exitServer();
 		void	testClients();
+		void	test();
 
 	public:
 		//*CONSTRUCTORS

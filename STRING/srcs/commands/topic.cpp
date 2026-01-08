@@ -51,5 +51,5 @@ void	Server::commandTopic(int i, std::string line)
 		return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), chName)));
 
 	_channels[chId].setTopic(newTopic);
-	serverBroadcast(i, chName, RPL_TOPIC(_clients[i].getNick(), chName, newTopic));
+	channelBroadcast(i, chName, RPL_TOPIC(_clients[i].getNick(), chName, newTopic));
 }

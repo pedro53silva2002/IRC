@@ -7,14 +7,14 @@
 
 /*
 	PASS USER NICK 		done
-	JOIN				//*redone, check key parsing and outputs
-	PRIVMSG				//*seems done, double check
-	PART 				//todo
-	KICK 				//todo
-	QUIT				//*seems done, double check, and broadcast?
-	MODE 				//*redone, parsing and broadcast needed
-	TOPIC 				//*seems done, double check
-	INVITE				//todo
+	JOIN				//
+	PRIVMSG				//
+	PART 				//
+	KICK 				//
+	QUIT				//
+	MODE 				//
+	TOPIC 				//
+	INVITE				//
 */
 
 
@@ -155,8 +155,8 @@ void	Server::testClients()
 		_clients[1].setUsername("First");
 		_clients[1].setRealname("First");
 		_clients[1].setPrefix(setPrefixTemp(1));
-		_clients[1].setChannel(1, "FIRST");
-		_channels.push_back(Channel("FIRST"));
+		// _clients[1].setChannel(1, "FIRST");
+		// _channels.push_back(Channel("FIRST"));
 		welcomeClient(1);
 	}
 	else if (_clients.size() == 3) {
@@ -182,10 +182,38 @@ void	Server::testClients()
 	// }
 }
 
+
+void	Server::test()
+{
+	std::cout << RED("-------------------------------------------------------------------------------------\n");
+	serverLog("TESTING", "");
+	serverLog("Existing channels", "");
+	for (int i = 0; i < _channels.size(); i++) {
+		std::cout << i << ": [" << _channels[i].getName() << "], ";
+	}
+	std::cout << std::endl;
+	serverLog("Existing clients", "");
+	for (int i = 0; i < _clients.size(); i++) {
+		std::cout << i << ": [" << _clients[i].getNick() << "], ";
+	}
+	std::cout << std::endl;
+	serverLog("Each client info:", "");
+	for (int i = 0; i < _clients.size(); i++) {
+		std::cout << i << ": " << _clients[i].getNick() << " is connected to channels: ";
+		for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); 
+		it != _clients[i].getChannels().end(); it++) {
+			std::cout << it->first << ": [" << it->second << "], ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+
 void	Server::srvRun()
 {
 	while (1)
 	{
+		// test();
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		

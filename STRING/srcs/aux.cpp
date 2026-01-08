@@ -36,8 +36,8 @@ void	Server::sendToClient(int i, std::string str) {
 	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
 }
 
-//only difference is it also sends to current user
-void	Server::serverBroadcast(int i, std::string chName, std::string str)
+//!THESE ARE WRONG
+void	Server::channelBroadcast(int i, std::string chName, std::string str)
 {
 	int chId = getChannelId(chName);
 	for (int j = 0; j < _clients.size(); j++) {
@@ -45,6 +45,10 @@ void	Server::serverBroadcast(int i, std::string chName, std::string str)
 			sendToClient(j, str);
 	}
 }
+
+
+//!THESE ARE WRONG
+//need to use getClientsInChannel() and run through them to figure out who to send it to
 void	Server::clientBroadcast(int i, std::string chName, std::string str)
 {
 	int chId = getChannelId(chName);
@@ -110,12 +114,3 @@ void	Server::leaveChannel(int i, int chId)
 		j++;
 	}
 }
-
-//LEAVECHANNEL GOES HERE
-/*
-	BASICALLY LEAVECHANNEL WILL RECIEVE:
-		THE CLIENT THATS LEAVING SAID CHANNEL
-		THE chId or chName OF SAID CHANNEL
-	it will have to find either chId or chName with the map that client has
-	and then erase it from the map
-*/

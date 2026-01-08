@@ -78,15 +78,8 @@ class Client
 		std::string	getNick() { return (_nick); }
 		std::string	getRealname() { return (_realname); }
 
-		std::map<int, std::string>	getChannels() { return (_chans); }
-		// std::string	getChannelNameNew(int id) { return (_chans[id]); }//!THESE ARE STUPID, I CAN GET THIS INFO FROM THE SERVER _CHANNELS
-		// int			getChannelIdNew(std::string chName) {//rename
-		// 	for (std::map<int, std::string>::iterator it = _chans.begin(); it != _chans.end(); it++) {
-		// 		if (it->second == chName)
-		// 			return (it->first);
-		// 	}
-		// 	return (-1);//HOPEFULLY THIS WORKS
-		// }
+		std::map<int, std::string>	&getChannels() { return (_chans); }
+
 
 		//*SETTERS
 		void	setAuthenticated(bool auth) { _authenticated = auth; }

@@ -1,6 +1,9 @@
 #include "../includes/Server.hpp"
 //OUTPUTS FOR CLIENT AND TO CHANNEL, PARSING, NUMERICS, DOUBLE CHECK
+//todo parse op and lim?
+//todo lim output
 
+//todo removing key needs key?
 /*
 	todo parsing for args:
 		op needing a user to Op, 
@@ -8,49 +11,45 @@
 		limit needing a number or nothing
 */
 
-//todo sendToAllClientsInChannel needs to be called where its needed
-
-//missing broadcast
+//*redone
 void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 {
 	_channels[chId].setInviteMode(inviteOnlyOrNot);
-	serverLog(_clients[i].getNick(), _channels[chId].getName() + " INVITE ONLY CHANGED");
-	//!BROADCAST THAT THIS CHANNEL IS INVITE ONLY OR NOT
-
+	char sign = (inviteOnlyOrNot) ? '+' : '-';
+	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "i";
+	channelBroadcast(i, _channels[chId].getName(), strToSend);
 }
-//missing broadcast
 void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
 {
 	_channels[chId].setTopicRestriction(topicRestrict);
-	serverLog(_clients[i].getNick(), _channels[chId].getName() + " TOPIC RESTRICTION CHANGED");
-	//!BROADCAST THAT THIS CHANNEL IS TOPIC RESTRICTED OR NOT
+	char sign = (topicRestrict) ? '+' : '-';
+	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "t";
+	channelBroadcast(i, _channels[chId].getName(), strToSend);
 }
-//missing broadcast
 void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 {
 	if (!setKey)
 		_channels[chId].setChannelKey("");
 	else
 		_channels[chId].setChannelKey(key);
-	serverLog(_clients[i].getNick(), _channels[chId].getName() + " CHANNEL KEY HAS BEEN CHANGED");
 	//!BROADCAST THAT THE CHANNEL HAS CHANGED OR REMOVED KEY
+	char sign = (setKey) ? '+' : '-';
+	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "k";
+	channelBroadcast(i, _channels[chId].getName(), strToSend);
 }
-//missing broadcast
 void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 {
-	int toOpId = getClientId(args);
 	if (_clients[i].getNick() == args)
 		return (sendToClient(i, " FIX THIS OUTPUT, you cannot op yourself"));
-
+	int toOpId = getClientId(args);
 	if (!isUserInChannel(toOpId, chId))
 		return (sendToClient(i, ERR_USERNOTINCHANNEL(_clients[i].getNick(), args, _channels[chId].getName())));
-	
+
 	_channels[chId].setOp(_clients[toOpId].getId(), opOrNot);
-	
-	serverLog(_clients[i].getNick(), args + " NEW USER HAS BEEN OPED");
-	//!BROADCAST THAT THE CLIENT CALLED IS NOW OP OR NOT
+	char sign = (opOrNot) ? '+' : '-';
+	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "o " + _clients[toOpId].getNick();
+	channelBroadcast(i, _channels[chId].getName(), strToSend);
 }
-//missing broadcast,	shouldnt accept +l 0
 void	Server::modeLim(int i, int chId, std::string limitStr)
 {
 	int limit = atoi(limitStr.c_str());
@@ -59,7 +58,9 @@ void	Server::modeLim(int i, int chId, std::string limitStr)
 		return serverLog(_clients[i].getNick(), "limit cannot be set to " + limitStr + ": too many people already");
 	_channels[chId].setLimit(limit);
 	serverLog(_clients[i].getNick(), _channels[chId].getName() + " CHANNEL LIMIT CHANGED");
-	//!BROADCAST THE NEW CHANNEL LIMIT
+	
+	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + "WHAT DO I PUT HERE" + "l";
+	channelBroadcast(i, _channels[chId].getName(), strToSend);
 }
 
 
@@ -68,7 +69,6 @@ void Server::executeCommandMode(int i, std::string chName, std::string opr, std:
 	int chId = getChannelId(chName);
 	if (!isUserInChannel(i, chId))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
-	
 	if (!_channels[chId].isOp(_clients[i].getId()))
 		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));
 
