@@ -6,7 +6,7 @@
 //*HARDCODE CHANNELS WITH DIFFERENT MODES TO TEST EVERYTHING
 
 /*
-	PASS USER NICK 		done
+	PASS USER NICK 		FULLY done
 	JOIN				//
 	PRIVMSG				//
 	PART 				//
@@ -15,13 +15,6 @@
 	MODE 				//
 	TOPIC 				//
 	INVITE				//
-*/
-
-
-/*
-	LEAVECHANNEL() will do:
-		client side leaving the channel, removing the channel from the map
-		server side forgetting the client, removing it from clients connected (decrementNbrClients)
 */
 
 //*CONSTRUCTORS
@@ -92,8 +85,11 @@ void	Server::processCommand(int i, std::string line)
 		return commandQuit(i, "HARDCODED");
 	else if (line.compare(0, 4, "exit") == 0)
 		return exitServer();
-	else if (line.compare(0, 4, "test") == 0)
-		return clientBroadcast(i, "FIRST", "THIS IS A TEST MESSAGE");
+	else if (line.compare(0, 4, "test") == 0) {
+		sendToClient(i, "You are the client calling test");
+		clientBroadcast(i, "FIRST", "YOU GUYS ARE JUST LISTENING");
+		return ;
+	}
 
 
 
@@ -170,16 +166,16 @@ void	Server::testClients()
 		// _clients[2].setChannel(1, "FIRST");
 		welcomeClient(2);
 	}
-	// else if (_clients.size() == 4) {
-	// 	_clients[3].setAuthenticated(true);
-	// 	_clients[3].setRegistered(true);
-	// 	_clients[3].setNick("Third");
-	// 	_clients[3].setUsername("Third");
-	// 	_clients[3].setRealname("Third");
-	// 	_clients[3].setPrefix(setPrefixTemp(3));
-	// 	// _clients[3].setChannel(1, "FIRST");
-	// 	welcomeClient(3);
-	// }
+	else if (_clients.size() == 4) {
+		_clients[3].setAuthenticated(true);
+		_clients[3].setRegistered(true);
+		_clients[3].setNick("Third");
+		_clients[3].setUsername("Third");
+		_clients[3].setRealname("Third");
+		_clients[3].setPrefix(setPrefixTemp(3));
+		// _clients[3].setChannel(1, "FIRST");
+		welcomeClient(3);
+	}
 }
 
 
@@ -187,16 +183,16 @@ void	Server::test()
 {
 	std::cout << RED("-------------------------------------------------------------------------------------\n");
 	serverLog("TESTING", "");
-	serverLog("Existing channels", "");
-	for (int i = 0; i < _channels.size(); i++) {
-		std::cout << i << ": [" << _channels[i].getName() << "], ";
-	}
-	std::cout << std::endl;
-	serverLog("Existing clients", "");
-	for (int i = 0; i < _clients.size(); i++) {
-		std::cout << i << ": [" << _clients[i].getNick() << "], ";
-	}
-	std::cout << std::endl;
+	// serverLog("Existing channels", "");
+	// for (int i = 0; i < _channels.size(); i++) {
+	// 	std::cout << i << ": [" << _channels[i].getName() << "], ";
+	// }
+	// std::cout << std::endl;
+	// serverLog("Existing clients", "");
+	// for (int i = 0; i < _clients.size(); i++) {
+	// 	std::cout << i << ": [" << _clients[i].getNick() << "], ";
+	// }
+	// std::cout << std::endl;
 	serverLog("Each client info:", "");
 	for (int i = 0; i < _clients.size(); i++) {
 		std::cout << i << ": " << _clients[i].getNick() << " is connected to channels: ";

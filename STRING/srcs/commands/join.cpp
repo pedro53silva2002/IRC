@@ -21,7 +21,7 @@ int		Server::findOrCreateChannel(int i, std::string chName)
 	_channels.push_back(Channel(chName));
 	int chId = _channels.rbegin()->getId();
 	_channels[chId].setOp(_clients[i].getId(), true);
-	std::cout << _channels.rbegin()->getName() << " has been created" << std::endl;//idk if this output is supposed to be here
+	serverLog("channel created: ", _channels.rbegin()->getName());
 	return (chId);
 }
 
@@ -48,10 +48,8 @@ void	Server::commandJoin(int i, std::string args)
 		return (sendToClient(i, ERR_INVITEONLYCHAN(_clients[i].getNick(), chName)));
 	//already joined error?
 
-	//*Joins the channel
 	_clients[i].setChannel(chId, chName);
 	_channels[chId].incrementNbrClients();
 	std::string strToSend = _clients[i].getPrefix() + " JOIN " + chName;
-	sendToClient(i, strToSend);
-	// channelBroadcast(i, chName, strToSend);//I THINK ITS SERVER BROADCAST, IDK IF CLIENT JOINING HAS A DIFFERENT OUTPUT
+	channelBroadcast(i, chName, strToSend);
 }

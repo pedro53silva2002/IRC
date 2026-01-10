@@ -54,7 +54,6 @@ class Client
 			_username = "";
 			_nick = "*";
 			_realname = "";
-			_chans[0] = "";
 			_host = "";
 			_prefix = "";
 		}
@@ -79,6 +78,18 @@ class Client
 		std::string	getRealname() { return (_realname); }
 
 		std::map<int, std::string>	&getChannels() { return (_chans); }
+		std::string	getConnectedChannel(int id) { return (_chans[id]); }
+		// int			getConnectedChannel(std::string chName) {//try not to use this one
+		// 	int id = 0;
+		// 	for (std::map<int, std::string>::iterator it = _chans.begin(); it != _chans.end(); it++) {
+		// 		if (it->second == chName)
+		// 			break;
+		// 		id++;
+		// 	}
+		// 	if (id == 0)
+		// 		return (-1);
+		// 	return (id);
+		// }
 
 
 		//*SETTERS
@@ -91,8 +102,9 @@ class Client
 		void	setNick(std::string nick) { _nick = nick; }
 		void	setRealname(std::string realname) { _realname = realname; }
 
-		void	setChannel(int id, std::string chName) {
-			_chans.insert(std::make_pair(id, chName));
+		void	setChannel(int chId, std::string chName)//! IT IS NOT SETTING THE CHANNEL
+		{
+			_chans.insert(std::make_pair(chId, chName));
 		}
 
 

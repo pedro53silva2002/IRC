@@ -31,29 +31,25 @@ void	Server::exitServer()
 
 //*SENDERS
 void	Server::sendToClient(int i, std::string str) {
-	std::string reply = str + "\r\n";//todo maybe its just \n
+	std::string reply = str + "\r\n";
 	serverLog(_clients[i].getNick(), "received string: [" + str + "]");
 	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
 }
 
-//!THESE ARE WRONG
 void	Server::channelBroadcast(int i, std::string chName, std::string str)
 {
 	int chId = getChannelId(chName);
 	for (int j = 0; j < _clients.size(); j++) {
-		if (chId == getChannelId(chName))
+		if (chName == _clients[j].getConnectedChannel(chId))
 			sendToClient(j, str);
 	}
 }
 
-
-//!THESE ARE WRONG
-//need to use getClientsInChannel() and run through them to figure out who to send it to
 void	Server::clientBroadcast(int i, std::string chName, std::string str)
 {
 	int chId = getChannelId(chName);
 	for (int j = 0; j < _clients.size(); j++) {
-		if (chId == getChannelId(chName) && i != j)
+		if (chName == _clients[j].getConnectedChannel(chId) && i != j)
 			sendToClient(j, str);
 	}
 }
@@ -77,12 +73,10 @@ int Server::getChannelId(std::string name)
 	}
 	return (-1);
 }
-
 std::string Server::getClientNick(int id)
 {
 	return (_clients[id].getNick());
 }
-
 std::string Server::getChannelName(int id)
 {
 	return (_channels[id].getName());
