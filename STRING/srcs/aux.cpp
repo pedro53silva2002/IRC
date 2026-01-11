@@ -82,8 +82,6 @@ std::string Server::getChannelName(int id)
 	return (_channels[id].getName());
 }
 
-
-
 bool Server::isUserInChannel(int i, int chId)
 {
 	if (i == -1)
@@ -95,16 +93,3 @@ bool Server::isUserInChannel(int i, int chId)
 	return (false);
 }
 
-void	Server::leaveChannel(int i, int chId)
-{
-	int j = 0;
-	for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); it != _clients[i].getChannels().end(); it++)
-	{
-		if (it->first == chId) {
-			_clients[i].getChannels().erase(it);
-			_channels[j].decrementNbrClients();
-			return ;
-		}
-		j++;
-	}
-}

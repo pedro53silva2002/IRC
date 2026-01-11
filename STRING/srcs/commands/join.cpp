@@ -46,7 +46,13 @@ void	Server::commandJoin(int i, std::string args)
 		return (sendToClient(i, ERR_CHANNELISFULL(_clients[i].getNick(), chName)));
 	if (_channels[chId].isInviteOnly())
 		return (sendToClient(i, ERR_INVITEONLYCHAN(_clients[i].getNick(), chName)));
-	//already joined error?
+
+	/*
+		!
+		OK SO BASICALLY when First connects to the channel, EVERY client will also connect to that channel
+	*/
+	if (isUserInChannel(i, chId))
+		return (sendToClient(i, "YOU ARE ALREADY IN THIS CHANNEL"));
 
 	_clients[i].setChannel(chId, chName);
 	_channels[chId].incrementNbrClients();

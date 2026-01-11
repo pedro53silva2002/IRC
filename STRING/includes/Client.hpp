@@ -102,10 +102,7 @@ class Client
 		void	setNick(std::string nick) { _nick = nick; }
 		void	setRealname(std::string realname) { _realname = realname; }
 
-		void	setChannel(int chId, std::string chName)//! IT IS NOT SETTING THE CHANNEL
-		{
-			_chans.insert(std::make_pair(chId, chName));
-		}
+		void	setChannel(int chId, std::string chName) { _chans.insert(std::make_pair(chId, chName)); }
 
 
 };

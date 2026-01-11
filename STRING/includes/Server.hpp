@@ -53,7 +53,6 @@ class Server
 		bool	isNickInUse(std::string toFind);
 		//*user
 		void	commandUser(int i, std::string line);
-		//*others
 		void	checkRegistration(int i);
 		void	welcomeClient(int i);
 		
@@ -63,8 +62,9 @@ class Server
 		void	commandPrivmsg(int i, std::string line);
 		//*join
 		void	commandJoin(int i, std::string args);
-		int		findOrCreateChannel(int i, std::string name);//todo rename
+		int		findOrCreateChannel(int i, std::string name);
 		//*part
+		void	leaveChannel(int i, int chId);
 		void	commandPart(int i, std::string name);
 		//*kick
 		void	commandKick(int i, std::string args);
@@ -73,7 +73,7 @@ class Server
 		void 	executeCommandMode(int i, std::string chName, std::string opr, std::string args);
 		void	modeInviteOnly(int i, int chId, bool inviteOnlyOrNot);
 		void	modeTopicRestriction(int i, int chId, bool topicRestrict);
-		void	modeKey(int i, int chId, std::string key, bool setKey);//setKey is to know if its +k or -k
+		void	modeKey(int i, int chId, std::string key, bool setKey);
 		void	modeOp(int i, int chId, std::string user, bool opOrNot);
 		void	modeLim(int i, int chId, std::string limitStr);
 		//*invite
@@ -90,17 +90,13 @@ class Server
 		int			getChannelId(std::string name);
 		std::string	getClientNick(int id);
 		std::string	getChannelName(int id);
-		void	leaveChannel(int i, int chId);
-		bool	isUserInChannel(int i, int chId);
+		bool		isUserInChannel(int i, int chId);
 
 		
 
-		// int		findChannel(Client client, std::vector<Channel> channels,std::string name, std::string userToInvite, std::string channelToGet);
-		// int		getIdFromClients(std::string name);
-		// bool	hasInChannels(std::string name);
 		
 
-		//just for testing
+		//just for testing, remove
 		void	exitServer();
 		void	testClients();
 		void	test();
@@ -120,13 +116,7 @@ class Server
 		
 };
 
-		//command from Angel: 		PRIVMSG Wiz :Hello are you receiving this message ?
-		//sendtoClient to Wiz:		:Angel PRIVMSG Wiz :Hello are you receiving this message ?
-		//command from dan:			PRIVMSG #coolpeople :Hi everyone!
-		//sendtoClientinChannel:	:dan!~h@localhost PRIVMSG #coolpeople :Hi everyone!
-
-
-void	serverLog(std::string nick, std::string str);
+void	serverLog(std::string nick, std::string str);//remove
 
 //*myFunctions
 int		mySocket(int __domain, int __type, int __protocol);

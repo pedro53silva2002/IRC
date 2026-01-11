@@ -202,6 +202,11 @@ void	Server::test()
 		}
 		std::cout << std::endl;
 	}
+	// serverLog("Each channel info:", "");
+	// for (int i = 0; i < _channels.size(); i++) {
+	// 	std::cout << i << ": " << _channels[i].getName() << " has " << _channels[i].getNbrClients() << " connected";
+	// 	std::cout << std::endl;
+	// }
 }
 
 
@@ -209,7 +214,7 @@ void	Server::srvRun()
 {
 	while (1)
 	{
-		// test();
+		test();
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		

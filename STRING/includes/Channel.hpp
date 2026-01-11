@@ -48,6 +48,7 @@ class Channel
 
 		Channel() {
 			_id = -1;
+			_nbrClients = 0;
 		}//DUMMY
 		
 

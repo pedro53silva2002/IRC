@@ -1,9 +1,26 @@
 #include "../includes/Server.hpp"
 //todo CHECK OUTPUTS, AND REDO QUIT
 
-/*
-	needs parsing to check channel exists, technically is done, but check its correct output
-*/
+// needs parsing to check channel exists, technically is done, but check its correct output
+
+//this gets a client, searches in its channels for channel ID, and erases the one corresponding to chID, 
+//also removing the client from channel-side info, check if it works
+void	Server::leaveChannel(int i, int chId)
+{
+	int j = 0;
+	for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); it != _clients[i].getChannels().end(); it++)
+	{
+		if (it->first == chId)
+		{
+			_clients[i].getChannels().erase(it);
+			
+			// _channels[j].decrementNbrClients();//!WRONG
+			return ;
+		}
+		j++;
+	}
+	_channels[chId].decrementNbrClients();
+}
 
 void	Server::commandPart(int i, std::string name)
 {
