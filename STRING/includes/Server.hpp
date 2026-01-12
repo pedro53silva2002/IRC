@@ -1,6 +1,10 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
-//divide these headers into each header
+
+# include "Client.hpp"
+# include "Channel.hpp"
+# include "Colours.hpp"
+# include "Defines.hpp"
 # include <iostream>
 # include <sys/types.h>
 # include <unistd.h>
@@ -11,11 +15,7 @@
 # include <string>
 # include <vector>
 # include <poll.h>
-# include <stdlib.h>//atoi
-# include "Client.hpp"
-# include "Colours.hpp"
-# include "Defines.hpp"
-# include "Channel.hpp"
+# include <stdlib.h>
 
 class Server
 {
@@ -32,7 +32,6 @@ class Server
 		std::vector<Channel>	_channels;
 
 		int				acceptClient();
-		std::string		setPrefixTemp(int i);
 		void			setPfds();
 		bool			handleClientPoll(int i);
 		void			processCommand(int i, std::string line);

@@ -1,6 +1,6 @@
 #ifndef CHANNEL_HPP
 # define CHANNEL_HPP
-# include "Client.hpp"
+
 # include "Colours.hpp"
 # include "Server.hpp"
 # include <iostream>
@@ -13,7 +13,7 @@
 # include <string>
 # include <vector>
 # include <poll.h>
-# include <stdlib.h>//atoi
+# include <stdlib.h>
 # include <algorithm>
 
 //todo I NEED TO BE SURE TO REMOVE CLIENTS THAT CLOSED SOCKET FROM THIS VECTOR
@@ -24,7 +24,6 @@ class Channel
 		int					_id;
 		std::string			_name;
 		
-		int 				_nbrClients;
 		std::string			_channelKey;
 		int				    _limit;
 		std::string			_topic;
@@ -32,6 +31,7 @@ class Channel
 		bool				_isTopicRestricted;
 
 		std::vector<int>	_ops;
+		std::vector<int>	_clientsInChannel;
 	public:
 		Channel(std::string name) {
 			_id = ++_globalChannelId;
@@ -39,7 +39,6 @@ class Channel
 			_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());//what??
 			_name.erase(std::remove(_name.begin(),_name.end(), '\r'),_name.end());
 			_limit = 0;//default meaning unlimited
-			_nbrClients = 0;
 			_channelKey = "";
 			_isInviteOnly = false;
 			_isTopicRestricted = true;//check
@@ -63,11 +62,8 @@ class Channel
 		void			setTopic(std::string topic) { _topic = topic; }
 		void			setInviteMode(bool value) { _isInviteOnly = value; }
 		void			setTopicRestriction(bool value) { _isTopicRestricted = value; }
-		int				getNbrClients() { return (_nbrClients); }
 		int				getLimit() { return (_limit); }
 
-		void		incrementNbrClients() { _nbrClients++; }
-		void		decrementNbrClients() { _nbrClients--; }
 		void		setLimit(int limit) { _limit = limit; }
 
 		//todo operators
@@ -82,6 +78,18 @@ class Channel
 				return (true);
 			return (false);
 		}
+
+
+		std::vector<int> &getClientsInChannel() {
+			return (_clientsInChannel);
+		}
+		void	addClient(int id) {
+			_clientsInChannel.push_back(id);
+		}
+		void	removeClient(int id) {
+			_clientsInChannel.erase(find(_clientsInChannel.begin(), _clientsInChannel.end(), id));
+		}
+		// (for size) getClientsInChannel().size()
 };
 
 #endif

@@ -36,21 +36,24 @@ void	Server::sendToClient(int i, std::string str) {
 	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
 }
 
+
+//todo this one doesnt need i
 void	Server::channelBroadcast(int i, std::string chName, std::string str)
 {
 	int chId = getChannelId(chName);
-	for (int j = 0; j < _clients.size(); j++) {
-		if (chName == _clients[j].getConnectedChannel(chId))
-			sendToClient(j, str);
-	}
+	for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
+		it != _channels[i].getClientsInChannel().end(); it++) {
+			sendToClient(*it, str);
+		}
 }
 
 void	Server::clientBroadcast(int i, std::string chName, std::string str)
 {
 	int chId = getChannelId(chName);
-	for (int j = 0; j < _clients.size(); j++) {
-		if (chName == _clients[j].getConnectedChannel(chId) && i != j)
-			sendToClient(j, str);
+	for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
+		it != _channels[i].getClientsInChannel().end(); it++) {
+			if (i != *it)
+				sendToClient(*it, str);
 	}
 }
 
@@ -84,11 +87,10 @@ std::string Server::getChannelName(int id)
 
 bool Server::isUserInChannel(int i, int chId)
 {
-	if (i == -1)
-		return (false);
-	for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); it != _clients[i].getChannels().end(); it++) {
-		if (chId == it->first)
-			return (true);
+	for (std::vector<int>::iterator it = _channels[chId].getClientsInChannel().begin(); 
+		it != _channels[chId].getClientsInChannel().end(); it++) {
+			if (i == *it)
+				return (true);
 	}
 	return (false);
 }

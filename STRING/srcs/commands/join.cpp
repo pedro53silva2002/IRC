@@ -2,6 +2,7 @@
 
 //todo DOUBLE CHECK OUTPUTS AND PARSING
 //if needed, created a hardcoded channel with a key to check everything is well created
+//What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
 
 void	setJoin(std::string args, std::string *chName, std::string *key)
 {
@@ -25,19 +26,6 @@ int		Server::findOrCreateChannel(int i, std::string chName)
 	return (chId);
 }
 
-void	Server::testChannels()
-{
-	serverLog("Each client info:", "");
-	for (int i = 0; i < _clients.size(); i++) {
-		std::cout << i << ": " << _clients[i].getNick() << " is connected to channels: ";
-		for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); 
-		it != _clients[i].getChannels().end(); it++) {
-			std::cout << it->first << ": [" << it->second << "], ";
-		}
-		std::cout << std::endl;
-	}
-}
-
 //todo parse: find if there is a key, and test it
 void	Server::commandJoin(int i, std::string args)
 {
@@ -53,18 +41,18 @@ void	Server::commandJoin(int i, std::string args)
 	
 	//*Errors
 	int chId = findOrCreateChannel(i, chName);
-	if (key != _channels[chId].getChannelKey())
-		return (sendToClient(i, ERR_BADCHANNELKEY(_clients[i].getNick(), chName)));
-	if (_channels[chId].getNbrClients() >= _channels[chId].getLimit() && _channels[chId].getLimit() != 0)
-		return (sendToClient(i, ERR_CHANNELISFULL(_clients[i].getNick(), chName)));
-	if (_channels[chId].isInviteOnly())
-		return (sendToClient(i, ERR_INVITEONLYCHAN(_clients[i].getNick(), chName)));
+	// if (key != _channels[chId].getChannelKey())
+	// 	return (sendToClient(i, ERR_BADCHANNELKEY(_clients[i].getNick(), chName)));
+	// if (_channels[chId].getNbrClients() >= _channels[chId].getLimit() && _channels[chId].getLimit() != 0)
+	// 	return (sendToClient(i, ERR_CHANNELISFULL(_clients[i].getNick(), chName)));
+	// if (_channels[chId].isInviteOnly())
+	// 	return (sendToClient(i, ERR_INVITEONLYCHAN(_clients[i].getNick(), chName)));
 
 	if (isUserInChannel(i, chId))
 		return (sendToClient(i, "YOU ARE ALREADY IN THIS CHANNEL"));
 
 	_clients[i].setChannel(chId, chName);
-	_channels[chId].incrementNbrClients();
+	_channels[chId].addClient(i);
 	std::string strToSend = _clients[i].getPrefix() + " JOIN " + chName;
 	channelBroadcast(i, chName, strToSend);
 }

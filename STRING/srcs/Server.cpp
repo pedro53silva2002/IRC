@@ -1,9 +1,7 @@
 #include "../includes/Server.hpp"
 
-//What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
 //check order of parsing, like isOp, isInChannel
 //check using a non existent channel as a parameter of a command "MODE <nonexistent> +l 100"
-//*HARDCODE CHANNELS WITH DIFFERENT MODES TO TEST EVERYTHING
 
 /*
 	PASS USER NICK 		FULLY done
@@ -87,7 +85,7 @@ void	Server::processCommand(int i, std::string line)
 		return exitServer();
 	else if (line.compare(0, 4, "test") == 0) {
 		sendToClient(i, "You are the client calling test");
-		clientBroadcast(i, "FIRST", "YOU GUYS ARE JUST LISTENING");
+		// clientBroadcast(i, "FIRST", "YOU GUYS ARE JUST LISTENING");
 		return ;
 	}
 
@@ -95,10 +93,10 @@ void	Server::processCommand(int i, std::string line)
 
 	
 	typedef void (Server::*funcs)(int, std::string);
-	std::string commands[] = {"PASS", "USER", "NICK", "JOIN", "PART", "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", "QUIT"};
+	std::string commands[] = {"PASS", "USER", "NICK", "JOIN",  "PART"/*, "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", "QUIT" */};
 
-	funcs function[] = {&Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin, &Server::commandPart ,
-	&Server::commandPrivmsg, &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, &Server::commandQuit};
+	funcs function[] = {&Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin,  &Server::commandPart ,
+	/*&Server::commandPrivmsg, &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, &Server::commandQuit */};
 	std::string temp = line.substr(0, line.find(' '));
 	for (int j = 0; j < 11; j++) {
 		if (commands[j] == temp) {
@@ -186,20 +184,24 @@ void	Server::test()
 	// 	std::cout << i << ": [" << _clients[i].getNick() << "], ";
 	// }
 	// std::cout << std::endl;
-	serverLog("Each client info:", "");
-	for (int i = 0; i < _clients.size(); i++) {
-		std::cout << i << ": " << _clients[i].getNick() << " is connected to channels: ";
-		for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); 
-		it != _clients[i].getChannels().end(); it++) {
-			std::cout << it->first << ": [" << it->second << "], ";
+	// serverLog("Each client info:", "");
+	// for (int i = 0; i < _clients.size(); i++) {
+	// 	std::cout << i << ": " << _clients[i].getNick() << " is connected to channels: ";
+	// 	for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); 
+	// 	it != _clients[i].getChannels().end(); it++) {
+	// 		std::cout << it->first << ": [" << it->second << "], ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+	serverLog("Each channel info:", "");
+	for (int i = 0; i < _channels.size(); i++) {
+		std::cout << i << ": " << _channels[i].getName() << " has these clients connected: ";
+		for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
+			it != _channels[i].getClientsInChannel().end(); it++) {
+				std::cout << "[" << _clients[*it].getNick() << "], ";
 		}
 		std::cout << std::endl;
 	}
-	// serverLog("Each channel info:", "");
-	// for (int i = 0; i < _channels.size(); i++) {
-	// 	std::cout << i << ": " << _channels[i].getName() << " has " << _channels[i].getNbrClients() << " connected";
-	// 	std::cout << std::endl;
-	// }
 }
 
 
@@ -207,7 +209,7 @@ void	Server::srvRun()
 {
 	while (1)
 	{
-		// test();
+		test();
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		

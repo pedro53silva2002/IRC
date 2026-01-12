@@ -1,6 +1,7 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
-//divide these headers into each header
+
+# include "Colours.hpp"
 # include <iostream>
 # include <sys/types.h>
 # include <unistd.h>
@@ -9,12 +10,10 @@
 # include <arpa/inet.h>
 # include <string.h>
 # include <string>
-# include <vector>//maybe not needed
+# include <vector>
 # include <map>
 # include <poll.h>
-# include <stdlib.h>//atoi
-# include "Colours.hpp"
-# include "Channel.hpp"
+# include <stdlib.h>
 # include <algorithm>
 
 
@@ -74,23 +73,6 @@ class Client
 		std::string	getRealname() { return (_realname); }
 
 		std::map<int, std::string>	&getChannels() { return (_chans); }
-		std::string	getConnectedChannel(int id) {
-			if (_chans.empty())
-				return ("");
-			return (_chans[id]);
-		}
-		// int			getConnectedChannel(std::string chName) {//try not to use this one
-		// 	int id = 0;
-		// 	for (std::map<int, std::string>::iterator it = _chans.begin(); it != _chans.end(); it++) {
-		// 		if (it->second == chName)
-		// 			break;
-		// 		id++;
-		// 	}
-		// 	if (id == 0)
-		// 		return (-1);
-		// 	return (id);
-		// }
-
 
 		//*SETTERS
 		void	setAuthenticated(bool auth) { _authenticated = auth; }
