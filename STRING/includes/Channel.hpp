@@ -31,7 +31,6 @@ class Channel
 		bool				_isInviteOnly;
 		bool				_isTopicRestricted;
 
-		std::vector<int>	_clientsInChannel;
 		std::vector<int>	_ops;
 	public:
 		Channel(std::string name) {
@@ -48,7 +47,6 @@ class Channel
 
 		Channel() {
 			_id = -1;
-			_nbrClients = 0;
 		}//DUMMY
 		
 

@@ -109,7 +109,7 @@ class Server
 		int			getSocket() { return (_socket); }
 		int			getPort() { return (_port); }
 		std::string getPass() { return (_pass); }
-
+void	testChannels();
 
 		void	srvRun();
 		

@@ -18,7 +18,6 @@
 # include <algorithm>
 
 
-//todo when setting username and nick, have the setUser and setNick do the parsing
 class Client
 {
 	private:
@@ -31,7 +30,6 @@ class Client
 		//INFO
 		bool		_authenticated;
 		bool		_registered;
-		// bool		_capped;
 		std::string	_username;
 		std::string _nick;
 		std::string	_realname;
@@ -60,14 +58,12 @@ class Client
 
 		Client() {
 			_id = -1;
-			_socket = 0;
-			_chans[0] = "";
 		}//DUMMY
 
 		//*GETTERS
 		int			getId() { return (_id); }
 		int			getSocket() { return (_socket); }
-		pollfd		&getPfd() { return (_pfd); }//why &
+		pollfd		&getPfd() { return (_pfd); }
 		bool		isAuthenticated() { return (_authenticated); }
 		bool		isRegistered() { return (_registered); }
 		std::string	getPrefix() { return (_prefix); }
@@ -78,7 +74,11 @@ class Client
 		std::string	getRealname() { return (_realname); }
 
 		std::map<int, std::string>	&getChannels() { return (_chans); }
-		std::string	getConnectedChannel(int id) { return (_chans[id]); }
+		std::string	getConnectedChannel(int id) {
+			if (_chans.empty())
+				return ("");
+			return (_chans[id]);
+		}
 		// int			getConnectedChannel(std::string chName) {//try not to use this one
 		// 	int id = 0;
 		// 	for (std::map<int, std::string>::iterator it = _chans.begin(); it != _chans.end(); it++) {
@@ -95,16 +95,13 @@ class Client
 		//*SETTERS
 		void	setAuthenticated(bool auth) { _authenticated = auth; }
 		void	setRegistered(bool auth) { _registered = auth; }
-		void	setPrefix(std::string prefix) { _prefix = prefix; }
+		void	setPrefix() { _prefix = ":" + _nick + "!" + _username + "@" + _host; }
 		void	setHost(std::string host) { _host = host; }
-
 		void	setUsername(std::string username) { _username = username; }
 		void	setNick(std::string nick) { _nick = nick; }
 		void	setRealname(std::string realname) { _realname = realname; }
 
 		void	setChannel(int chId, std::string chName) { _chans.insert(std::make_pair(chId, chName)); }
-
-
 };
 
 #endif

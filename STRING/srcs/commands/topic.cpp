@@ -41,7 +41,7 @@ void	Server::commandTopic(int i, std::string line)
 	setTopicArgs(line, &chName, &newTopic);
 
 	int chId = getChannelId(chName);
-	if (chId == -1 || isUserInChannel(i, chId))
+	if (chId == -1 || !isUserInChannel(i, chId))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	
 	if (newTopic.empty())

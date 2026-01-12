@@ -1,11 +1,9 @@
 #include "../includes/Server.hpp"
 //todo check the orders of errors
+//Nick can be called after, has to change prefix
 
-//*1 thing left, multiple params output
 void	Server::commandPass(int i, std::string line)
 {
-	//just check for PASS <1st string> <2nd string>
-	//CHECK ORDER OF NEEDMOREPARAMS VS ALREADYREGISTERED VS PASSWDMISMATCH
 	if (_clients[i].isAuthenticated())
 		return (sendToClient(i, ERR_ALREADYREGISTERED(_clients[i].getNick())));
 	if (line.empty())
@@ -16,7 +14,6 @@ void	Server::commandPass(int i, std::string line)
 	serverLog(_clients[i].getNick(), "has authenticated");
 }
 
-//*should be done, just need to check is <nick> gets sent as a parameter here
 bool	isValidUser(std::string line)
 {
 	int pos = 0;
@@ -59,7 +56,6 @@ void	Server::commandUser(int i, std::string line)
 	checkRegistration(i);
 }
 
-//*feels like its done, just a check of isRegistered
 bool	isValidNick(std::string line)
 {
 	if (line.find(' ') != std::string::npos || line[0] == ':' || line[0] == '#' || line.compare(0, 2, "#&") == 0 || line.compare(0, 2, "&#") == 0)
@@ -90,6 +86,7 @@ void	Server::commandNick(int i, std::string line)
 	_clients[i].setNick(line);
 	std::cout << _clients[i].getNick() << std::endl;
 	checkRegistration(i);
+	//todo setPrefix();
 
 	//clientBroadcast("<old> changed nick to <new>"), only if client is connected to channel
 }
@@ -107,11 +104,6 @@ void	Server::welcomeClient(int i)
 	std::string todo = "The rest of the welcome message will come after";
 
 	sendToClient(i, todo);
-	//RPL_YOURHOST 
-	//RPL_CREATED 
-	//RPL_MYINFO
-	//RPL_ISUPPORT (prob not needed)
-	//LUSERS?
 	//MOTD
 }
 

@@ -134,13 +134,6 @@ bool	Server::handleClientPoll(int i)
 	return (true);
 }
 
-//todo to be put in client
-std::string	Server::setPrefixTemp(int i)//!THIS NEEDS TO BE CALLED MANUALLY, FIX LATER, CAUSE NOW ITS ONLY IN HARDCODED
-{
-	//have to find a way to save host when not using hard coded clients
-	return ":" + _clients[i].getNick() + "!" + _clients[i].getUsername() + "@" + _clients[i].getHost();
-}
-
 void	Server::testClients()
 {
 	if (_clients.size() == 2) {
@@ -150,7 +143,7 @@ void	Server::testClients()
 		_clients[1].setNick("First");
 		_clients[1].setUsername("First");
 		_clients[1].setRealname("First");
-		_clients[1].setPrefix(setPrefixTemp(1));
+		_clients[1].setPrefix();
 		// _clients[1].setChannel(1, "FIRST");
 		// _channels.push_back(Channel("FIRST"));
 		welcomeClient(1);
@@ -162,7 +155,7 @@ void	Server::testClients()
 		_clients[2].setNick("Second");
 		_clients[2].setUsername("Second");
 		_clients[2].setRealname("Second");
-		_clients[2].setPrefix(setPrefixTemp(2));
+		_clients[2].setPrefix();
 		// _clients[2].setChannel(1, "FIRST");
 		welcomeClient(2);
 	}
@@ -172,7 +165,7 @@ void	Server::testClients()
 		_clients[3].setNick("Third");
 		_clients[3].setUsername("Third");
 		_clients[3].setRealname("Third");
-		_clients[3].setPrefix(setPrefixTemp(3));
+		_clients[3].setPrefix();
 		// _clients[3].setChannel(1, "FIRST");
 		welcomeClient(3);
 	}
@@ -181,7 +174,7 @@ void	Server::testClients()
 
 void	Server::test()
 {
-	std::cout << RED("-------------------------------------------------------------------------------------\n");
+	std::cout << RED("--------------------------------------------------------------------------------\n");
 	serverLog("TESTING", "");
 	// serverLog("Existing channels", "");
 	// for (int i = 0; i < _channels.size(); i++) {
@@ -214,7 +207,7 @@ void	Server::srvRun()
 {
 	while (1)
 	{
-		test();
+		// test();
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		

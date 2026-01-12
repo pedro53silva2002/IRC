@@ -69,7 +69,7 @@ int Server::getChannelId(std::string name)
 	for (size_t i = 1; i < _channels.size(); i++)
 	{
 		if (name == _channels[i].getName())
-			return (i);
+			return (_channels[i].getId());
 	}
 	return (-1);
 }

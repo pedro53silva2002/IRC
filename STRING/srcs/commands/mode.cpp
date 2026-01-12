@@ -2,8 +2,8 @@
 //OUTPUTS FOR CLIENT AND TO CHANNEL, PARSING, NUMERICS, DOUBLE CHECK
 //todo parse op and lim?
 //todo lim output
-
 //todo removing key needs key?
+
 /*
 	todo parsing for args:
 		op needing a user to Op, 
@@ -32,7 +32,6 @@ void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 		_channels[chId].setChannelKey("");
 	else
 		_channels[chId].setChannelKey(key);
-	//!BROADCAST THAT THE CHANNEL HAS CHANGED OR REMOVED KEY
 	char sign = (setKey) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "k";
 	channelBroadcast(i, _channels[chId].getName(), strToSend);
@@ -53,7 +52,6 @@ void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 void	Server::modeLim(int i, int chId, std::string limitStr)
 {
 	int limit = atoi(limitStr.c_str());
-	//probably should allow limit to be smaller than users in channel, but dont let new users join, like discord
 	if (_channels[chId].getNbrClients() > limit && limit != 0)
 		return serverLog(_clients[i].getNick(), "limit cannot be set to " + limitStr + ": too many people already");
 	_channels[chId].setLimit(limit);

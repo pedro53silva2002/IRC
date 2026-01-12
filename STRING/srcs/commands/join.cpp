@@ -25,6 +25,19 @@ int		Server::findOrCreateChannel(int i, std::string chName)
 	return (chId);
 }
 
+void	Server::testChannels()
+{
+	serverLog("Each client info:", "");
+	for (int i = 0; i < _clients.size(); i++) {
+		std::cout << i << ": " << _clients[i].getNick() << " is connected to channels: ";
+		for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); 
+		it != _clients[i].getChannels().end(); it++) {
+			std::cout << it->first << ": [" << it->second << "], ";
+		}
+		std::cout << std::endl;
+	}
+}
+
 //todo parse: find if there is a key, and test it
 void	Server::commandJoin(int i, std::string args)
 {
@@ -47,10 +60,6 @@ void	Server::commandJoin(int i, std::string args)
 	if (_channels[chId].isInviteOnly())
 		return (sendToClient(i, ERR_INVITEONLYCHAN(_clients[i].getNick(), chName)));
 
-	/*
-		!
-		OK SO BASICALLY when First connects to the channel, EVERY client will also connect to that channel
-	*/
 	if (isUserInChannel(i, chId))
 		return (sendToClient(i, "YOU ARE ALREADY IN THIS CHANNEL"));
 
