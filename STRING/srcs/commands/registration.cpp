@@ -64,9 +64,8 @@ bool	isValidNick(std::string line)
 }
 bool	Server::isNickInUse(std::string toFind)
 {
-	for (int i = 0; i < _clients.size(); i++)
-	{
-		if (_clients[i].getNick() == toFind)
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)	{
+		if (_clients[it->first].getNick() == toFind)
 			return true;
 	}
 	return false;
@@ -115,5 +114,6 @@ void	Server::checkRegistration(int i)
 		{
 			_clients[i].setRegistered(true);
 			welcomeClient(i);
+			_clients[i].setPrefix();
 		}
 }

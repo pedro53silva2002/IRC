@@ -28,7 +28,7 @@ class Server
 		pollfd			_srvPfd;
 
 		std::vector<pollfd>		_pfds;
-		std::vector<Client> 	_clients;
+		std::map<int, Client> 	_clients;
 		std::vector<Channel>	_channels;
 
 		int				acceptClient();
@@ -39,7 +39,7 @@ class Server
 
 		
 		//only difference is it also sends to current user
-		void	channelBroadcast(int i, std::string chName, std::string str);
+		void	channelBroadcast(std::string chName, std::string str);
 		void	clientBroadcast(int i, std::string chName, std::string str);
 		void	sendToClient(int i, std::string str);
 
@@ -63,7 +63,6 @@ class Server
 		void	commandJoin(int i, std::string args);
 		int		findOrCreateChannel(int i, std::string name);
 		//*part
-		void	leaveChannel(int i, int chId);
 		void	commandPart(int i, std::string name);
 		//*kick
 		void	commandKick(int i, std::string args);
@@ -84,6 +83,8 @@ class Server
 		void	noArgsTopic(int i, std::string chName);
 		//*quit
 		void	commandQuit(int i, std::string str);
+		void	leaveAllChannels(int i);
+
 
 		int			getClientId(std::string name);
 		int			getChannelId(std::string name);
@@ -97,7 +98,8 @@ class Server
 
 		//just for testing, remove
 		void	exitServer();
-		void	testClients();
+		void	testClients(int i);
+		void	testaux(int i);
 		void	test();
 
 	public:
@@ -108,7 +110,7 @@ class Server
 		int			getSocket() { return (_socket); }
 		int			getPort() { return (_port); }
 		std::string getPass() { return (_pass); }
-void	testChannels();
+		void	testChannels();
 
 		void	srvRun();
 		

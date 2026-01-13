@@ -40,7 +40,7 @@ Server::Server(char *port, char *pass) {
 	_srvPfd.events = POLLIN;
 	_srvPfd.revents = 0;
 
-	_clients.push_back(Client());//This is so that we dont have to work with _clients[i - 1]
+	// _clients.push_back(NULL);//This is so that we dont have to work with _clients[i - 1]
 	_channels.push_back(Channel());//This is so that we dont have to work with _channel[j - 1]
 }
 
@@ -75,6 +75,7 @@ std::string parseLine(std::string line)
 }
 
 
+
 void	Server::processCommand(int i, std::string line)
 {
 	if (line.compare(0, 11, "CAP LS 302") == 0)//todo figure out what to do
@@ -83,9 +84,17 @@ void	Server::processCommand(int i, std::string line)
 		return commandQuit(i, "HARDCODED");
 	else if (line.compare(0, 4, "exit") == 0)
 		return exitServer();
+
+
+	
+	
 	else if (line.compare(0, 4, "test") == 0) {
-		sendToClient(i, "You are the client calling test");
-		// clientBroadcast(i, "FIRST", "YOU GUYS ARE JUST LISTENING");
+		sendToClient(i, _clients[i].getPrefix() + ": You are " + _clients[i].getNick() +", calling test");
+		return ;
+	}
+	else if (line.compare(0, 4, "TEST") == 0) {
+		sendToClient(i, _clients[i].getPrefix() + ": You are " + _clients[i].getNick() +", calling test");
+		clientBroadcast(i, "FIRST", "YOU GUYS ARE JUST LISTENING");
 		return ;
 	}
 
@@ -109,11 +118,13 @@ void	Server::processCommand(int i, std::string line)
 
 bool	Server::handleClientPoll(int i)
 {
+	// std::cout << "MESSAGE BEING FROM CLIENT " << i << std::endl;
+	// std::cout << " NAMED " << _clients[i].getNick() << std::endl;
 	char		buf[512];
 	std::string	recv_buffer;
 
 	memset(buf, 0, sizeof(buf));
-	int bytesRecv = myRecv(_pfds[i].fd, buf, sizeof(buf), 0);
+	int bytesRecv = myRecv(i, buf, sizeof(buf), 0);
 	if (bytesRecv == 0) {
 		commandQuit(i, "");
 		return (false);
@@ -132,41 +143,53 @@ bool	Server::handleClientPoll(int i)
 	return (true);
 }
 
-void	Server::testClients()
+void	Server::testaux(int i) {
+	std::cout << "hardcoding client " << i << "\n";
+	if (i == 1) {
+		_clients[i].setNick("First");
+		_clients[i].setUsername("First");
+		_clients[i].setRealname("First");
+	}
+	else if (i == 2) {
+		_clients[i].setNick("Second");
+		_clients[i].setUsername("Second");
+		_clients[i].setRealname("Second");
+	}
+	else if (i == 3) {
+		_clients[i].setNick("Third");
+		_clients[i].setUsername("Third");
+		_clients[i].setRealname("Third");
+	}
+	_clients[i].setAuthenticated(true);
+	_clients[i].setRegistered(true);
+	_clients[i].setHost(_name);
+	_clients[i].setPrefix();
+	welcomeClient(i);
+}
+
+void	Server::testClients(int i)
 {
-	if (_clients.size() == 2) {
-		_clients[1].setAuthenticated(true);
-		_clients[1].setRegistered(true);
-		_clients[1].setHost(_name);
-		_clients[1].setNick("First");
-		_clients[1].setUsername("First");
-		_clients[1].setRealname("First");
-		_clients[1].setPrefix();
-		// _clients[1].setChannel(1, "FIRST");
-		// _channels.push_back(Channel("FIRST"));
-		welcomeClient(1);
+	std::cout << "hardcoding client " << i << "\n";
+	if (_clients.size() == 1) {
+		_clients[i].setNick("First");
+		_clients[i].setUsername("First");
+		_clients[i].setRealname("First");
+	}
+	else if (_clients.size() == 2) {
+		_clients[i].setNick("Second");
+		_clients[i].setUsername("Second");
+		_clients[i].setRealname("Second");
 	}
 	else if (_clients.size() == 3) {
-		_clients[2].setAuthenticated(true);
-		_clients[2].setRegistered(true);
-		_clients[2].setHost(_name);
-		_clients[2].setNick("Second");
-		_clients[2].setUsername("Second");
-		_clients[2].setRealname("Second");
-		_clients[2].setPrefix();
-		// _clients[2].setChannel(1, "FIRST");
-		welcomeClient(2);
+		_clients[i].setNick("Third");
+		_clients[i].setUsername("Third");
+		_clients[i].setRealname("Third");
 	}
-	else if (_clients.size() == 4) {
-		_clients[3].setAuthenticated(true);
-		_clients[3].setRegistered(true);
-		_clients[3].setNick("Third");
-		_clients[3].setUsername("Third");
-		_clients[3].setRealname("Third");
-		_clients[3].setPrefix();
-		// _clients[3].setChannel(1, "FIRST");
-		welcomeClient(3);
-	}
+	_clients[i].setAuthenticated(true);
+	_clients[i].setRegistered(true);
+	_clients[i].setHost(_name);
+	_clients[i].setPrefix();
+	welcomeClient(i);
 }
 
 
@@ -179,11 +202,11 @@ void	Server::test()
 	// 	std::cout << i << ": [" << _channels[i].getName() << "], ";
 	// }
 	// std::cout << std::endl;
-	// serverLog("Existing clients", "");
-	// for (int i = 0; i < _clients.size(); i++) {
-	// 	std::cout << i << ": [" << _clients[i].getNick() << "], ";
-	// }
-	// std::cout << std::endl;
+	serverLog("Existing clients", "");
+	for (int i = 0; i < _clients.size(); i++) {
+		std::cout << i << ": [" << _clients[i].getNick() << "], ";
+	}
+	std::cout << std::endl;
 	// serverLog("Each client info:", "");
 	// for (int i = 0; i < _clients.size(); i++) {
 	// 	std::cout << i << ": " << _clients[i].getNick() << " is connected to channels: ";
@@ -193,15 +216,15 @@ void	Server::test()
 	// 	}
 	// 	std::cout << std::endl;
 	// }
-	serverLog("Each channel info:", "");
-	for (int i = 0; i < _channels.size(); i++) {
-		std::cout << i << ": " << _channels[i].getName() << " has these clients connected: ";
-		for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
-			it != _channels[i].getClientsInChannel().end(); it++) {
-				std::cout << "[" << _clients[*it].getNick() << "], ";
-		}
-		std::cout << std::endl;
-	}
+	// serverLog("Each channel info:", "");
+	// for (int i = 0; i < _channels.size(); i++) {
+	// 	std::cout << i << ": " << _channels[i].getName() << " has these clients connected: ";
+	// 	for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
+	// 		it != _channels[i].getClientsInChannel().end(); it++) {
+	// 			std::cout << "[" << _clients[*it].getNick() << "], ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
 }
 
 
@@ -209,23 +232,23 @@ void	Server::srvRun()
 {
 	while (1)
 	{
-		test();
+		// test();
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		
 		if (_pfds[0].revents & POLLIN)//*Client Connecting
 		{
 			int temp = acceptClient();
-			_clients.push_back(Client(temp));
+			_clients.insert(std::make_pair(temp, Client(temp)));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			testClients();
+			// testClients(temp);
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)//*loop through clients
 		{
 			if (_pfds[i].revents & POLLIN) {
-				int ret = handleClientPoll(i);
+				int ret = handleClientPoll(_pfds[i].fd);
 				if (ret == false)//i dont like this
 					continue ;
 			}

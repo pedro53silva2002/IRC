@@ -1,5 +1,5 @@
 #include "../includes/Server.hpp"
-int Channel::_globalChannelId;//learn why this needs to happen
+int Channel::_globalChannelId;
 int Client::_globalId;
 
 
@@ -13,16 +13,16 @@ void	Server::setPfds()
 {
 	_pfds.clear();
 	_pfds.push_back(_srvPfd);
-	for (std::vector<Client>::iterator it = _clients.begin() + 1; it != _clients.end(); it++)
-		_pfds.push_back(it->getPfd());
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		_pfds.push_back(it->second.getPfd());
 }
 
 //this is just testing
 void	Server::exitServer()
 {
 	std::cout << "exiting server" << std::endl;
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		close(it->getSocket());
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		close(it->second.getSocket());
 	close(_socket);
 	throw (0);
 }
@@ -35,25 +35,28 @@ void	Server::sendToClient(int i, std::string str) {
 	serverLog(_clients[i].getNick(), "received string: [" + str + "]");
 	send(_clients[i].getSocket(), reply.c_str(), reply.size(), 0);
 }
-
-
-//todo this one doesnt need i
-void	Server::channelBroadcast(int i, std::string chName, std::string str)
+void	Server::channelBroadcast(std::string chName, std::string str)
 {
 	int chId = getChannelId(chName);
-	for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
-		it != _channels[i].getClientsInChannel().end(); it++) {
+	for (std::vector<int>::iterator it = _channels[chId].getClientsInChannel().begin(); 
+		it != _channels[chId].getClientsInChannel().end(); it++) {
 			sendToClient(*it, str);
 		}
 }
-
 void	Server::clientBroadcast(int i, std::string chName, std::string str)
 {
 	int chId = getChannelId(chName);
-	for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
-		it != _channels[i].getClientsInChannel().end(); it++) {
-			if (i != *it)
+	if (chId == -1)
+	{
+		std::cout << "BROKE\n";
+		return ;
+	}
+	for (std::vector<int>::iterator it = _channels[chId].getClientsInChannel().begin(); 
+		it != _channels[chId].getClientsInChannel().end(); it++) {
+			if (i != *it) {
+				std::cout << "will send to client " << _clients[*it].getNick() << std::endl;
 				sendToClient(*it, str);
+			}
 	}
 }
 

@@ -54,5 +54,5 @@ void	Server::commandJoin(int i, std::string args)
 	_clients[i].setChannel(chId, chName);
 	_channels[chId].addClient(i);
 	std::string strToSend = _clients[i].getPrefix() + " JOIN " + chName;
-	channelBroadcast(i, chName, strToSend);
+	channelBroadcast(chName, strToSend);
 }

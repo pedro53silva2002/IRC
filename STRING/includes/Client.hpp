@@ -34,6 +34,18 @@ class Client
 		std::string	_realname;
 
 		std::map<int, std::string> _chans;
+/* 
+				char arr[] = {0 1 2 3 4 5}; 
+				char* arr[] = {{"bruno", 22} "luis", isaac}; 
+				arr[1] == world
+
+				map = {(22, "bruno")(42, "ola")(68, "bruno")}
+				map[3] == [""]
+				map[22] == bruno
+				map[42] == ola
+
+
+*/
 
 		std::string	_host;
 		std::string	_prefix;
@@ -75,6 +87,7 @@ class Client
 		std::map<int, std::string>	&getChannels() { return (_chans); }
 
 		//*SETTERS
+		void	setId(int id) { _id = id; }
 		void	setAuthenticated(bool auth) { _authenticated = auth; }
 		void	setRegistered(bool auth) { _registered = auth; }
 		void	setPrefix() { _prefix = ":" + _nick + "!" + _username + "@" + _host; }
