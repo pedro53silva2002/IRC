@@ -17,14 +17,14 @@ void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 	_channels[chId].setInviteMode(inviteOnlyOrNot);
 	char sign = (inviteOnlyOrNot) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "i";
-	channelBroadcast(i, _channels[chId].getName(), strToSend);
+	channelBroadcast(_channels[chId].getName(), strToSend);
 }
 void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
 {
 	_channels[chId].setTopicRestriction(topicRestrict);
 	char sign = (topicRestrict) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "t";
-	channelBroadcast(i, _channels[chId].getName(), strToSend);
+	channelBroadcast(_channels[chId].getName(), strToSend);
 }
 void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 {
@@ -34,7 +34,7 @@ void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 		_channels[chId].setChannelKey(key);
 	char sign = (setKey) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "k";
-	channelBroadcast(i, _channels[chId].getName(), strToSend);
+	channelBroadcast(_channels[chId].getName(), strToSend);
 }
 void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 {
@@ -47,7 +47,7 @@ void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 	_channels[chId].setOp(_clients[toOpId].getId(), opOrNot);
 	char sign = (opOrNot) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "o " + _clients[toOpId].getNick();
-	channelBroadcast(i, _channels[chId].getName(), strToSend);
+	channelBroadcast(_channels[chId].getName(), strToSend);
 }
 void	Server::modeLim(int i, int chId, std::string limitStr)
 {
@@ -58,7 +58,7 @@ void	Server::modeLim(int i, int chId, std::string limitStr)
 	serverLog(_clients[i].getNick(), _channels[chId].getName() + " CHANNEL LIMIT CHANGED");
 	
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + "WHAT DO I PUT HERE" + "l";
-	channelBroadcast(i, _channels[chId].getName(), strToSend);
+	channelBroadcast(_channels[chId].getName(), strToSend);
 }
 
 
@@ -98,11 +98,7 @@ void Server::executeCommandMode(int i, std::string chName, std::string opr, std:
 
 void	Server::commandMode(int i, std::string line)
 {
-	if (!_clients[i].isRegistered())
-		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
-		//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
-	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "MODE")));
+	//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
 	
 	int pos = line.find(' ', 0);
 	std::string channelTarget = line.substr(0, pos);

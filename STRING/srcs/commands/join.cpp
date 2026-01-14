@@ -2,7 +2,6 @@
 
 //todo DOUBLE CHECK OUTPUTS AND PARSING
 //if needed, created a hardcoded channel with a key to check everything is well created
-//What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
 
 void	setJoin(std::string args, std::string *chName, std::string *key)
 {
@@ -29,10 +28,6 @@ int		Server::findOrCreateChannel(int i, std::string chName)
 //todo parse: find if there is a key, and test it
 void	Server::commandJoin(int i, std::string args)
 {
-	if (!_clients[i].isRegistered())
-		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
-	if (args.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "JOIN")));
 	// if (args[0] != '#')
 	// 	return (sendToClient(i, ERR_BADCHANMASK(_clients[i].getNick(), args)));
 

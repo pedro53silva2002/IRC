@@ -20,11 +20,6 @@ void	setKick(std::string line, std::string *chName, std::string *toKickName)
 
 void	Server::commandKick(int i, std::string line)
 {
-	if (!_clients[i].isRegistered())
-		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
-	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "KICK")));
-
 	//! PARSE
 	std::string chName, toKickName;
 	setKick(line, &chName, &toKickName);

@@ -5,8 +5,6 @@
 #define RPL_NOTOPIC(client, channel) ("331 " + client + " " + channel + " :No topic is set")
 #define RPL_TOPIC(client, channel, topic) ("332 " + client + " " + channel + " :" + topic)
 
-
-
 //SERVER PREFIX MISSING
 //also, check all outputs and numerics
 //*ERRORS

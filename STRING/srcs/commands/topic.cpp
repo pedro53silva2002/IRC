@@ -31,12 +31,7 @@ void	Server::noArgsTopic(int i, std::string chName)
 }
 
 void	Server::commandTopic(int i, std::string line)
-{
-	if (!_clients[i].isRegistered())
-		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
-	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "TOPIC")));
-	
+{	
 	std::string chName, newTopic;
 	setTopicArgs(line, &chName, &newTopic);
 
@@ -51,5 +46,5 @@ void	Server::commandTopic(int i, std::string line)
 		return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), chName)));
 
 	_channels[chId].setTopic(newTopic);
-	channelBroadcast(i, chName, RPL_TOPIC(_clients[i].getNick(), chName, newTopic));
+	channelBroadcast(chName, RPL_TOPIC(_clients[i].getNick(), chName, newTopic));
 }

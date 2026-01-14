@@ -6,8 +6,6 @@ void	Server::commandPass(int i, std::string line)
 {
 	if (_clients[i].isAuthenticated())
 		return (sendToClient(i, ERR_ALREADYREGISTERED(_clients[i].getNick())));
-	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PASS")));
 	if (line.compare(_pass))
 		return (sendToClient(i, ERR_PASSWDMISMATCH(_clients[i].getNick())));
 	_clients[i].setAuthenticated(true);
@@ -38,8 +36,6 @@ void	Server::commandUser(int i, std::string line)
 	// 	return (sendToClient(i, ERR_NOTAUTH));
 	if (!_clients[i].getUsername().empty() && !_clients[i].getRealname().empty())
 		return (sendToClient(i, ERR_ALREADYREGISTERED(_clients[i].getNick())));
-	if (line.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "USER")));
 	if (!isValidUser(line))
 		return (sendToClient(i, "WHAT SHOULD I PUT HERE"));
 
@@ -66,9 +62,9 @@ bool	Server::isNickInUse(std::string toFind)
 {
 	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)	{
 		if (_clients[it->first].getNick() == toFind)
-			return true;
+			return (true);
 	}
-	return false;
+	return (false);
 }
 void	Server::commandNick(int i, std::string line)
 {

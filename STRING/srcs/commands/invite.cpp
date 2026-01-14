@@ -2,7 +2,6 @@
 
 //todo REDOOOOOOOOOOOOOOOOOOOOOOOOOO
 
-
 bool Server::hasInChannels(std::string name)
 {
 	for (int i = 0; i < _channels.size(); i++) {
@@ -11,7 +10,6 @@ bool Server::hasInChannels(std::string name)
 	}
 	return (false);
 }
-
 
 bool Server::findChannel(std::string nick, std::string chName)
 {
@@ -25,16 +23,9 @@ bool Server::findChannel(std::string nick, std::string chName)
 //ERR_USERONCHANNEL
 //ERR_CHANNELISFULL, +l
 
-
 void	Server::commandInvite(int i, std::string name)
 {
-	if (!_clients[i].isRegistered())
-		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
-	//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
-	if (name.empty())
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "INVITE")));
-
-	
+	//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND	
 	std::string userToInvite = name.substr(0, name.find(' ', 0));
 	std::string channelToGet = name.substr(name.find(' ', 0) + 1);
 	int index;

@@ -5,11 +5,11 @@
 
 /*
 	PASS USER NICK 		FULLY done
-	JOIN				//
+	QUIT				//? should be done
+	JOIN				//? done except key
+	PART 				//? should be done
 	PRIVMSG				//
-	PART 				//
 	KICK 				//
-	QUIT				//
 	MODE 				//
 	TOPIC 				//
 	INVITE				//
@@ -80,8 +80,6 @@ void	Server::processCommand(int i, std::string line)
 {
 	if (line.compare(0, 11, "CAP LS 302") == 0)//todo figure out what to do
 		return ;
-	if (line.compare(0, 4, "QUIT") == 0)
-		return commandQuit(i, "HARDCODED");
 	else if (line.compare(0, 4, "exit") == 0)
 		return exitServer();
 
@@ -100,16 +98,19 @@ void	Server::processCommand(int i, std::string line)
 
 
 
-	
 	typedef void (Server::*funcs)(int, std::string);
-	std::string commands[] = {"PASS", "USER", "NICK", "JOIN",  "PART"/*, "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", "QUIT" */};
-
-	funcs function[] = {&Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin,  &Server::commandPart ,
-	/*&Server::commandPrivmsg, &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, &Server::commandQuit */};
+	std::string commands[] = {"QUIT", "PASS", "USER", "NICK", "JOIN",  "PART"/*, "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", */};
+	funcs function[] = {&Server::commandQuit, &Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin,  &Server::commandPart ,
+						/*&Server::commandPrivmsg, &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, */};
 	std::string temp = line.substr(0, line.find(' '));
+	std::string args = parseLine(line);
 	for (int j = 0; j < 11; j++) {
 		if (commands[j] == temp) {
-			(this->*function[j])(i, parseLine(line));
+			if (j > 3 && !_clients[i].isRegistered())
+				return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
+			if (args.empty() && j != 3)
+				return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), commands[j])));
+			(this->*function[j])(i, args);
 			return ;
 		}
 	}
@@ -143,33 +144,9 @@ bool	Server::handleClientPoll(int i)
 	return (true);
 }
 
-void	Server::testaux(int i) {
-	std::cout << "hardcoding client " << i << "\n";
-	if (i == 1) {
-		_clients[i].setNick("First");
-		_clients[i].setUsername("First");
-		_clients[i].setRealname("First");
-	}
-	else if (i == 2) {
-		_clients[i].setNick("Second");
-		_clients[i].setUsername("Second");
-		_clients[i].setRealname("Second");
-	}
-	else if (i == 3) {
-		_clients[i].setNick("Third");
-		_clients[i].setUsername("Third");
-		_clients[i].setRealname("Third");
-	}
-	_clients[i].setAuthenticated(true);
-	_clients[i].setRegistered(true);
-	_clients[i].setHost(_name);
-	_clients[i].setPrefix();
-	welcomeClient(i);
-}
-
 void	Server::testClients(int i)
 {
-	std::cout << "hardcoding client " << i << "\n";
+	std::cout << "hardcoding client " << _clients[i].getId() << "\n";
 	if (_clients.size() == 1) {
 		_clients[i].setNick("First");
 		_clients[i].setUsername("First");
@@ -202,29 +179,30 @@ void	Server::test()
 	// 	std::cout << i << ": [" << _channels[i].getName() << "], ";
 	// }
 	// std::cout << std::endl;
-	serverLog("Existing clients", "");
-	for (int i = 0; i < _clients.size(); i++) {
-		std::cout << i << ": [" << _clients[i].getNick() << "], ";
+	// serverLog("Existing clients", "");
+	// for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)	{
+	// 	std::cout << it->first << ": [" << it->second.getNick() << "], ";
+	// }
+	// std::cout << std::endl;
+	serverLog("Each client info:", "");
+	for (std::map<int, Client>::iterator it1 = _clients.begin(); it1 != _clients.end(); it1++)	{
+		std::cout << _clients[it1->first].getId() << ": [" << _clients[it1->first].getNick() << "] is connected to channels: ";
+		
+		for (std::map<int, std::string>::iterator it2 = _clients[it1->first].getChannels().begin(); 
+		it2 != _clients[it1->first].getChannels().end(); it2++) {
+			std::cout << it2->first << ": [" << it2->second << "], ";
+		}
+		std::cout << std::endl;
 	}
-	std::cout << std::endl;
-	// serverLog("Each client info:", "");
-	// for (int i = 0; i < _clients.size(); i++) {
-	// 	std::cout << i << ": " << _clients[i].getNick() << " is connected to channels: ";
-	// 	for (std::map<int, std::string>::iterator it = _clients[i].getChannels().begin(); 
-	// 	it != _clients[i].getChannels().end(); it++) {
-	// 		std::cout << it->first << ": [" << it->second << "], ";
-	// 	}
-	// 	std::cout << std::endl;
-	// }
-	// serverLog("Each channel info:", "");
-	// for (int i = 0; i < _channels.size(); i++) {
-	// 	std::cout << i << ": " << _channels[i].getName() << " has these clients connected: ";
-	// 	for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
-	// 		it != _channels[i].getClientsInChannel().end(); it++) {
-	// 			std::cout << "[" << _clients[*it].getNick() << "], ";
-	// 	}
-	// 	std::cout << std::endl;
-	// }
+	serverLog("Each channel info:", "");
+	for (int i = 0; i < _channels.size(); i++) {
+		std::cout << i << ": [" << _channels[i].getName() << "] has these clients connected: ";
+		for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
+			it != _channels[i].getClientsInChannel().end(); it++) {
+				std::cout << "[" << _clients[*it].getNick() << "], ";
+		}
+		std::cout << std::endl;
+	}
 }
 
 
@@ -232,7 +210,7 @@ void	Server::srvRun()
 {
 	while (1)
 	{
-		// test();
+		test();
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		
@@ -242,7 +220,7 @@ void	Server::srvRun()
 			_clients.insert(std::make_pair(temp, Client(temp)));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			// testClients(temp);
+			testClients(temp);
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)//*loop through clients

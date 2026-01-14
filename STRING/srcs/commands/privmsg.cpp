@@ -22,9 +22,7 @@ void	setPrivmsg(std::string line, std::string *channel, std::string *message)
 
 void	Server::commandPrivmsg(int i, std::string line)
 {
-	if (!_clients[i].isRegistered())
-		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
-	if (line.empty() || !isValidPrivmsg(line))
+	if (!isValidPrivmsg(line))
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PRIVMSG")));
 	
 	std::string chName, message;
