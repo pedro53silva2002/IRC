@@ -36,38 +36,34 @@ class Server
 		bool			handleClientPoll(int i);
 		void			processCommand(int i, std::string line);
 		
-
 		
-		//only difference is it also sends to current user
 		void	serverBroadcast(std::string str);
 		void	channelBroadcast(std::string chName, std::string str);
 		void	clientBroadcast(int i, std::string chName, std::string str);
 		void	sendToClient(int i, std::string str);
 
 
-		//*REGISTRATION
-		//*pass
 		void	commandPass(int i, std::string line);
-		//*nick
 		void	commandNick(int i, std::string line);
 		bool	isNickInUse(std::string toFind);
-		//*user
 		void	commandUser(int i, std::string line);
 		void	checkRegistration(int i);
 		void	welcomeClient(int i);
 		
 		//*CHANNEL COMMANDS
-		//*privmsg
-		bool	isValidPrivmsg(std::string line);
-		void	commandPrivmsg(int i, std::string line);
-		//*join
+		
 		void	commandJoin(int i, std::string args);
 		int		findOrCreateChannel(int i, std::string name);
-		//*part
+
 		void	commandPart(int i, std::string name);
-		//*kick
 		void	commandKick(int i, std::string args);
-		//*mode
+		void	commandQuit(int i, std::string str);
+		void	leaveChannel(int i, int chId);
+		void	leaveAllChannels(int i);
+		
+		bool	isValidPrivmsg(std::string line);
+		void	commandPrivmsg(int i, std::string line);
+
 		void	commandMode(int i, std::string line);
 		void 	executeCommandMode(int i, std::string chName, std::string opr, std::string args);
 		void	modeInviteOnly(int i, int chId, bool inviteOnlyOrNot);
@@ -75,17 +71,13 @@ class Server
 		void	modeKey(int i, int chId, std::string key, bool setKey);
 		void	modeOp(int i, int chId, std::string user, bool opOrNot);
 		void	modeLim(int i, int chId, std::string limitStr);
-		//*invite
+		
 		void	commandInvite(int i, std::string name);
 		bool 	findChannel(std::string nick, std::string chName);
 		bool	hasInChannels(std::string name);
-		//*topic
+		
 		void	commandTopic(int i, std::string line);
 		void	noArgsTopic(int i, std::string chName);
-		//*quit
-		void	commandQuit(int i, std::string str);
-		void	leaveChannel(int i, int chId);
-		void	leaveAllChannels(int i);
 
 
 		int			getClientId(std::string name);
@@ -95,20 +87,14 @@ class Server
 		bool		isUserInChannel(int i, int chId);
 
 		
-
-		
-
-		//just for testing, remove
 		void	exitServer();
 		void	testClients(int i);
 		void	testaux(int i);
 		void	test();
 
 	public:
-		//*CONSTRUCTORS
 		Server(char *port, char *pass);
 
-		//*GETTERS
 		int			getSocket() { return (_socket); }
 		int			getPort() { return (_port); }
 		std::string getPass() { return (_pass); }
@@ -121,7 +107,6 @@ class Server
 
 void	serverLog(std::string nick, std::string str);//remove
 
-//*myFunctions
 int		mySocket(int __domain, int __type, int __protocol);
 void	myBind(int __fd, const sockaddr *__addr, socklen_t __len);
 void	myListen(int __fd, int __n);

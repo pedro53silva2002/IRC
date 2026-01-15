@@ -8,7 +8,6 @@ void	serverLog(std::string nick, std::string str)
 	std::cout << YELLOW("Server log: ") << nick << " " << str << std::endl;
 }
 
-//*Set pollfds for loop
 void	Server::setPfds()
 {
 	_pfds.clear();
@@ -17,7 +16,6 @@ void	Server::setPfds()
 		_pfds.push_back(it->second.getPfd());
 }
 
-//this is just testing
 void	Server::exitServer()
 {
 	std::cout << "exiting server" << std::endl;
@@ -29,7 +27,6 @@ void	Server::exitServer()
 
 
 
-//*SENDERS
 void	Server::sendToClient(int i, std::string str) {
 	std::string reply = str + "\r\n";
 	serverLog(_clients[i].getNick(), "received string: [" + str + "]");

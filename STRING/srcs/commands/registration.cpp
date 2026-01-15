@@ -1,6 +1,5 @@
 #include "../includes/Server.hpp"
-//todo check the orders of errors
-//Nick can be called after, has to change prefix
+//todo Nick can be called after, has to change prefix
 
 void	Server::commandPass(int i, std::string line)
 {
@@ -32,8 +31,6 @@ bool	isValidUser(std::string line)
 }
 void	Server::commandUser(int i, std::string line)
 {
-	// if (!_clients[i].isAuthenticated())//todo might not be needed to be here, check with Dot
-	// 	return (sendToClient(i, ERR_NOTAUTH));
 	if (!_clients[i].getUsername().empty() && !_clients[i].getRealname().empty())
 		return (sendToClient(i, ERR_ALREADYREGISTERED(_clients[i].getNick())));
 	if (!isValidUser(line))
@@ -68,8 +65,6 @@ bool	Server::isNickInUse(std::string toFind)
 }
 void	Server::commandNick(int i, std::string line)
 {
-	// if (!_clients[i].isAuthenticated())//todo might not be needed to be here, check with Dot
-	// 	return (sendToClient(i, ERR_NOTAUTH));
 	if (line.empty())
 		return (sendToClient(i, ERR_NONICKNAMEGIVEN(_clients[i].getNick())));
 	if (!isValidNick(line))
@@ -88,10 +83,8 @@ void	Server::commandNick(int i, std::string line)
 
 
 
-//*Registration
 void	Server::welcomeClient(int i)
 {
-	//remove this function, put it inside checkReg
 	std::string welcome = "Welcome to the " + _name + " Network ";
 		// + _clients[i].getNick() + "[!" + _clients[i].getUsername() 
 		// + "@"+ "host" + "]";//hardcoded
@@ -102,7 +95,6 @@ void	Server::welcomeClient(int i)
 	//MOTD
 }
 
-//RENAME
 void	Server::checkRegistration(int i)
 {
 	if (!_clients[i].isRegistered() && !_clients[i].getNick().empty() && !_clients[i].getUsername().empty() 

@@ -1,13 +1,9 @@
 #ifndef DEFINES_HPP	
 # define DEFINES_HPP
 
-//*RPLs
 #define RPL_NOTOPIC(client, channel) ("331 " + client + " " + channel + " :No topic is set")
 #define RPL_TOPIC(client, channel, topic) ("332 " + client + " " + channel + " :" + topic)
 
-//SERVER PREFIX MISSING
-//also, check all outputs and numerics
-//*ERRORS
 #define ERR_NOSUCHCHANNEL(client, channel) ("403 " + client + " "  + channel + " :No such channel")
 #define ERR_UNKNOWNCOMMAND(client, command) ("421 " + client + " "  + command + " :Unknown command")
 #define ERR_NONICKNAMEGIVEN(client) ("431 " + client + " :No nickname given")
@@ -31,9 +27,7 @@
 //todo fix
 #define ERR_NOTAUTH "Not authenticated FIX LATER"
 
-//join
 #define JOINED(client, channel) (client + " joined " + channel)
-#define RPL_TOPIC(client, channel, topic) ("332 " + client + " " + channel + " :" + topic)
 
 
 

@@ -32,7 +32,6 @@ void	Server::commandPart(int i, std::string name)
 }
 
 
-//*QUIT
 void	Server::commandQuit(int i, std::string str)
 {
 	serverLog(_clients[i].getNick(), "has disconnected");

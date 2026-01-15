@@ -15,7 +15,6 @@
 	INVITE				//
 */
 
-//*CONSTRUCTORS
 Server::Server(char *port, char *pass) {
 	_name = "MyIRC";
 	_port = atoi(port);
@@ -28,7 +27,7 @@ Server::Server(char *port, char *pass) {
 
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(_port);
-	inet_pton(AF_INET, "0.0.0.0", &server_addr.sin_addr);//check "0.0.0.0"
+	inet_pton(AF_INET, "0.0.0.0", &server_addr.sin_addr);
 
 	myBind(_socket, (sockaddr*)&server_addr, sizeof(server_addr));
 
@@ -40,11 +39,9 @@ Server::Server(char *port, char *pass) {
 	_srvPfd.events = POLLIN;
 	_srvPfd.revents = 0;
 
-	// _clients.push_back(NULL);//This is so that we dont have to work with _clients[i - 1]
-	_channels.push_back(Channel());//This is so that we dont have to work with _channel[j - 1]
+	_channels.push_back(Channel());
 }
 
-//*Accepting client
 int		Server::acceptClient()
 {
 	int			tempSocket;
@@ -52,7 +49,6 @@ int		Server::acceptClient()
 	socklen_t	clientSize = sizeof(clientAddr);
 	char		host[NI_MAXHOST];
 	
-	//myAccept
 	tempSocket = accept(_socket, (sockaddr*)&clientAddr, &clientSize);
 	if (tempSocket == -1)
 		throw (std::runtime_error("Problem with client connecting"));
@@ -83,13 +79,6 @@ void	Server::processCommand(int i, std::string line)
 	else if (line.compare(0, 4, "exit") == 0)
 		return exitServer();
 
-
-	
-	
-	else if (line.compare(0, 4, "test") == 0) {
-		sendToClient(i, _clients[i].getPrefix() + ": You are " + _clients[i].getNick() +", calling test");
-		return ;
-	}
 	else if (line.compare(0, 4, "TEST") == 0) {
 		sendToClient(i, _clients[i].getPrefix() + ": You are " + _clients[i].getNick() +", calling test");
 		clientBroadcast(i, "FIRST", "YOU GUYS ARE JUST LISTENING");
@@ -99,9 +88,9 @@ void	Server::processCommand(int i, std::string line)
 
 
 	typedef void (Server::*funcs)(int, std::string);
-	std::string commands[] = {"QUIT", "PASS", "USER", "NICK", "JOIN",  "PART"/*, "PRIVMSG", "KICK", "INVITE", "MODE", "TOPIC", */};
+	std::string commands[] = {"QUIT", "PASS", "USER", "NICK", "JOIN",  "PART", "PRIVMSG", "KICK", "MODE", "TOPIC"/* , "INVITE" */};
 	funcs function[] = {&Server::commandQuit, &Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin,  &Server::commandPart ,
-						/*&Server::commandPrivmsg, &Server::commandKick, &Server::commandInvite, &Server::commandMode, &Server::commandTopic, */};
+		&Server::commandPrivmsg, &Server::commandKick, &Server::commandMode, &Server::commandTopic/*, &Server::commandInvite*/};
 	std::string temp = line.substr(0, line.find(' '));
 	std::string args = parseLine(line);
 	for (int j = 0; j < 11; j++) {
@@ -119,8 +108,6 @@ void	Server::processCommand(int i, std::string line)
 
 bool	Server::handleClientPoll(int i)
 {
-	// std::cout << "MESSAGE BEING FROM CLIENT " << i << std::endl;
-	// std::cout << " NAMED " << _clients[i].getNick() << std::endl;
 	char		buf[512];
 	std::string	recv_buffer;
 
@@ -174,16 +161,16 @@ void	Server::test()
 {
 	std::cout << RED("--------------------------------------------------------------------------------\n");
 	serverLog("TESTING", "");
-	// serverLog("Existing channels", "");
-	// for (int i = 0; i < _channels.size(); i++) {
-	// 	std::cout << i << ": [" << _channels[i].getName() << "], ";
-	// }
-	// std::cout << std::endl;
-	// serverLog("Existing clients", "");
-	// for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)	{
-	// 	std::cout << it->first << ": [" << it->second.getNick() << "], ";
-	// }
-	// std::cout << std::endl;
+/* 	serverLog("Existing channels", "");
+	for (int i = 0; i < _channels.size(); i++) {
+		std::cout << i << ": [" << _channels[i].getName() << "], ";
+	}
+	std::cout << std::endl;
+	serverLog("Existing clients", "");
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)	{
+		std::cout << it->first << ": [" << it->second.getNick() << "], ";
+	}
+	std::cout << std::endl; */
 	serverLog("Each client info:", "");
 	for (std::map<int, Client>::iterator it1 = _clients.begin(); it1 != _clients.end(); it1++)	{
 		std::cout << _clients[it1->first].getId() << ": [" << _clients[it1->first].getNick() << "] is connected to channels: ";
@@ -214,7 +201,7 @@ void	Server::srvRun()
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		
-		if (_pfds[0].revents & POLLIN)//*Client Connecting
+		if (_pfds[0].revents & POLLIN)
 		{
 			int temp = acceptClient();
 			_clients.insert(std::make_pair(temp, Client(temp)));
@@ -223,7 +210,7 @@ void	Server::srvRun()
 			testClients(temp);
 		}
 	
-		for (int i = 1; i < _pfds.size(); i++)//*loop through clients
+		for (int i = 1; i < _pfds.size(); i++)
 		{
 			if (_pfds[i].revents & POLLIN) {
 				int ret = handleClientPoll(_pfds[i].fd);

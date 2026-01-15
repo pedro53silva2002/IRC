@@ -26,7 +26,6 @@ class Client
 		int			_socket;
 		pollfd		_pfd;
 
-		//INFO
 		bool		_authenticated;
 		bool		_registered;
 		std::string	_username;
@@ -51,7 +50,6 @@ class Client
 		std::string	_prefix;
 		
 	public:
-		//*CONSTRUCTORS
 		Client(int srvSocket) {
 			_id = _globalId++;
 			_socket = srvSocket;
@@ -69,9 +67,8 @@ class Client
 
 		Client() {
 			_id = -1;
-		}//DUMMY
+		}
 
-		//*GETTERS
 		int			getId() { return (_id); }
 		int			getSocket() { return (_socket); }
 		pollfd		&getPfd() { return (_pfd); }
@@ -79,14 +76,11 @@ class Client
 		bool		isRegistered() { return (_registered); }
 		std::string	getPrefix() { return (_prefix); }
 		std::string	getHost() { return (_host); }
-
 		std::string	getUsername() { return (_username); }
 		std::string	getNick() { return (_nick); }
 		std::string	getRealname() { return (_realname); }
-
 		std::map<int, std::string>	&getChannels() { return (_chans); }
 
-		//*SETTERS
 		void	setId(int id) { _id = id; }
 		void	setAuthenticated(bool auth) { _authenticated = auth; }
 		void	setRegistered(bool auth) { _registered = auth; }
@@ -95,7 +89,6 @@ class Client
 		void	setUsername(std::string username) { _username = username; }
 		void	setNick(std::string nick) { _nick = nick; }
 		void	setRealname(std::string realname) { _realname = realname; }
-
 		void	setChannel(int chId, std::string chName) { _chans.insert(std::make_pair(chId, chName)); }
 };
 

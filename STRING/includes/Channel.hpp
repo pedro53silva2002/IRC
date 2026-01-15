@@ -38,15 +38,15 @@ class Channel
 			_name = name;
 			_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());//what??
 			_name.erase(std::remove(_name.begin(),_name.end(), '\r'),_name.end());
-			_limit = 0;//default meaning unlimited
+			_limit = 0;
 			_channelKey = "";
 			_isInviteOnly = false;
-			_isTopicRestricted = true;//check
+			_isTopicRestricted = false;
 		}
 
 		Channel() {
 			_id = -1;
-		}//DUMMY
+		}
 		
 
 		int				getId() { return (_id); }
@@ -66,7 +66,6 @@ class Channel
 
 		void		setLimit(int limit) { _limit = limit; }
 
-		//todo operators
 		void		setOp(int id, bool opOrNot) {
 			if (opOrNot == true) 
 				_ops.push_back(id);
@@ -89,7 +88,6 @@ class Channel
 		void	removeClient(int id) {
 			_clientsInChannel.erase(find(_clientsInChannel.begin(), _clientsInChannel.end(), id));
 		}
-		// (for size) getClientsInChannel().size()
 };
 
 #endif

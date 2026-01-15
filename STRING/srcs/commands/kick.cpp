@@ -2,14 +2,14 @@
 //todo PARSING, OUTPUT FOR KICKED CLIENT
 
 
-// bool	Server::isValidKick(std::string line)
-// {
-//		todo old
-// 	int pos = line.find(' ');
-// 	if (pos == std::string::npos || line.substr(pos + 1).empty())
-// 		return (false);
-// 	return (true);
-// }
+/* bool	Server::isValidKick(std::string line)
+{
+		todo old
+	int pos = line.find(' ');
+	if (pos == std::string::npos || line.substr(pos + 1).empty())
+		return (false);
+	return (true);
+} */
 
 void	setKick(std::string line, std::string *chName, std::string *toKickName)
 {
