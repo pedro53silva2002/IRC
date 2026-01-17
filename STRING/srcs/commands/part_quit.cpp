@@ -1,7 +1,6 @@
 #include "../includes/Server.hpp"
 //todo PARSING, CHECK OUTPUTS, AND REDO QUIT
 //parse QUIT, quit can get a <reason>, //!FIX QUICK OUTPUT
-//What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
 
 
 void	Server::leaveChannel(int i, int chId)

@@ -2,6 +2,10 @@
 
 //check order of parsing, like isOp, isInChannel
 //check using a non existent channel as a parameter of a command "MODE <nonexistent> +l 100"
+//What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
+//what happens if an Op kicks an Op
+
+
 
 /*
 	PASS USER NICK 		FULLY done
@@ -207,7 +211,7 @@ void	Server::srvRun()
 			_clients.insert(std::make_pair(temp, Client(temp)));
 
 			//HARDCODED CLIENTS AND CHANNELS
-			testClients(temp);
+			// testClients(temp);
 		}
 	
 		for (int i = 1; i < _pfds.size(); i++)
