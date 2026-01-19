@@ -54,30 +54,30 @@ class Server
 		
 		void	commandJoin(int i, std::string args);
 		int		findOrCreateChannel(int i, std::string name);
-
+		//
 		void	commandPart(int i, std::string name);
 		void	commandKick(int i, std::string args);
 		void	commandQuit(int i, std::string str);
 		void	leaveChannel(int i, int chId);
 		void	leaveAllChannels(int i);
-		
+		//
 		bool	isValidPrivmsg(std::string line);
 		void	commandPrivmsg(int i, std::string line);
-
+		//
 		void	commandMode(int i, std::string line);
 		void 	executeCommandMode(int i, std::string chName, std::string opr, std::string args);
+		void	outputMode(int i, int chId, bool enable, char mode);
 		void	modeInviteOnly(int i, int chId, bool inviteOnlyOrNot);
 		void	modeTopicRestriction(int i, int chId, bool topicRestrict);
 		void	modeKey(int i, int chId, std::string key, bool setKey);
 		void	modeOp(int i, int chId, std::string user, bool opOrNot);
 		void	modeLim(int i, int chId, std::string limitStr);
-		
+		//
 		void	commandInvite(int i, std::string name);
-		bool 	findChannel(std::string nick, std::string chName);
-		bool	hasInChannels(std::string name);
-		
+		//
 		void	commandTopic(int i, std::string line);
 		void	noArgsTopic(int i, std::string chName);
+
 
 
 		int			getClientId(std::string name);

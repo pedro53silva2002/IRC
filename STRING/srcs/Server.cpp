@@ -5,18 +5,16 @@
 //What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
 //what happens if an Op kicks an Op
 
-
-
 /*
 	PASS USER NICK 		FULLY done
 	QUIT				//? should be done
 	JOIN				//? done except key
 	PART 				//? should be done
-	PRIVMSG				//
-	KICK 				//
-	MODE 				//
-	TOPIC 				//
-	INVITE				//
+	PRIVMSG				//*fully done?
+	KICK 				//needs parsing
+	MODE 				//needs parsing and outputs
+	TOPIC 				//broken
+	INVITE				//redone, needs parse
 */
 
 Server::Server(char *port, char *pass) {
@@ -175,16 +173,16 @@ void	Server::test()
 		std::cout << it->first << ": [" << it->second.getNick() << "], ";
 	}
 	std::cout << std::endl; */
-	serverLog("Each client info:", "");
-	for (std::map<int, Client>::iterator it1 = _clients.begin(); it1 != _clients.end(); it1++)	{
-		std::cout << _clients[it1->first].getId() << ": [" << _clients[it1->first].getNick() << "] is connected to channels: ";
+	// serverLog("Each client info:", "");
+	// for (std::map<int, Client>::iterator it1 = _clients.begin(); it1 != _clients.end(); it1++)	{
+	// 	std::cout << _clients[it1->first].getId() << ": [" << _clients[it1->first].getNick() << "] is connected to channels: ";
 		
-		for (std::map<int, std::string>::iterator it2 = _clients[it1->first].getChannels().begin(); 
-		it2 != _clients[it1->first].getChannels().end(); it2++) {
-			std::cout << it2->first << ": [" << it2->second << "], ";
-		}
-		std::cout << std::endl;
-	}
+	// 	for (std::map<int, std::string>::iterator it2 = _clients[it1->first].getChannels().begin(); 
+	// 	it2 != _clients[it1->first].getChannels().end(); it2++) {
+	// 		std::cout << it2->first << ": [" << it2->second << "], ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
 	serverLog("Each channel info:", "");
 	for (int i = 0; i < _channels.size(); i++) {
 		std::cout << i << ": [" << _channels[i].getName() << "] has these clients connected: ";

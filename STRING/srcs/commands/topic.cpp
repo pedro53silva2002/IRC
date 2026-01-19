@@ -14,6 +14,7 @@
 	TOPIC #channel <something>			(does it ignore?)//todo
 */
 
+//!TOPIC IS BROKEN
 void	setTopicArgs(std::string line, std::string *channel, std::string *newTopic)
 {
 	int pos = line.find(' ');

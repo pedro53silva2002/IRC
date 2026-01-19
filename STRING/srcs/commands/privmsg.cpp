@@ -1,6 +1,11 @@
 #include "../includes/Server.hpp"
 //todo DO PRIVATE MESSAGES
 
+/*
+	check this output: 
+	PRIVMSG #CHANNEL :
+*/
+
 bool	Server::isValidPrivmsg(std::string line)
 {
 	int pos = line.find(' ');

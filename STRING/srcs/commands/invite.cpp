@@ -1,65 +1,34 @@
 #include "../includes/Server.hpp"
 
-//todo REDOOOOOOOOOOOOOOOOOOOOOOOOOO
-
-bool Server::hasInChannels(std::string name)
-{
-	for (int i = 0; i < _channels.size(); i++) {
-		if (name == _channels[i].getName())
-			return (true);
-	}
-	return (false);
-}
-
-bool Server::findChannel(std::string nick, std::string chName)
-{
-	int i = getClientId(nick);
-	int chId = getChannelId(chName);
-	if (chId == -1 || isUserInChannel(i ,chId))
-		return (false);
-	return (true);
-}
+//todo redoing
 
 //ERR_USERONCHANNEL
 //ERR_CHANNELISFULL, +l
+//TODO PARSE
 
-void	Server::commandInvite(int i, std::string name)
+void	setInvite(std::string line, std::string *invitedName, std::string *chName)
 {
-	//TODO HAVE A FUNCTION THAT PARSES THIS COMMAND	
-	std::string userToInvite = name.substr(0, name.find(' ', 0));
-	std::string channelToGet = name.substr(name.find(' ', 0) + 1);
-	int index;
-	size_t pos = 0;
-	int UserToInviteId;
+	int pos = line.find(' ');
+	*invitedName = line.substr(0, pos);
+	*chName = line.substr(pos + 1);
+}
 
-	//todo pus isto em comentario, tenho de resolver depois
-	// if (_clients[i].getChannelId() == -1) {
-	// 	std::cout << _clients[i].getNick() << " cannot invite users without being in any channel." << std::endl;
-	// 	sendToClient(_clients[i].getId(), "you cannot users without being in any channel");//!check the actual output
-	// 	return ;
-	// }
-	if (findChannel(_clients[i].getNick(), channelToGet))
-		std::cout << "INVITED: " << userToInvite << " by " << _clients[i].getNick() << std::endl;
-	for (size_t i = 1; i < _clients.size(); i++)
-	{
-		if (userToInvite == _clients[i].getNick())
-			UserToInviteId = i;
-	}
-	for (std::vector<Channel>::iterator channelIt = _channels.begin(); channelIt != _channels.end(); ++channelIt)
-	{
-		if (channelToGet == channelIt->getName())//change to use subster of the getName
-		{
-			index = channelIt - _channels.begin();
-			break ;
-		}
-	}
-	/* else
-		std::cout << "Didnt found the channel to invite " << std::endl; */
-	//std::cout << "USER TO INVITE: " << userToInvite << "(" << _clients[UserToInviteId].getNick() << ")\t" << " CHANNEL TO GET: " << channelToGet << std::endl;
-	//std::cout << "CHANNEL TO INVITE: " << index << std::endl;
-	if (_channels[index].getChannelKey() != "")
-		commandJoin(UserToInviteId, (channelToGet + " " + _channels[index].getChannelKey()));
-	else
-		commandJoin(UserToInviteId, (channelToGet));
-	//commandJoin(UserToInviteId, (channelToGet + " " + _channels[index].getChannelKey()));
+void	Server::commandInvite(int i, std::string args)
+{
+	std::string invitedName, chName;
+	setInvite(args, &invitedName, &chName);
+
+	int chId = getChannelId(chName);
+	if (!isUserInChannel(i, chId))
+		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
+
+	int invitedId = getClientId(invitedName);
+	if (isUserInChannel(invitedId, chId))
+		return (sendToClient(i, "CLIENT ALREADY IN CHANNEL, CREATE OUTPUT"));
+
+	//!check if key is needed in case its locked channel, prob not because user inviting the other is in channel
+	_clients[invitedId].setChannel(chId, chName);
+	_channels[chId].addClient(invitedId);
+	std::string strToSend = _clients[i].getPrefix() + " INVITED " + invitedName + " TO THE CHANNEL, CHECK OUTPUT";
+	channelBroadcast(chName, strToSend);
 }

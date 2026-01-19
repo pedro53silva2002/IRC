@@ -9,11 +9,21 @@
 		op needing a user to Op, 
 		key needing a key or nothing, 
 		limit needing a number or nothing
+	todo:
+		check output for key mode, lim, and op
 */
+
+void	Server::outputMode(int i, int chId, bool enable, char mode)
+{
+	char sign = (enable) ? '+' : '-';
+	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + mode;
+	channelBroadcast(_channels[chId].getName(), strToSend);
+}
 
 void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 {
 	_channels[chId].setInviteMode(inviteOnlyOrNot);
+	outputMode(i, chId, inviteOnlyOrNot, 'i');
 	char sign = (inviteOnlyOrNot) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "i";
 	channelBroadcast(_channels[chId].getName(), strToSend);
@@ -21,9 +31,7 @@ void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
 {
 	_channels[chId].setTopicRestriction(topicRestrict);
-	char sign = (topicRestrict) ? '+' : '-';
-	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "t";
-	channelBroadcast(_channels[chId].getName(), strToSend);
+	outputMode(i, chId, topicRestrict, 't');
 }
 void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 {
@@ -31,9 +39,8 @@ void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 		_channels[chId].setChannelKey("");
 	else
 		_channels[chId].setChannelKey(key);
-	char sign = (setKey) ? '+' : '-';
-	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "k";
-	channelBroadcast(_channels[chId].getName(), strToSend);
+	//todo check output for this one
+	outputMode(i, chId, setKey, 'k');
 }
 void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 {
