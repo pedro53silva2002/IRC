@@ -25,7 +25,7 @@ void	Server::commandPart(int i, std::string name)
 
 		
 	std::string strToSend = _clients[i].getPrefix() + " PART " + name;
-	channelBroadcast(name, strToSend);
+	channelBroadcast(chId, strToSend);
 
 	leaveChannel(i, chId);
 }

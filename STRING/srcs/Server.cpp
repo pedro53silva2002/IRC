@@ -76,6 +76,8 @@ std::string parseLine(std::string line)
 
 void	Server::processCommand(int i, std::string line)
 {
+	std::cout << RED("--------------------------------------------------------------------------------\n");
+	std::cout << _clients[i].getNick() << " said: [" + line + "]\n";
 	if (line.compare(0, 11, "CAP LS 302") == 0)//todo figure out what to do
 		return ;
 	else if (line.compare(0, 4, "exit") == 0)
@@ -199,7 +201,7 @@ void	Server::srvRun()
 {
 	while (1)
 	{
-		test();
+		// test();
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		

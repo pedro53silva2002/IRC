@@ -3,19 +3,8 @@
 
 # include "Client.hpp"
 # include "Channel.hpp"
-# include "Colours.hpp"
 # include "Defines.hpp"
-# include <iostream>
-# include <sys/types.h>
-# include <unistd.h>
-# include <sys/socket.h>
-# include <netdb.h>
-# include <arpa/inet.h>
-# include <string.h>
-# include <string>
-# include <vector>
-# include <poll.h>
-# include <stdlib.h>
+# include "Headers.hpp"
 
 class Server
 {
@@ -38,7 +27,7 @@ class Server
 		
 		
 		void	serverBroadcast(std::string str);
-		void	channelBroadcast(std::string chName, std::string str);
+		void	channelBroadcast(int chId, std::string str);
 		void	clientBroadcast(int i, std::string chName, std::string str);
 		void	sendToClient(int i, std::string str);
 

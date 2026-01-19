@@ -30,5 +30,5 @@ void	Server::commandInvite(int i, std::string args)
 	_clients[invitedId].setChannel(chId, chName);
 	_channels[chId].addClient(invitedId);
 	std::string strToSend = _clients[i].getPrefix() + " INVITED " + invitedName + " TO THE CHANNEL, CHECK OUTPUT";
-	channelBroadcast(chName, strToSend);
+	channelBroadcast(chId, strToSend);
 }

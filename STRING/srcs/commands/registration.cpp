@@ -75,10 +75,15 @@ void	Server::commandNick(int i, std::string line)
 	std::cout << _clients[i].getNick() << " set their nick to: ";
 	_clients[i].setNick(line);
 	std::cout << _clients[i].getNick() << std::endl;
-	checkRegistration(i);
+
+
+	/* if (_clients[i].isRegistered())
+		clientBroadcast("<old> changed nick to <new>"), only if client is connected to channel
+	 */
 	//todo setPrefix();
 
-	//clientBroadcast("<old> changed nick to <new>"), only if client is connected to channel
+
+	checkRegistration(i);
 }
 
 

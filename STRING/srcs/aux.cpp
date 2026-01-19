@@ -38,9 +38,8 @@ void	Server::serverBroadcast(std::string str)
 		sendToClient(it->first, str);
 	}
 }
-void	Server::channelBroadcast(std::string chName, std::string str)
+void	Server::channelBroadcast(int chId, std::string str)
 {
-	int chId = getChannelId(chName);
 	for (std::vector<int>::iterator it = _channels[chId].getClientsInChannel().begin(); 
 		it != _channels[chId].getClientsInChannel().end(); it++) {
 			sendToClient(*it, str);

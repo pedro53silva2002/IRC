@@ -17,7 +17,7 @@ void	Server::outputMode(int i, int chId, bool enable, char mode)
 {
 	char sign = (enable) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + mode;
-	channelBroadcast(_channels[chId].getName(), strToSend);
+	channelBroadcast(chId, strToSend);
 }
 
 void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
@@ -26,7 +26,7 @@ void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 	outputMode(i, chId, inviteOnlyOrNot, 'i');
 	char sign = (inviteOnlyOrNot) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "i";
-	channelBroadcast(_channels[chId].getName(), strToSend);
+	channelBroadcast(chId, strToSend);
 }
 void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
 {
@@ -53,7 +53,7 @@ void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 	_channels[chId].setOp(_clients[toOpId].getId(), opOrNot);
 	char sign = (opOrNot) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "o " + _clients[toOpId].getNick();
-	channelBroadcast(_channels[chId].getName(), strToSend);
+	channelBroadcast(chId, strToSend);
 }
 void	Server::modeLim(int i, int chId, std::string limitStr)
 {
@@ -64,7 +64,7 @@ void	Server::modeLim(int i, int chId, std::string limitStr)
 	serverLog(_clients[i].getNick(), _channels[chId].getName() + " CHANNEL LIMIT CHANGED");
 	
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + "WHAT DO I PUT HERE" + "l";
-	channelBroadcast(_channels[chId].getName(), strToSend);
+	channelBroadcast(chId, strToSend);
 }
 
 
