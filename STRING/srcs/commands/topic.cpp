@@ -14,7 +14,6 @@
 	TOPIC #channel <something>			(does it ignore?)//todo
 */
 
-//!TOPIC IS BROKEN
 void	setTopicArgs(std::string line, std::string *channel, std::string *newTopic)
 {
 	int pos = line.find(' ');
@@ -34,6 +33,7 @@ void	Server::noArgsTopic(int i, std::string chName)
 		return (sendToClient(i, RPL_NOTOPIC(_clients[i].getNick(), chName)));
 	return (sendToClient(i, RPL_TOPIC(_clients[i].getNick(), chName, _channels[chId].getTopic())));
 }
+//RPL_TOPICWHOTIME?
 
 void	Server::commandTopic(int i, std::string line)
 {	

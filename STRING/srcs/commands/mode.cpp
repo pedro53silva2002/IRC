@@ -12,7 +12,7 @@
 	todo:
 		check output for key mode, lim, and op
 */
-
+//according to other irc, output is just for the client sending MODE
 void	Server::outputMode(int i, int chId, bool enable, char mode)
 {
 	char sign = (enable) ? '+' : '-';
@@ -24,24 +24,24 @@ void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 {
 	_channels[chId].setInviteMode(inviteOnlyOrNot);
 	outputMode(i, chId, inviteOnlyOrNot, 'i');
-	char sign = (inviteOnlyOrNot) ? '+' : '-';
-	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "i";
-	channelBroadcast(chId, strToSend);
 }
 void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
 {
 	_channels[chId].setTopicRestriction(topicRestrict);
 	outputMode(i, chId, topicRestrict, 't');
 }
+
+//+k needs to also send new password in the output
 void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 {
 	if (!setKey)
 		_channels[chId].setChannelKey("");
 	else
 		_channels[chId].setChannelKey(key);
-	//todo check output for this one
 	outputMode(i, chId, setKey, 'k');
 }
+
+//if toOpId doesnt exist: ERR_NOSUCKNICK
 void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 {
 	if (_clients[i].getNick() == args)
@@ -55,6 +55,8 @@ void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "o " + _clients[toOpId].getNick();
 	channelBroadcast(chId, strToSend);
 }
+
+//+l needs to also send new limit in the output
 void	Server::modeLim(int i, int chId, std::string limitStr)
 {
 	int limit = atoi(limitStr.c_str());
@@ -67,7 +69,8 @@ void	Server::modeLim(int i, int chId, std::string limitStr)
 	channelBroadcast(chId, strToSend);
 }
 
-
+//BADCHANMASK before getChannelId?
+//RPL_CHANNELMODEIS?
 void Server::executeCommandMode(int i, std::string chName, std::string opr, std::string args)
 {
 	int chId = getChannelId(chName);
@@ -97,6 +100,7 @@ void Server::executeCommandMode(int i, std::string chName, std::string opr, std:
 			modeLim(i, chId, args);
 			break ;
 		default:
+		// ERR_UNKNOWNMODE instead?
 			sendToClient(i, ERR_UMODEWUNKNOWNFLAG + opr);
 			break ;
 	}

@@ -1,9 +1,11 @@
 #include "../includes/Server.hpp"
 #include "../includes/Client.hpp"
 
+//both the Clients and the Channels should be new, so i can save info to them before pushing them back
 
 int		main(int ac, char **av)
 {
+	//todo parse
 	if (ac != 3) {
 		std::cout << RED("Bad arguments") << std::endl;
 		return 1;
@@ -19,22 +21,3 @@ int		main(int ac, char **av)
 
 	return 0;
 }
-
-/*
-	Client needs to register itself in server before using stuff like JOIN or PRIVMSG
-	client should send info:
-		recommended order by ircdocs:
-			CAP LS 302 (will i be able to ignore this??)
-			PASS
-			NICK and USER
-			CAP END
-
-	server MUST send:
-		RPL_WELCOME
-		RPL_YOURHOST
-
-
-	cases client should disconnect:
-		client tries to talk before setting nick or user
-		client send data with no newline or too long
-*/

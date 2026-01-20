@@ -1,8 +1,10 @@
 #include "../includes/Server.hpp"
 
+//todo parse the main
 //check order of parsing, like isOp, isInChannel
 //check using a non existent channel as a parameter of a command "MODE <nonexistent> +l 100"
 //What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
+//todo if everyone leaves a channel, it gets removed. check what happens with op
 //what happens if an Op kicks an Op
 
 /*

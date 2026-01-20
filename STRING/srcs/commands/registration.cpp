@@ -1,6 +1,8 @@
 #include "../includes/Server.hpp"
 //todo Nick can be called after, has to change prefix
 
+//according to other irc, is PASSWDMISMATCH, disconnected the client
+//also according to other irc, PASS needs to come before NICK or USER
 void	Server::commandPass(int i, std::string line)
 {
 	if (_clients[i].isAuthenticated())
@@ -72,17 +74,12 @@ void	Server::commandNick(int i, std::string line)
 	if (isNickInUse(line))
 		return (sendToClient(i, ERR_NICKNAMEINUSE(_clients[i].getNick(), line)));
 	
-	std::cout << _clients[i].getNick() << " set their nick to: ";
+	std::cout << _clients[i].getNick() << " set their nick to: ";//no need for this, can just set it and use it after
 	_clients[i].setNick(line);
 	std::cout << _clients[i].getNick() << std::endl;
 
-
-	/* if (_clients[i].isRegistered())
-		clientBroadcast("<old> changed nick to <new>"), only if client is connected to channel
-	 */
+	//just outputs to client that NICK has been set
 	//todo setPrefix();
-
-
 	checkRegistration(i);
 }
 

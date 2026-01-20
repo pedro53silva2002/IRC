@@ -1,5 +1,5 @@
-#ifndef HEADERS_HPP
-# define HEADERS_HPP
+#ifndef UTILS_HPP
+# define UTILS_HPP
 
 # include <iostream>
 # include <sys/types.h>

@@ -17,10 +17,17 @@ void	setKick(std::string line, std::string *chName, std::string *toKickName)
 	*chName = line.substr(0, pos);
 	*toKickName = line.substr(pos + 1);
 }
-
+//OPERATORS CAN KICK OTHER OPERATORS
 void	Server::commandKick(int i, std::string line)
 {
 	//! PARSE
+	/*
+		parse() {
+			NONICKNAMEGIVEN, CHANOPRIVSNEEDED
+		}
+		if (!parse)
+			return
+	*/
 	std::string chName, toKickName;
 	setKick(line, &chName, &toKickName);
 	int chId = getChannelId(chName);
