@@ -6,32 +6,37 @@
 	PRIVMSG #CHANNEL :
 */
 
-bool	Server::isValidPrivmsg(std::string line)
+bool	Server::isValidPrivmsg(int i, std::string args)
 {
-	int pos = line.find(' ');
-	if (pos == std::string::npos || line.substr(pos + 1).empty())
+	if (!_clients[i].isRegistered())
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())), false);
+	if (args.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PRIVMSG")), false);
+	
+	int pos = args.find(' ');
+	if (pos == std::string::npos || args.substr(pos + 1).empty())
 		return (false);
 	return (true);
 }
 
-void	setPrivmsg(std::string line, std::string *channel, std::string *message)
+void	setPrivmsg(std::string args, std::string *channel, std::string *message)
 {
-	int pos = line.find(' ');
-	*channel = line.substr(0, pos);
-	std::string rest = line.substr(pos + 1);
+	int pos = args.find(' ');
+	*channel = args.substr(0, pos);
+	std::string rest = args.substr(pos + 1);
 	if (rest[0] == ':')
 		*message = rest.substr(1);
 	else
 		*message = rest.substr(0, rest.find(' '));
 }
 
-void	Server::commandPrivmsg(int i, std::string line)
+void	Server::commandPrivmsg(int i, std::string args)
 {
-	if (!isValidPrivmsg(line))
-		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PRIVMSG")));
+	if (!isValidPrivmsg(i, args))
+		return ;
 	
 	std::string chName, message;
-	setPrivmsg(line, &chName, &message);
+	setPrivmsg(args, &chName, &message);
 
 	int chId = getChannelId(chName);
 	if (!isUserInChannel(i, chId))

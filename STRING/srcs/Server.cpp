@@ -2,17 +2,14 @@
 
 //todo parse the main
 //check order of parsing, like isOp, isInChannel
-//check using a non existent channel as a parameter of a command "MODE <nonexistent> +l 100"
-//What happens if a client leaves a channel or disconnects? does the channel disappear? or does it give op to some other person?
-//todo if everyone leaves a channel, it gets removed. check what happens with op
-//what happens if an Op kicks an Op
+//todo if op leaves a channel, it gets removed. check what happens with op
 
 /*
 	PASS USER NICK 		FULLY done
 	QUIT				//? should be done
 	JOIN				//? done except key
 	PART 				//? should be done
-	PRIVMSG				//*fully done?
+	PRIVMSG				//fully done?
 	KICK 				//needs parsing
 	MODE 				//needs parsing and outputs
 	TOPIC 				//broken
@@ -44,6 +41,7 @@ Server::Server(char *port, char *pass) {
 	_srvPfd.revents = 0;
 
 	_channels.push_back(Channel());
+	_motd = "it is wednesday my dudes";
 }
 
 int		Server::acceptClient()
@@ -59,7 +57,7 @@ int		Server::acceptClient()
 	memset(host, 0, NI_MAXHOST);
 	
 	inet_ntop(AF_INET, &clientAddr.sin_addr, host, NI_MAXHOST);
-	std::cout << host << " manually connected on " << ntohs(clientAddr.sin_port) << std::endl;
+	// std::cout << host << " manually connected on " << ntohs(clientAddr.sin_port) << std::endl;
 	return (tempSocket);
 }
 
@@ -78,13 +76,12 @@ std::string parseLine(std::string line)
 
 void	Server::processCommand(int i, std::string line)
 {
-	std::cout << RED("--------------------------------------------------------------------------------\n");
-	std::cout << _clients[i].getNick() << " said: [" + line + "]\n";
-	if (line.compare(0, 11, "CAP LS 302") == 0)//todo figure out what to do
+	// std::cout << RED("--------------------------------------------------------------------------------\n");
+	// std::cout << _clients[i].getNick() << " said: [" + line + "]\n";
+	if (line.compare(0, 6, "CAP LS") == 0)//todo figure out what to do
 		return ;
 	else if (line.compare(0, 4, "exit") == 0)
 		return exitServer();
-
 	else if (line.compare(0, 4, "TEST") == 0) {
 		sendToClient(i, _clients[i].getPrefix() + ": You are " + _clients[i].getNick() +", calling test");
 		clientBroadcast(i, "FIRST", "YOU GUYS ARE JUST LISTENING");
@@ -101,15 +98,12 @@ void	Server::processCommand(int i, std::string line)
 	std::string args = parseLine(line);
 	for (int j = 0; j < 11; j++) {
 		if (commands[j] == temp) {
-			if (j > 3 && !_clients[i].isRegistered())
-				return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())));
-			if (args.empty() && j != 3)
-				return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), commands[j])));
 			(this->*function[j])(i, args);
 			return ;
 		}
 	}
-	sendToClient(i, ERR_UNKNOWNCOMMAND(_clients[i].getNick(), line));
+	//todo turn on again
+	// sendToClient(i, ERR_UNKNOWNCOMMAND(_clients[i].getNick(), line));
 }
 
 bool	Server::handleClientPoll(int i)
@@ -177,16 +171,16 @@ void	Server::test()
 		std::cout << it->first << ": [" << it->second.getNick() << "], ";
 	}
 	std::cout << std::endl; */
-	// serverLog("Each client info:", "");
-	// for (std::map<int, Client>::iterator it1 = _clients.begin(); it1 != _clients.end(); it1++)	{
-	// 	std::cout << _clients[it1->first].getId() << ": [" << _clients[it1->first].getNick() << "] is connected to channels: ";
+/* 	serverLog("Each client info:", "");
+	for (std::map<int, Client>::iterator it1 = _clients.begin(); it1 != _clients.end(); it1++)	{
+		std::cout << _clients[it1->first].getId() << ": [" << _clients[it1->first].getNick() << "] is connected to channels: ";
 		
-	// 	for (std::map<int, std::string>::iterator it2 = _clients[it1->first].getChannels().begin(); 
-	// 	it2 != _clients[it1->first].getChannels().end(); it2++) {
-	// 		std::cout << it2->first << ": [" << it2->second << "], ";
-	// 	}
-	// 	std::cout << std::endl;
-	// }
+		for (std::map<int, std::string>::iterator it2 = _clients[it1->first].getChannels().begin(); 
+		it2 != _clients[it1->first].getChannels().end(); it2++) {
+			std::cout << it2->first << ": [" << it2->second << "], ";
+		}
+		std::cout << std::endl;
+	} */
 	serverLog("Each channel info:", "");
 	for (int i = 0; i < _channels.size(); i++) {
 		std::cout << i << ": [" << _channels[i].getName() << "] has these clients connected: ";

@@ -1,10 +1,17 @@
 #include "../includes/Server.hpp"
 
-//todo redoing
-
 //ERR_USERONCHANNEL
 //ERR_CHANNELISFULL, +l
 //TODO PARSE
+
+bool	Server::isValidInvite(int i, std::string args)
+{
+	if (!_clients[i].isRegistered())
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())), false);
+	if (args.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "INVITE")), false);
+	return (true);
+}
 
 void	setInvite(std::string line, std::string *invitedName, std::string *chName)
 {
@@ -17,6 +24,9 @@ void	setInvite(std::string line, std::string *invitedName, std::string *chName)
 //INVITE message to invited user
 void	Server::commandInvite(int i, std::string args)
 {
+	if (!isValidInvite(i, args))
+		return ;
+	
 	std::string invitedName, chName;
 	setInvite(args, &invitedName, &chName);
 

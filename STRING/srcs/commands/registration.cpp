@@ -13,36 +13,41 @@ void	Server::commandPass(int i, std::string line)
 	serverLog(_clients[i].getNick(), "has authenticated");
 }
 
-bool	isValidUser(std::string line)
+bool	Server::isValidUser(int i, std::string args)
 {
+	if (!_clients[i].isAuthenticated())
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())), false);
+	if (args.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "USER")), false);
+	if (!_clients[i].getUsername().empty() && !_clients[i].getRealname().empty())
+		return (sendToClient(i, ERR_ALREADYREGISTERED(_clients[i].getNick())), false);
 	int pos = 0;
 	int newpos = 0;
 	std::vector<std::string>	params;
-	while (line.find(' ', pos) != std::string::npos)
+	while (args.find(' ', pos) != std::string::npos)
 	{
-		newpos = line.find(' ', pos + 1);
+		newpos = args.find(' ', pos + 1);
 		if (pos == 0)
-			params.push_back(line.substr(pos, newpos));
+			params.push_back(args.substr(pos, newpos));
 		else
-			params.push_back(line.substr(pos + 1, newpos - pos - 1));
+			params.push_back(args.substr(pos + 1, newpos - pos - 1));
 		pos = newpos;
 	}
 	if (params.size() >= 4 && params[1][0] == '0' && params[2][0] == '*')	
 		return (true);
+	sendToClient(i, "WHAT SHOULD I PUT HERE");
 	return (false);
 }
-void	Server::commandUser(int i, std::string line)
+void	Server::commandUser(int i, std::string args)
 {
-	if (!_clients[i].getUsername().empty() && !_clients[i].getRealname().empty())
-		return (sendToClient(i, ERR_ALREADYREGISTERED(_clients[i].getNick())));
-	if (!isValidUser(line))
-		return (sendToClient(i, "WHAT SHOULD I PUT HERE"));
+	if (!isValidUser(i, args))
+		return ;
 
 	int pos = 0;
 	for (int i = 0; i < 4; ++i)
-		pos = line.find(' ', pos + 1);
-	std::string real = line.substr(pos + 1);
-	std::string user = line.substr(0, line.find(' '));
+		pos = args.find(' ', pos + 1);
+	std::string real = args.substr(pos + 1);
+	std::string user = args.substr(0, args.find(' '));
 	_clients[i].setRealname(real);
 	_clients[i].setUsername(user);
 		
@@ -51,11 +56,17 @@ void	Server::commandUser(int i, std::string line)
 	checkRegistration(i);
 }
 
-bool	isValidNick(std::string line)
+bool	Server::isValidNick(int i,std::string args)
 {
-	if (line.find(' ') != std::string::npos || line[0] == ':' || line[0] == '#' || line.compare(0, 2, "#&") == 0 || line.compare(0, 2, "&#") == 0)
-		return (false);
-	return true;
+	if (!_clients[i].isAuthenticated())
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())), false);	
+	if (args.empty())
+		return (sendToClient(i, ERR_NONICKNAMEGIVEN()), false);
+	if (args.find(' ') != std::string::npos || args[0] == ':' || args[0] == '#' || args.compare(0, 2, "#&") == 0 || args.compare(0, 2, "&#") == 0)
+		return (sendToClient(i, ERR_ERRONEUSNICKNAME(_clients[i].getNick(), args)), false);
+	if (isNickInUse(args))
+		return (sendToClient(i, ERR_NICKNAMEINUSE(_clients[i].getNick(), args)), false);
+	return (true);
 }
 bool	Server::isNickInUse(std::string toFind)
 {
@@ -65,17 +76,15 @@ bool	Server::isNickInUse(std::string toFind)
 	}
 	return (false);
 }
-void	Server::commandNick(int i, std::string line)
+void	Server::commandNick(int i, std::string args)
 {
-	if (line.empty())
-		return (sendToClient(i, ERR_NONICKNAMEGIVEN(_clients[i].getNick())));
-	if (!isValidNick(line))
-		return (sendToClient(i, ERR_ERRONEUSNICKNAME(_clients[i].getNick(), line)));
-	if (isNickInUse(line))
-		return (sendToClient(i, ERR_NICKNAMEINUSE(_clients[i].getNick(), line)));
+	//todo PUT THIS IN isValidNick
+	//todo PUT THIS IN isValidNick
+	if (!isValidNick(i, args))
+		return ;
 	
 	std::cout << _clients[i].getNick() << " set their nick to: ";//no need for this, can just set it and use it after
-	_clients[i].setNick(line);
+	_clients[i].setNick(args);
 	std::cout << _clients[i].getNick() << std::endl;
 
 	//just outputs to client that NICK has been set
@@ -84,17 +93,15 @@ void	Server::commandNick(int i, std::string line)
 }
 
 
-
 void	Server::welcomeClient(int i)
 {
-	std::string welcome = "Welcome to the " + _name + " Network ";
-		// + _clients[i].getNick() + "[!" + _clients[i].getUsername() 
-		// + "@"+ "host" + "]";//hardcoded
-	sendToClient(i, welcome);
-	std::string todo = "The rest of the welcome message will come after";
-
-	sendToClient(i, todo);
-	//MOTD
+	sendToClient(i, "CAP * LS");
+	// sendToClient(i, RPL_WELCOME(_clients[i].getNick(), _name));
+	// sendToClient(i, RPL_YOURHOST(_name));
+	// sendToClient(i, RPL_MYINFO(_name, _clients[i].getNick()));
+	// sendToClient(i, RPL_MOTDSTART(_clients[i].getNick(), _name));
+	// sendToClient(i, RPL_MOTD(_clients[i].getNick(), _motd));
+	// sendToClient(i, RPL_ENDOFMOTD(_clients[i].getNick()));
 }
 
 void	Server::checkRegistration(int i)

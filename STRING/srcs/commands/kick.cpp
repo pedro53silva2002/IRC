@@ -2,14 +2,14 @@
 //todo PARSING, OUTPUT FOR KICKED CLIENT
 
 
-/* bool	Server::isValidKick(std::string line)
+bool	Server::isValidKick(int i, std::string args)
 {
-		todo old
-	int pos = line.find(' ');
-	if (pos == std::string::npos || line.substr(pos + 1).empty())
-		return (false);
+	if (!_clients[i].isRegistered())
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())), false);
+	if (args.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "KICK")), false);
 	return (true);
-} */
+}
 
 void	setKick(std::string line, std::string *chName, std::string *toKickName)
 {
@@ -18,18 +18,13 @@ void	setKick(std::string line, std::string *chName, std::string *toKickName)
 	*toKickName = line.substr(pos + 1);
 }
 //OPERATORS CAN KICK OTHER OPERATORS
-void	Server::commandKick(int i, std::string line)
+void	Server::commandKick(int i, std::string args)
 {
-	//! PARSE
-	/*
-		parse() {
-			NONICKNAMEGIVEN, CHANOPRIVSNEEDED
-		}
-		if (!parse)
-			return
-	*/
+	if (!isValidKick(i, args))
+		return ;
 	std::string chName, toKickName;
-	setKick(line, &chName, &toKickName);
+	setKick(args, &chName, &toKickName);
+	
 	int chId = getChannelId(chName);
 	int toKickId = getClientId(toKickName);
 	if (chId == -1 || !isUserInChannel(toKickId, chId))

@@ -4,14 +4,18 @@
 //todo lim output
 //todo removing key needs key?
 
-/*
-	todo parsing for args:
-		op needing a user to Op, 
-		key needing a key or nothing, 
-		limit needing a number or nothing
-	todo:
-		check output for key mode, lim, and op
-*/
+bool	Server::isValidMode(int i, std::string args)
+{
+	if (!_clients[i].isRegistered())
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())), false);
+	if (args.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "MODE")), false);
+		// op needing a user to Op, 
+		// key needing a key or nothing, 
+		// limit needing a number or nothing
+	return (true);
+}
+
 //according to other irc, output is just for the client sending MODE
 void	Server::outputMode(int i, int chId, bool enable, char mode)
 {
@@ -109,6 +113,8 @@ void Server::executeCommandMode(int i, std::string chName, std::string opr, std:
 //TODO HAVE A FUNCTION THAT PARSES THIS COMMAND
 void	Server::commandMode(int i, std::string line)
 {
+	if (!isValidMode(i, line))
+		return ;
 	
 	int pos = line.find(' ', 0);
 	std::string channelTarget = line.substr(0, pos);

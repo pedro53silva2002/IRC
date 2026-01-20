@@ -97,7 +97,7 @@ void	Client::setRealname(std::string realname) {
 	_realname = realname;
 }
 void	Client::setPrefix() {
-	_prefix = ":" + _nick + "!" + _username + "@" + _host;
+	_prefix = ":" + _nick + "!" + _username + "@127.0.0.1";
 }
 void	Client::setHost(std::string host) {
 	_host = host;

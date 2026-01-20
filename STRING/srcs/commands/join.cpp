@@ -2,6 +2,18 @@
 
 //todo PARSING AND KEY
 
+//also &
+bool	Server::isValidJoin(int i, std::string args)
+{
+	if (!_clients[i].isRegistered()) 
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())), false);
+	if (args.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "JOIN")), false);
+	if (args[0] != '#')
+		return (sendToClient(i, ERR_NOSUCHCHANNEL(args)), false);
+	return (true);
+}
+
 void	setJoin(std::string args, std::string *chName, std::string *key)
 {
 	int pos = args.find(' ');
@@ -26,8 +38,8 @@ int		Server::findOrCreateChannel(int i, std::string chName)
 
 void	Server::commandJoin(int i, std::string args)
 {
-	if (args[0] != '#')
-		return (sendToClient(i, ERR_BADCHANMASK(_clients[i].getNick(), args)));
+	if (!isValidJoin(i, args))
+		return ;
 
 	std::string chName, key;
 	setJoin(args, &chName, &key);
@@ -45,8 +57,26 @@ void	Server::commandJoin(int i, std::string args)
 		return (sendToClient(i, ERR_USERONCHANNEL(_clients[i].getNick(), chName)));
 
 	_clients[i].setChannel(chId, chName);
-	// RPL_TOPIC2
-	// RPL_NAMREPLY (create a user list)
+	//todo  RPL_TOPIC2
+	//todo  RPL_NAMREPLY (create a user list)
+	/* 
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	//!AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAV
+	*/
 	_channels[chId].addClient(i);
 	std::string strToSend = _clients[i].getPrefix() + " JOIN " + chName;
 	channelBroadcast(chId, strToSend);

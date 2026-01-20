@@ -15,6 +15,7 @@ class Server
 		int				_socket;
 		sockaddr_in		server_addr;
 		pollfd			_srvPfd;
+		std::string		_motd;
 
 		std::vector<pollfd>		_pfds;
 		std::map<int, Client> 	_clients;
@@ -32,40 +33,47 @@ class Server
 		void	sendToClient(int i, std::string str);
 
 
-		void	commandPass(int i, std::string line);
-		void	commandNick(int i, std::string line);
-		bool	isNickInUse(std::string toFind);
-		void	commandUser(int i, std::string line);
-		void	checkRegistration(int i);
-		void	welcomeClient(int i);
 		
-		//*CHANNEL COMMANDS
+		//*COMMANDS
+		void	commandPass(int, std::string);
+		void	commandNick(int, std::string);
+		bool	isValidNick(int, std::string);
+		bool	isNickInUse(std::string);
+		void	commandUser(int, std::string);
+		bool	isValidUser(int, std::string);
+		void	checkRegistration(int);
+		void	welcomeClient(int);
+
+		void	commandJoin(int, std::string);
+		bool	isValidJoin(int, std::string);
+		int		findOrCreateChannel(int, std::string);
 		
-		void	commandJoin(int i, std::string args);
-		int		findOrCreateChannel(int i, std::string name);
-		//
-		void	commandPart(int i, std::string name);
-		void	commandKick(int i, std::string args);
-		void	commandQuit(int i, std::string str);
-		void	leaveChannel(int i, int chId);
-		void	leaveAllChannels(int i);
-		//
-		bool	isValidPrivmsg(std::string line);
-		void	commandPrivmsg(int i, std::string line);
-		//
-		void	commandMode(int i, std::string line);
-		void 	executeCommandMode(int i, std::string chName, std::string opr, std::string args);
-		void	outputMode(int i, int chId, bool enable, char mode);
-		void	modeInviteOnly(int i, int chId, bool inviteOnlyOrNot);
-		void	modeTopicRestriction(int i, int chId, bool topicRestrict);
-		void	modeKey(int i, int chId, std::string key, bool setKey);
-		void	modeOp(int i, int chId, std::string user, bool opOrNot);
-		void	modeLim(int i, int chId, std::string limitStr);
-		//
-		void	commandInvite(int i, std::string name);
-		//
-		void	commandTopic(int i, std::string line);
-		void	noArgsTopic(int i, std::string chName);
+		void	commandPart(int, std::string);
+		bool	isValidPart(int, std::string);
+		void	commandKick(int, std::string);
+		bool	isValidKick(int, std::string);
+		void	commandQuit(int, std::string);
+		void	leaveChannel(int, int);
+		
+		void	commandPrivmsg(int, std::string);
+		bool	isValidPrivmsg(int, std::string);
+		
+		void	commandMode(int, std::string);
+		bool	isValidMode(int, std::string);
+		void 	executeCommandMode(int, std::string, std::string, std::string);
+		void	outputMode(int, int, bool, char);
+		void	modeInviteOnly(int, int, bool);
+		void	modeTopicRestriction(int, int, bool);
+		void	modeKey(int, int, std::string, bool);
+		void	modeOp(int, int, std::string, bool);
+		void	modeLim(int, int, std::string);
+		
+		void	commandInvite(int, std::string);
+		bool	isValidInvite(int, std::string);
+
+		void	commandTopic(int, std::string);
+		bool	isValidTopic(int, std::string);
+		void	noArgsTopic(int, std::string);
 
 
 

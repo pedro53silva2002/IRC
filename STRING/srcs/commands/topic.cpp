@@ -14,6 +14,15 @@
 	TOPIC #channel <something>			(does it ignore?)//todo
 */
 
+bool	Server::isValidTopic(int i, std::string args)
+{
+	if (!_clients[i].isRegistered())
+		return (sendToClient(i, ERR_NOTREGISTERED(_clients[i].getNick())), false);
+	if (args.empty())
+		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "TOPIC")), false);
+	return (true);
+}
+
 void	setTopicArgs(std::string line, std::string *channel, std::string *newTopic)
 {
 	int pos = line.find(' ');
@@ -33,12 +42,14 @@ void	Server::noArgsTopic(int i, std::string chName)
 		return (sendToClient(i, RPL_NOTOPIC(_clients[i].getNick(), chName)));
 	return (sendToClient(i, RPL_TOPIC(_clients[i].getNick(), chName, _channels[chId].getTopic())));
 }
-//RPL_TOPICWHOTIME?
 
-void	Server::commandTopic(int i, std::string line)
-{	
+void	Server::commandTopic(int i, std::string args)
+{
+	if (!isValidTopic(i, args))
+		return ;
+
 	std::string chName, newTopic;
-	setTopicArgs(line, &chName, &newTopic);
+	setTopicArgs(args, &chName, &newTopic);
 
 	int chId = getChannelId(chName);
 	if (!isUserInChannel(i, chId))

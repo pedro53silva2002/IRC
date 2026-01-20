@@ -1,12 +1,21 @@
 #ifndef DEFINES_HPP	
 # define DEFINES_HPP
 
+#define RPL_WELCOME(nick, network) ("001 " + nick + " :Welcome to "+ network + ", " + nick)
+#define RPL_YOURHOST(server) ("002 :Your host is " + server + ", running version 1.0")
+#define RPL_MYINFO(server, nick) (server + " 004 " + nick + " 1.0 :Available user modes: io, channel modes: tkl")
+
+
 #define RPL_NOTOPIC(client, channel) ("331 " + client + " " + channel + " :No topic is set")
 #define RPL_TOPIC(client, channel, topic) ("332 " + client + " " + channel + " :" + topic)
+#define RPL_MOTD(nick, motd) ("372 " + nick + ":- " + motd)
+#define RPL_MOTDSTART(nick, server) ("375 " + nick + " :- " + server + " Message of the day - ")
+#define RPL_ENDOFMOTD(nick) ("376 " + nick + ":End of /MOTD command.")
 
-#define ERR_NOSUCHCHANNEL(client, channel) ("403 " + client + " "  + channel + " :No such channel")
+
+#define ERR_NOSUCHCHANNEL(channel) ("403 "  + channel + " :No such channel")
 #define ERR_UNKNOWNCOMMAND(client, command) ("421 " + client + " "  + command + " :Unknown command")
-#define ERR_NONICKNAMEGIVEN(client) ("431 " + client + " :No nickname given")
+#define ERR_NONICKNAMEGIVEN() ("431 :No nickname given")
 #define ERR_ERRONEUSNICKNAME(client, nick) ("432 " + client + " " + nick + " :Erroneus nickname")
 #define ERR_NICKNAMEINUSE(client, nick) ("433 " + client + " " + nick + " :Nickname is already in use")
 #define ERR_USERNOTINCHANNEL(client, nick, channel) ("441 " + client + " " + nick + " " + channel + " :They aren't on that channel")
@@ -25,7 +34,6 @@
 #define ERR_CHANOPRIVSNEEDED(client, channel) ("482 " + client + " " + channel + " :You're not channel operator")
 #define ERR_UMODEWUNKNOWNFLAG "501 :Unknown MODE flag"//TODO
 
-//todo fix
 #define ERR_NOTAUTH "Not authenticated FIX LATER"
 
 #define JOINED(client, channel) (client + " joined " + channel)
