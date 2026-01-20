@@ -1,0 +1,7 @@
+
+alias tester1='~/IRC/STRING/t1.sh > outMine1'
+alias tester2='~/IRC/STRING/t2.sh > outMine2'
+alias dot1='~/IRC/STRING/t1.sh > outDot1'
+alias dot2='~/IRC/STRING/t2.sh > outDot2'
+alias diffirc1='diff ~/IRC/STRING/outMine1 ~/DOT/outDot1'
+alias diffirc2='diff ~/IRC/STRING/outMine2 ~/DOT/outDot2'
