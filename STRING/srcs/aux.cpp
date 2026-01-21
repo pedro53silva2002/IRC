@@ -3,6 +3,7 @@ int Channel::_globalChannelId;
 int Client::_globalId;
 
 
+
 void	serverLog(std::string nick, std::string str)
 {
 	std::cout << YELLOW("Server log: ") << nick << " " << str << std::endl;
@@ -14,15 +15,6 @@ void	Server::setPfds()
 	_pfds.push_back(_srvPfd);
 	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 		_pfds.push_back(it->second.getPfd());
-}
-
-void	Server::exitServer()
-{
-	std::cout << "exiting server" << std::endl;
-	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		close(it->second.getSocket());
-	close(_socket);
-	throw (0);
 }
 
 
@@ -45,14 +37,8 @@ void	Server::channelBroadcast(int chId, std::string str)
 			sendToClient(*it, str);
 		}
 }
-void	Server::clientBroadcast(int i, std::string chName, std::string str)
+void	Server::clientBroadcast(int i, int chId, std::string str)
 {
-	int chId = getChannelId(chName);
-	if (chId == -1)
-	{
-		std::cout << "BROKE\n";
-		return ;
-	}
 	for (std::vector<int>::iterator it = _channels[chId].getClientsInChannel().begin(); 
 		it != _channels[chId].getClientsInChannel().end(); it++) {
 			if (i != *it) {
@@ -81,14 +67,6 @@ int Server::getChannelId(std::string name)
 	}
 	return (-1);
 }
-std::string Server::getClientNick(int id)
-{
-	return (_clients[id].getNick());
-}
-std::string Server::getChannelName(int id)
-{
-	return (_channels[id].getName());
-}
 
 bool Server::isUserInChannel(int i, int chId)
 {
@@ -102,3 +80,31 @@ bool Server::isUserInChannel(int i, int chId)
 	return (false);
 }
 
+
+
+bool	isNum(std::string str)
+{
+	std::string::iterator it = str.begin();
+	while (it != str.end() && std::isdigit(*it))
+		it++;
+	if(it == str.end() && !str.empty())
+		return (true);
+	return (false);
+}
+
+bool	parseMain(int ac, char **av)
+{
+	if (ac != 3 || !isNum(av[1])) {
+		std::cout << RED("./ircserv <port> <password>") << std::endl;
+		return (false);
+	}
+	if (atoi(av[1]) <= 1023 || atoi(av[1]) > 65535) {
+		std::cout << RED("invalid port number");
+		return (false);
+	}
+	if (strlen(av[2]) == 0) {
+		std::cout << RED("needs password");
+		return (false);
+	}
+	return (true);
+}

@@ -26,13 +26,12 @@
 #define ERR_ALREADYREGISTERED(client) ("462 " + client + " :You may not reregister")
 #define ERR_PASSWDMISMATCH(client) ("464 " + client + " :Password incorrect")
 #define ERR_CHANNELISFULL(client, channel) ("471 " + client + " " + channel + " :Cannot join channel (+l)")
-//unknown mode 472
 #define ERR_INVITEONLYCHAN(client, channel) ("473 " + client + " " + channel + " :Cannot join channel (+i)")
 #define ERR_BADCHANNELKEY(client, channel) ("475 " + client + " " + channel + " :Cannot join channel (+K)")
 #define ERR_BADCHANMASK(client, channel) ("476 " + client + " " + channel + " :Bad Channel Mask")
 #define ERR_NOPRIVILEGES(client) ("481 " + client + " :Permission Denied- You're not an IRC operator")
 #define ERR_CHANOPRIVSNEEDED(client, channel) ("482 " + client + " " + channel + " :You're not channel operator")
-#define ERR_UMODEWUNKNOWNFLAG "501 :Unknown MODE flag"//TODO
+#define ERR_UMODEWUNKNOWNFLAG "501 :Unknown MODE flag"
 
 #define ERR_NOTAUTH "Not authenticated FIX LATER"
 

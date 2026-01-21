@@ -1,7 +1,0 @@
-CAP * LS
-001 First :Welcome to MyIRC, First
-002 :Your host is MyIRC, running version 1.0
-MyIRC 004 First 1.0 :Available user modes: io, channel modes: tkl
-375 First :- MyIRC Message of the day -
-372 First:- AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-376 First:End of /MOTD command.

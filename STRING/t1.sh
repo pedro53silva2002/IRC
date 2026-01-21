@@ -4,6 +4,5 @@ CAP LS
 PASS PASS
 NICK First
 USER FIRST 0 * FIRST
-JOIN channel
 JOIN #channel
 EOF

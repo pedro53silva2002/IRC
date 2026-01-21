@@ -1,4 +1,0 @@
-running t1
-CAP * LS
-403 channel :No such channel
-:First!FIRST@127.0.0.1 JOIN #channel

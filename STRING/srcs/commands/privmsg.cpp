@@ -43,5 +43,5 @@ void	Server::commandPrivmsg(int i, std::string args)
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	
 	std::string toSend = _clients[i].getPrefix() + " PRIVMSG " + chName + " :" + message;
-	clientBroadcast(i, chName, toSend);
+	clientBroadcast(i, chId, toSend);
 }
