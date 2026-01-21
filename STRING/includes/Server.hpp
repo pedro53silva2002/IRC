@@ -29,10 +29,8 @@ class Server
 		
 		void	serverBroadcast(std::string str);
 		void	channelBroadcast(int chId, std::string str);
-		void	clientBroadcast(int i, std::string chName, std::string str);
+		void	clientBroadcast(int i, int chId, std::string str);
 		void	sendToClient(int i, std::string str);
-
-
 		
 		//*COMMANDS
 		void	commandPass(int, std::string);
@@ -79,27 +77,17 @@ class Server
 
 		int			getClientId(std::string name);
 		int			getChannelId(std::string name);
-		std::string	getClientNick(int id);
-		std::string	getChannelName(int id);
 		bool		isUserInChannel(int i, int chId);
 
 		
-		void	exitServer();
 		void	testClients(int i);
-		void	testaux(int i);
 		void	test();
 
 	public:
 		Server(char *port, char *pass);
+		~Server();
 
-		int			getSocket() { return (_socket); }
-		int			getPort() { return (_port); }
-		std::string getPass() { return (_pass); }
-		void	testChannels();
-
-		void	srvRun();
-		
-		
+		void	srvRun();	
 };
 
 void	serverLog(std::string nick, std::string str);//remove
@@ -109,5 +97,7 @@ void	myBind(int __fd, const sockaddr *__addr, socklen_t __len);
 void	myListen(int __fd, int __n);
 void	myPoll(pollfd *__fds, nfds_t __nfds, int __timeout);
 size_t	myRecv(int __fd, char *__buf, size_t __n, int __flags);
+
+bool	parseMain(int ac, char **av);
 
 #endif

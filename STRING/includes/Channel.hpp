@@ -3,7 +3,6 @@
 
 # include "Utils.hpp"
 
-//todo I NEED TO BE SURE TO REMOVE CLIENTS THAT CLOSED SOCKET FROM THIS VECTOR
 class Channel
 {
 	private:
