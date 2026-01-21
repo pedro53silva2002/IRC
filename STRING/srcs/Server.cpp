@@ -16,6 +16,10 @@
 	INVITE				//redone, needs parse
 */
 
+/** @brief Constructs a Server object and initializes the listening socket.
+ *  @param port - Port number on which the server will listen for incoming client connections.
+ *  @param pass - Password required for clients to authenticate with the server.
+*/
 Server::Server(char *port, char *pass) {
 	_name = "MyIRC";
 	_port = atoi(port);
@@ -43,6 +47,7 @@ Server::Server(char *port, char *pass) {
 	_channels.push_back(Channel());
 	_motd = "it is wednesday my dudes";
 }
+
 
 int		Server::acceptClient()
 {
@@ -73,7 +78,10 @@ std::string parseLine(std::string line)
 }
 
 
-
+/** @brief Checks and select the command that was chosen from the input
+ *  @param i - Index of the client that made the input
+ *  @param line - Input in which the command is found
+*/
 void	Server::processCommand(int i, std::string line)
 {
 	// std::cout << RED("--------------------------------------------------------------------------------\n");
@@ -192,7 +200,7 @@ void	Server::test()
 	}
 }
 
-
+/** @brief Starts the server ready to accept the clients. */
 void	Server::srvRun()
 {
 	while (1)

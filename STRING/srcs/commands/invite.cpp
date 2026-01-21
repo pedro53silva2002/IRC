@@ -4,6 +4,21 @@
 //ERR_CHANNELISFULL, +l
 //TODO PARSE
 
+/**
+ * @brief Validates the INVITE command arguments before execution.
+ * 
+ * Performs basic validation to ensure the client is registered and
+ * that arguments were provided.
+ * 
+ * @param i    The file descriptor index of the client sending the invite.
+ * @param args The raw arguments: "<nickname> <channel>".
+ * 
+ * @return true if basic validation passes.
+ * @return false if validation fails (error sent to client).
+ * 
+ * @note Sends ERR_NOTREGISTERED (451) if client is not registered.
+ * @note Sends ERR_NEEDMOREPARAMS (461) if no arguments provided.
+ */
 bool	Server::isValidInvite(int i, std::string args)
 {
 	if (!_clients[i].isRegistered())
@@ -13,6 +28,16 @@ bool	Server::isValidInvite(int i, std::string args)
 	return (true);
 }
 
+/**
+ * @brief Parses INVITE command arguments into nickname and channel components.
+ * 
+ * Extracts the invited user's nickname and the target channel name
+ * from the raw INVITE command arguments string.
+ * 
+ * @param line        The raw arguments string in format "<nickname> <channel>".
+ * @param invitedName Output pointer to store the invited user's nickname.
+ * @param chName      Output pointer to store the channel name.
+ */
 void	setInvite(std::string line, std::string *invitedName, std::string *chName)
 {
 	int pos = line.find(' ');
@@ -22,6 +47,23 @@ void	setInvite(std::string line, std::string *invitedName, std::string *chName)
 //CHANOPRIVSNEEDEDE if inviteOnly?
 //RPL_INVITING to i
 //INVITE message to invited user
+/**
+ * @brief Handles the INVITE command to invite a user to a channel.
+ * 
+ * Allows a channel member to invite another user to join the channel.
+ * The invited user is automatically added to the channel upon invitation.
+ * 
+ * @param i    The file descriptor index of the client sending the invite.
+ * @param args The raw arguments: "<nickname> <channel>".
+ * 
+ * @note Sends ERR_NOTONCHANNEL (442) if inviter is not in the channel.
+ * @note Sends ERR_USERONCHANNEL (443) if invited user is already in the channel.
+ * @note Broadcasts invite message to all channel members.
+ * 
+ * @see isValidInvite() for basic validation (registration, params).
+ * @see setInvite() for parsing nickname and channel name.
+ * 
+ */
 void	Server::commandInvite(int i, std::string args)
 {
 	if (!isValidInvite(i, args))
