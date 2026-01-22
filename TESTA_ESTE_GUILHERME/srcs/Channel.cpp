@@ -7,7 +7,7 @@ Channel::Channel() {
 Channel::Channel(std::string name) {
 	_id = _globalChannelId++;
 	_name = name;
-	_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());//what??
+	_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());
 	_name.erase(std::remove(_name.begin(),_name.end(), '\r'),_name.end());
 	_limit = 0;
 	_channelKey = "";

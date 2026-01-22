@@ -1,7 +1,5 @@
 #include "../includes/Server.hpp"
 
-//both the Clients and the Channels should be new, so i can save info to them before pushing them back
-
 Server *srv = NULL;
 
 void signalHandler(int signum)
@@ -15,7 +13,6 @@ void signalHandler(int signum)
 
 int		main(int ac, char **av)
 {
-	//todo parse
 	if (!parseMain(ac, av)) 
 		return (1);
 

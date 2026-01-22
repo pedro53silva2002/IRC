@@ -1,7 +1,5 @@
 #include "../includes/Server.hpp"
 
-//todo PARSING AND KEY
-
 bool	Server::isValidJoin(int i, std::string args)
 {
 	if (!_clients[i].isRegistered()) 

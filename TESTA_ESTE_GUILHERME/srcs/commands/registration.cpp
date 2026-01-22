@@ -1,8 +1,5 @@
 #include "../includes/Server.hpp"
-//todo Nick can be called after, has to change prefix
 
-//according to other irc, is PASSWDMISMATCH, disconnected the client
-//also according to other irc, PASS needs to come before NICK or USER
 void	Server::commandPass(int i, std::string line)
 {
 	if (_clients[i].isAuthenticated())
@@ -78,17 +75,14 @@ bool	Server::isNickInUse(std::string toFind)
 }
 void	Server::commandNick(int i, std::string args)
 {
-	//todo PUT THIS IN isValidNick
-	//todo PUT THIS IN isValidNick
 	if (!isValidNick(i, args))
 		return ;
 	
-	std::cout << _clients[i].getNick() << " set their nick to: ";//no need for this, can just set it and use it after
+	std::cout << _clients[i].getNick() << " set their nick to: ";
 	_clients[i].setNick(args);
 	std::cout << _clients[i].getNick() << std::endl;
 
-	//just outputs to client that NICK has been set
-	//todo setPrefix();
+	_clients[i].setPrefix();
 	checkRegistration(i);
 }
 
@@ -96,12 +90,12 @@ void	Server::commandNick(int i, std::string args)
 void	Server::welcomeClient(int i)
 {
 	sendToClient(i, "CAP * LS");
-	// sendToClient(i, RPL_WELCOME(_clients[i].getNick(), _name));
-	// sendToClient(i, RPL_YOURHOST(_name));
-	// sendToClient(i, RPL_MYINFO(_name, _clients[i].getNick()));
-	// sendToClient(i, RPL_MOTDSTART(_clients[i].getNick(), _name));
-	// sendToClient(i, RPL_MOTD(_clients[i].getNick(), _motd));
-	// sendToClient(i, RPL_ENDOFMOTD(_clients[i].getNick()));
+/* 	sendToClient(i, RPL_WELCOME(_clients[i].getNick(), _name));
+	sendToClient(i, RPL_YOURHOST(_name));
+	sendToClient(i, RPL_MYINFO(_name, _clients[i].getNick()));
+	sendToClient(i, RPL_MOTDSTART(_clients[i].getNick(), _name));
+	sendToClient(i, RPL_MOTD(_clients[i].getNick(), _motd));
+	sendToClient(i, RPL_ENDOFMOTD(_clients[i].getNick())); */
 }
 
 void	Server::checkRegistration(int i)

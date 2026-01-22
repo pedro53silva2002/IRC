@@ -79,18 +79,15 @@ class Server
 		int			getChannelId(std::string name);
 		bool		isUserInChannel(int i, int chId);
 
-		
-		void	testClients(int i);
-		void	test();
-
 	public:
+	//todo other constructors
 		Server(char *port, char *pass);
 		~Server();
 
 		void	srvRun();	
 };
 
-void	serverLog(std::string nick, std::string str);//remove
+void	serverLog(std::string nick, std::string str);
 
 int		mySocket(int __domain, int __type, int __protocol);
 void	myBind(int __fd, const sockaddr *__addr, socklen_t __len);

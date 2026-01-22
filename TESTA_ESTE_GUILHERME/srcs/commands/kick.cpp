@@ -1,6 +1,4 @@
 #include "../includes/Server.hpp"
-//todo PARSING, OUTPUT FOR KICKED CLIENT
-
 
 bool	Server::isValidKick(int i, std::string args)
 {
@@ -17,7 +15,7 @@ void	setKick(std::string line, std::string *chName, std::string *toKickName)
 	*chName = line.substr(0, pos);
 	*toKickName = line.substr(pos + 1);
 }
-//OPERATORS CAN KICK OTHER OPERATORS
+
 void	Server::commandKick(int i, std::string args)
 {
 	if (!isValidKick(i, args))
@@ -31,12 +29,8 @@ void	Server::commandKick(int i, std::string args)
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	if (!_channels[chId].isOp(i))
 		return (sendToClient(i, ERR_NOPRIVILEGES(_clients[i].getNick())));
-	if (toKickId == i)
-		return (sendToClient(i, " you cannot kick yourself FIX THIS STILL"));
 	
 	leaveChannel(toKickId, chId);
-	//todo output for kicked client
-
 	std::string strToSend = _clients[i].getPrefix() + " KICK " + chName + " " + toKickName;
 	clientBroadcast(i, chId, strToSend);
 }

@@ -9,7 +9,6 @@ bool	Server::isValidMode(int i, std::string args)
 	return (true);
 }
 
-//according to other irc, output is just for the client sending MODE
 void	Server::outputMode(int i, int chId, bool enable, char mode)
 {
 	char sign = (enable) ? '+' : '-';
@@ -55,7 +54,7 @@ void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 	if (!isUserInChannel(toOpId, chId))
 		return (sendToClient(i, ERR_USERNOTINCHANNEL(_clients[i].getNick(), args, _channels[chId].getName())));
 
-	_channels[chId].setOp(_clients[toOpId].getId(), opOrNot);//might replace for toOpId
+	_channels[chId].setOp(_clients[toOpId].getId(), opOrNot);
 	char sign = (opOrNot) ? '+' : '-';
 	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "o " + _clients[toOpId].getNick();
 	channelBroadcast(chId, strToSend);

@@ -17,10 +17,6 @@ void	Server::leaveChannel(int i, int chId)
 		serverLog(_channels[chId].getName(), "is empty, deleting");
 		_channels.erase(_channels.begin() + chId);
 	}
-	/* for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); it++) {
-				if (chId == it->getId())
-					_channels.erase(it);
-			} */
 }
 
 void	setPart(std::string args, std::string *chName, std::string *reason)

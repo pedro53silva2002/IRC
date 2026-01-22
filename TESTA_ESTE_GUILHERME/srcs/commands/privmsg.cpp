@@ -1,10 +1,4 @@
 #include "../includes/Server.hpp"
-//todo DO PRIVATE MESSAGES
-
-/*
-	check this output: 
-	PRIVMSG #CHANNEL :
-*/
 
 bool	Server::isValidPrivmsg(int i, std::string args)
 {

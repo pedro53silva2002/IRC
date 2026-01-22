@@ -1,9 +1,5 @@
 #include "../includes/Server.hpp"
 
-//ERR_USERONCHANNEL
-//ERR_CHANNELISFULL, +l
-//TODO PARSE
-
 bool	Server::isValidInvite(int i, std::string args)
 {
 	if (!_clients[i].isRegistered())

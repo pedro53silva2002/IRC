@@ -18,10 +18,6 @@
 */
 
 
-/** @brief Constructs a Server object and initializes the listening socket.
- *  @param port - Port number on which the server will listen for incoming client connections.
- *  @param pass - Password required for clients to authenticate with the server.
-*/
 Server::Server(char *port, char *pass) {
 	_name = "MyIRC";
 	_port = atoi(port);
@@ -46,10 +42,9 @@ Server::Server(char *port, char *pass) {
 	_srvPfd.events = POLLIN;
 	_srvPfd.revents = 0;
 
-	_channels.push_back(Channel());//NEW
+	// _channels.push_back(Channel());//NEW
 	_motd = "it is wednesday my dudes";
 }
-
 
 
 Server::~Server()
@@ -65,6 +60,7 @@ Server::~Server()
 	//clients.clear();
 	close(_socket);
 }
+
 
 int		Server::acceptClient()
 {
@@ -95,13 +91,10 @@ std::string parseLine(std::string line)
 }
 
 
-/** @brief Checks and select the command that was chosen from the input
- *  @param i - Index of the client that made the input
- *  @param line - Input in which the command is found
-*/
+
 void	Server::processCommand(int i, std::string line)
 {
-	std::cout << RED("--------------------------------------------------------------------------------\n");
+	// std::cout << RED("--------------------------------------------------------------------------------\n");
 	std::cout << _clients[i].getNick() << " said: [" + line + "]\n";
 	if (line.compare(0, 6, "CAP LS") == 0)//todo figure out what to do
 		return ;
@@ -111,9 +104,9 @@ void	Server::processCommand(int i, std::string line)
 
 
 	typedef void (Server::*funcs)(int, std::string);
-	std::string commands[] = {"QUIT", "PASS", "USER", "NICK", "JOIN",  "PART", "PRIVMSG", "KICK", "MODE", "TOPIC"/* , "INVITE" */};
+	std::string commands[] = {"QUIT", "PASS", "USER", "NICK", "JOIN",  "PART", "PRIVMSG", "KICK", "MODE", "TOPIC", "INVITE" };
 	funcs function[] = {&Server::commandQuit, &Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin,  &Server::commandPart ,
-		&Server::commandPrivmsg, &Server::commandKick, &Server::commandMode, &Server::commandTopic/*, &Server::commandInvite*/};
+		&Server::commandPrivmsg, &Server::commandKick, &Server::commandMode, &Server::commandTopic, &Server::commandInvite};
 	std::string temp = line.substr(0, line.find(' '));
 	std::string args = parseLine(line);
 	for (int j = 0; j < 11; j++) {
@@ -211,12 +204,12 @@ void	Server::test()
 	}
 }
 
-/** @brief Starts the server ready to accept the clients. */
+
 void	Server::srvRun()
 {
 	while (1)
 	{
-		// test();
+		test();
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		

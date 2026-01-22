@@ -1,19 +1,5 @@
 #include "../includes/Server.hpp"
 
-//todo parse
-/*
-	TOPIC <channel> [<topic>]
-	if <topic> is not given, RPL_TOPIC or RPL_NOTOPIC
-	else if topicRestricted, only op can edit topic
-	else user edits topic
-
-	valid:
-	TOPIC #channel :<topic?>
-	TOPIC #channel :					(clears channel)//todo
-	TOPIC #channel
-	TOPIC #channel <something>			(does it ignore?)//todo
-*/
-
 bool	Server::isValidTopic(int i, std::string args)
 {
 	if (!_clients[i].isRegistered())
@@ -56,7 +42,7 @@ void	Server::commandTopic(int i, std::string args)
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	if (newTopic.empty())
 		return (noArgsTopic(i, chName));
-	if (_channels[chId].isTopicRestricted() && !_channels[chId].isOp(_clients[i].getId()))//prob replace for i
+	if (_channels[chId].isTopicRestricted() && !_channels[chId].isOp(_clients[i].getId()))
 		return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), chName)));
 
 	_channels[chId].setTopic(newTopic);
