@@ -1,6 +1,7 @@
 #include "Channel.hpp"
 
 //*CONSTRUCTORS
+
 Channel::Channel() {
 	_id = -1;
 }

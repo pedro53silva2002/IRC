@@ -1,5 +1,20 @@
 #include "../includes/Server.hpp"
 
+/**
+ * @brief Validates the MODE command arguments before execution.
+ * 
+ * Performs basic validation to ensure the client is registered
+ * and that arguments were provided.
+ * 
+ * @param i    The file descriptor index of the client sending the command.
+ * @param args The raw arguments: "<channel> [modes]".
+ * 
+ * @return true if basic validation passes.
+ * @return false if validation fails (error sent to client).
+ * 
+ * @note Sends ERR_NOTREGISTERED (451) if client is not registered.
+ * @note Sends ERR_NEEDMOREPARAMS (461) if no arguments provided.
+ */
 bool	Server::isValidMode(int i, std::string args)
 {
 	if (!_clients[i].isRegistered())
@@ -9,7 +24,21 @@ bool	Server::isValidMode(int i, std::string args)
 	return (true);
 }
 
+
 //according to other irc, output is just for the client sending MODE
+/**
+ * @brief Sends a MODE change confirmation message to the client.
+ * 
+ * Constructs and sends a formatted MODE message indicating whether
+ * a specific mode was enabled or disabled on a channel.
+ * 
+ * @param i      The file descriptor index of the client to notify.
+ * @param chId   The ID of the channel where the mode was changed.
+ * @param enable true if the mode was enabled, false if disabled.
+ * @param mode   The mode character that was changed (e.g., 'i', 't', 'k', 'l').
+ * 
+ * @note The message format is: "<prefix> MODE <channel> <+/->mode".
+ */
 void	Server::outputMode(int i, int chId, bool enable, char mode)
 {
 	char sign = (enable) ? '+' : '-';
@@ -17,6 +46,19 @@ void	Server::outputMode(int i, int chId, bool enable, char mode)
 	sendToClient(i, strToSend);
 }
 
+/**
+ * @brief Sets or unsets the invite-only mode (+i) on a channel.
+ * 
+ * Enables or disables the invite-only restriction on the specified channel,
+ * notifies the client, and logs the change.
+ * 
+ * @param i              The file descriptor index of the client changing the mode.
+ * @param chId           The ID of the channel to modify.
+ * @param inviteOnlyOrNot true to enable invite-only mode, false to disable.
+ * 
+ * @note Sends MODE confirmation to the client via outputMode().
+ * @note Logs the mode change to the server log.
+ */
 void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 {
 	_channels[chId].setInviteMode(inviteOnlyOrNot);
@@ -26,6 +68,20 @@ void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 	else
 		serverLog(_channels[chId].getName(), " is now NOT invite only");
 }
+
+/**
+ * @brief Sets or unsets the topic restriction mode (+t) on a channel.
+ * 
+ * Enables or disables the topic restriction on the specified channel.
+ * When enabled, only channel operators can change the topic.
+ * 
+ * @param i             The file descriptor index of the client changing the mode.
+ * @param chId          The ID of the channel to modify.
+ * @param topicRestrict true to enable topic restriction, false to disable.
+ * 
+ * @note Sends MODE confirmation to the client via outputMode().
+ * @note Logs the mode change to the server log.
+ */
 void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
 {
 	_channels[chId].setTopicRestriction(topicRestrict);
@@ -35,6 +91,22 @@ void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
 	else
 		serverLog(_channels[chId].getName(), " is now NOT topic restricted");
 }
+
+/**
+ * @brief Sets or unsets the channel key mode (+k) on a channel.
+ * 
+ * Enables or disables the key (password) requirement for joining
+ * the specified channel.
+ * 
+ * @param i      The file descriptor index of the client changing the mode.
+ * @param chId   The ID of the channel to modify.
+ * @param key    The channel key to set (ignored if setKey is false).
+ * @param setKey true to set the channel key, false to remove it.
+ * 
+ * @note When disabling, the key is set to an empty string.
+ * @note Sends MODE confirmation to the client via outputMode().
+ * @note Logs the mode change to the server log.
+ */
 void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 {
 	if (!setKey)
@@ -47,6 +119,23 @@ void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 	else
 		serverLog(_channels[chId].getName(), " is now NOT key entry only");
 }
+
+/**
+ * @brief Sets or unsets the operator mode (+o) on a channel for a user.
+ * 
+ * Grants or revokes operator status for a specified user on a channel,
+ * notifies all channel members, and logs the change.
+ * 
+ * @param i       The file descriptor index of the client changing the mode.
+ * @param chId    The ID of the channel to modify.
+ * @param args    The nickname of the user to op or de-op.
+ * @param opOrNot true to grant operator status, false to revoke.
+ * 
+ * @note Sends error if the client tries to op themselves.
+ * @note Sends error if the target user is not in the channel.
+ * @note Broadcasts the mode change to all channel members.
+ * @note Logs the mode change to the server log.
+ */
 void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 {
 	if (_clients[i].getNick() == args)
@@ -66,6 +155,22 @@ void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 	else
 		serverLog(args, " is now NOT op");
 }
+
+/**
+ * @brief Sets or removes the user limit mode (+l) on a channel.
+ * 
+ * Sets a maximum number of users allowed in the channel, or removes
+ * the limit if an empty string is provided.
+ * 
+ * @param i        The file descriptor index of the client changing the mode.
+ * @param chId     The ID of the channel to modify.
+ * @param limitStr The user limit as a string, or empty to remove the limit.
+ * 
+ * @note If limitStr is empty, the limit is set to 0 (no limit).
+ * @note Sends an error message if limitStr is not a valid number.
+ * @note Sends MODE confirmation to the client via outputMode().
+ * @note Logs the mode change to the server log.
+ */
 void	Server::modeLim(int i, int chId, std::string limitStr)
 {
 	int limit;
@@ -83,7 +188,22 @@ void	Server::modeLim(int i, int chId, std::string limitStr)
 		serverLog(_channels[chId].getName(), "now has limit of " + limitStr);
 }
 
-
+/**
+ * @brief Executes a single MODE operation on a channel.
+ * 
+ * Validates permissions and dispatches the mode change to the appropriate
+ * handler based on the mode character.
+ * 
+ * @param i      The file descriptor index of the client executing the mode.
+ * @param chName The name of the target channel.
+ * @param opr    The mode operator string (e.g., "+i", "-t", "+o").
+ * @param args   Additional arguments for modes that require them (e.g., nickname for +o).
+ * 
+ * @note Sends ERR_NOTONCHANNEL (442) if the client is not in the channel.
+ * @note Sends ERR_NOPRIVILEGES (481) if the client is not a channel operator.
+ * @note Sends ERR_UMODEUNKNOWNFLAG if the mode character is not recognized.
+ * @note Supported modes: i (invite-only), t (topic restriction), k (key), o (operator), l (limit).
+ */
 void Server::executeCommandMode(int i, std::string chName, std::string opr, std::string args)
 {
 	int chId = getChannelId(chName);
@@ -117,6 +237,18 @@ void Server::executeCommandMode(int i, std::string chName, std::string opr, std:
 	}
 }
 
+/**
+ * @brief Handles the IRC MODE command for channels.
+ * 
+ * Parses the MODE command arguments, validates them, and executes
+ * the requested mode changes on the specified channel.
+ * 
+ * @param i    The file descriptor index of the client sending the command.
+ * @param line The raw arguments: "<channel> [modes]".
+ * 
+ * @note If no modes are provided, sends the current channel modes to the client.
+ * @note Supports multiple mode changes in a single command.
+ */
 void	Server::commandMode(int i, std::string line)
 {
 	if (!isValidMode(i, line))

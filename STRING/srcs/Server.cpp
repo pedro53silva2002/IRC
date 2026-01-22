@@ -61,7 +61,17 @@ Server::~Server()
 	close(_socket);
 }
 
-
+/**
+ * @brief Accepts a new incoming client connection.
+ * 
+ * Waits for a new client to connect, accepts the connection,
+ * and returns the new client's socket file descriptor.
+ * 
+ * @return The socket file descriptor for the accepted client.
+ * 
+ * @throws std::runtime_error if accepting the client fails.
+ * 
+ */
 int		Server::acceptClient()
 {
 	int			tempSocket;
@@ -81,6 +91,16 @@ int		Server::acceptClient()
 
 
 //todo skip all whitespaces
+/**
+ * @brief Extracts the arguments from a command line string.
+ * 
+ * Finds the first space in the input string and returns the substring
+ * following it, which represents the command arguments.
+ * 
+ * @param line The full command line string.
+ * 
+ * @return The arguments substring after the first space, or an empty string if none found.
+ */
 std::string parseLine(std::string line)
 {
 	int pos = line.find(' ');
@@ -90,8 +110,17 @@ std::string parseLine(std::string line)
 	return (arguments);
 }
 
-
-
+/**
+ * @brief Processes a command received from a client.
+ * 
+ * Parses the command line to identify the command and its arguments,
+ * then invokes the corresponding handler function for that command.
+ * 
+ * @param i    The file descriptor index of the client sending the command.
+ * @param line The full command line string received from the client.
+ * 
+ * @note If the command is unrecognized, sends an ERR_UNKNOWNCOMMAND response to the client.
+ */
 void	Server::processCommand(int i, std::string line)
 {
 	// std::cout << RED("--------------------------------------------------------------------------------\n");
@@ -118,6 +147,19 @@ void	Server::processCommand(int i, std::string line)
 	sendToClient(i, ERR_UNKNOWNCOMMAND(_clients[i].getNick(), line));
 }
 
+/**
+ * @brief Handles incoming data from a client socket.
+ * 
+ * Receives data from the client, processes complete command lines,
+ * and handles client disconnection if necessary.
+ * 
+ * @param i The file descriptor index of the client.
+ * 
+ * @return true if the client is still connected, false if the client disconnected.
+ * 
+ * @note Calls processCommand() for each complete command line received.
+ * @note Calls commandQuit() and returns false if the client disconnects.
+ */
 bool	Server::handleClientPoll(int i)
 {
 	char		buf[512];
@@ -143,6 +185,7 @@ bool	Server::handleClientPoll(int i)
 	return (true);
 }
 
+
 void	Server::testClients(int i)
 {
 	std::cout << "hardcoding client " << _clients[i].getId() << "\n";
@@ -167,7 +210,6 @@ void	Server::testClients(int i)
 	_clients[i].setPrefix();
 	welcomeClient(i);
 }
-
 
 void	Server::test()
 {
@@ -204,7 +246,18 @@ void	Server::test()
 	}
 }
 
-
+/**
+ * @brief Main server loop for handling client connections and events.
+ * 
+ * Continuously polls for new client connections and incoming data from clients,
+ * accepts new clients, and dispatches events to the appropriate handlers.
+ * 
+ * @note Calls test() for debugging output each loop iteration.
+ * @note Uses setPfds() to update the pollfd vector.
+ * @note Accepts new clients and adds them to the _clients map.
+ * @note Handles incoming data for each client using handleClientPoll().
+ * @note Closes the server socket on exit.
+ */
 void	Server::srvRun()
 {
 	while (1)
