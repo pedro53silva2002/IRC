@@ -1,14 +1,13 @@
 #include "Channel.hpp"
 
 //*CONSTRUCTORS
-
 Channel::Channel() {
 	_id = -1;
 }
 Channel::Channel(std::string name) {
 	_id = _globalChannelId++;
 	_name = name;
-	_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());//what??
+	_name.erase(std::remove(_name.begin(),_name.end(), '\n'),_name.end());
 	_name.erase(std::remove(_name.begin(),_name.end(), '\r'),_name.end());
 	_limit = 0;
 	_channelKey = "";
@@ -31,6 +30,9 @@ Channel& Channel::operator=(const Channel& other) {
 	}
 	return (*this);
 }
+Channel::~Channel() {
+
+}
 
 //*GETTERS
 int				Channel::getId() {
@@ -42,7 +44,7 @@ std::string		Channel::getName() {
 std::string		Channel::getChannelKey() {
 	return (_channelKey);
 }
-int				Channel::getLimit() {
+size_t				Channel::getLimit() {
 	return (_limit);
 }
 std::string		Channel::getTopic() {
@@ -86,10 +88,14 @@ void	Channel::setTopicRestriction(bool value) {
 	_isTopicRestricted = value;
 }
 void	Channel::setOp(int id, bool opOrNot) {
-	if (opOrNot == true)
+	if (opOrNot)
 		_ops.push_back(id);
 	else
 		_ops.erase(find(_ops.begin(), _ops.end(), id));
+}
+
+void		Channel::decrementId() {
+	_globalChannelId--;
 }
 
 //*OTHERS

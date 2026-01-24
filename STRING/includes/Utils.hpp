@@ -16,8 +16,6 @@
 # include <map>
 # include <signal.h>
 
-
-
 #define RST "\033[1;0m"
 #define DRED "\033[1;31m"
 #define DGREEN "\033[1;32m"

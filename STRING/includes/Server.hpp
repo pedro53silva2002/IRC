@@ -59,7 +59,7 @@ class Server
 		void	commandMode(int, std::string);
 		bool	isValidMode(int, std::string);
 		void 	executeCommandMode(int, std::string, std::string, std::string);
-		void	outputMode(int, int, bool, char);
+		void	outputMode(int, int, bool, char, std::string);
 		void	modeInviteOnly(int, int, bool);
 		void	modeTopicRestriction(int, int, bool);
 		void	modeKey(int, int, std::string, bool);
@@ -79,18 +79,19 @@ class Server
 		int			getChannelId(std::string name);
 		bool		isUserInChannel(int i, int chId);
 
-		
-		void	testClients(int i);
 		void	test();
 
 	public:
+		Server();
 		Server(char *port, char *pass);
+		Server(const Server& other);
+		Server& operator=(const Server& other);
 		~Server();
 
 		void	srvRun();	
 };
 
-void	serverLog(std::string nick, std::string str);//remove
+void	serverLog(std::string nick, std::string str);
 
 int		mySocket(int __domain, int __type, int __protocol);
 void	myBind(int __fd, const sockaddr *__addr, socklen_t __len);

@@ -1,9 +1,5 @@
 #include "../includes/Server.hpp"
 
-//ERR_USERONCHANNEL
-//ERR_CHANNELISFULL, +l
-//TODO PARSE
-
 /**
  * @brief Validates the INVITE command arguments before execution.
  * 
@@ -45,7 +41,6 @@ void	setInvite(std::string line, std::string *invitedName, std::string *chName)
 	*invitedName = line.substr(0, pos);
 	*chName = line.substr(pos + 1);
 }
-
 
 /**
  * @brief Handles the IRC INVITE command to invite a user to a channel.

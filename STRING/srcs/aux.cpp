@@ -3,15 +3,7 @@ int Channel::_globalChannelId;
 int Client::_globalId;
 
 
-/**
- * @brief Outputs a formatted server log message to the console.
- * 
- * Prints a message to standard output with a yellow "Server log:" prefix,
- * followed by the provided nickname and message string.
- * 
- * @param nick The nickname or context for the log entry.
- * @param str  The message to log.
- */
+
 void	serverLog(std::string nick, std::string str)
 {
 	std::cout << YELLOW("Server log: ") << nick << " " << str << std::endl;
@@ -34,6 +26,8 @@ void	Server::setPfds()
 		_pfds.push_back(it->second.getPfd());
 }
 
+
+//*Broadcasts
 /**
  * @brief Sends a message to a specific client socket.
  * 
@@ -103,6 +97,8 @@ void	Server::clientBroadcast(int i, int chId, std::string str)
 	}
 }
 
+
+//*Other Getters
 /**
  * @brief Retrieves the client ID (index) for a given nickname.
  * 
@@ -117,10 +113,9 @@ void	Server::clientBroadcast(int i, int chId, std::string str)
  */
 int Server::getClientId(std::string name)
 {
-	for (size_t i = 1; i < _clients.size(); i++)
-	{
-		if (name == _clients[i].getNick())
-			return (i);
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)	{
+		if (name == _clients[it->first].getNick())
+			return (it->first);
 	}
 	return (-1);
 }
@@ -170,7 +165,9 @@ bool Server::isUserInChannel(int i, int chId)
 	return (false);
 }
 
- /**
+
+//*Parsing
+/**
  * @brief Checks if a string consists only of numeric characters.
  * 
  * Iterates through the string to verify that each character is a digit.

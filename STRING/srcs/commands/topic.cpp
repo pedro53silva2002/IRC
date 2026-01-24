@@ -1,19 +1,5 @@
 #include "../includes/Server.hpp"
 
-//todo parse
-/*
-	TOPIC <channel> [<topic>]
-	if <topic> is not given, RPL_TOPIC or RPL_NOTOPIC
-	else if topicRestricted, only op can edit topic
-	else user edits topic
-
-	valid:
-	TOPIC #channel :<topic?>
-	TOPIC #channel :					(clears channel)//todo
-	TOPIC #channel
-	TOPIC #channel <something>			(does it ignore?)//todo
-*/
-
 /**
  * @brief Validates the TOPIC command arguments before execution.
  * 
@@ -50,10 +36,10 @@ bool	Server::isValidTopic(int i, std::string args)
  * 
  * @note If no space is found, the entire line is treated as the channel name.
  */
-void	setTopicArgs(std::string line, std::string *channel, std::string *newTopic)
+void	setTopicArgs(std::string line, std::string *chName, std::string *newTopic)
 {
-	int pos = line.find(' ');
-	*channel = line.substr(0, pos);
+	size_t pos = line.find(' ');
+	*chName = line.substr(0, pos);
 	if (pos != std::string::npos) {
 		std::string rest = line.substr(pos + 1);
 		*newTopic = rest;
@@ -108,7 +94,7 @@ void	Server::commandTopic(int i, std::string args)
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	if (newTopic.empty())
 		return (noArgsTopic(i, chName));
-	if (_channels[chId].isTopicRestricted() && !_channels[chId].isOp(_clients[i].getId()))//prob replace for i
+	if (_channels[chId].isTopicRestricted() && !_channels[chId].isOp(i))
 		return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), chName)));
 
 	_channels[chId].setTopic(newTopic);

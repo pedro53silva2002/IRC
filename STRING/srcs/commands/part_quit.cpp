@@ -43,11 +43,8 @@ void	Server::leaveChannel(int i, int chId)
 	if (_channels[chId].getClientsInChannel().empty()) {
 		serverLog(_channels[chId].getName(), "is empty, deleting");
 		_channels.erase(_channels.begin() + chId);
+		_channels[chId].decrementId();
 	}
-	/* for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); it++) {
-				if (chId == it->getId())
-					_channels.erase(it);
-			} */
 }
 
 /**
@@ -64,7 +61,7 @@ void	Server::leaveChannel(int i, int chId)
  */
 void	setPart(std::string args, std::string *chName, std::string *reason)
 {
-	int pos = args.find(' ');
+	size_t pos = args.find(' ');
 	*chName = args.substr(0, pos);
 	*reason = args.substr(pos + 1);
 }

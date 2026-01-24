@@ -24,7 +24,6 @@ bool	Server::isValidMode(int i, std::string args)
 	return (true);
 }
 
-
 //according to other irc, output is just for the client sending MODE
 /**
  * @brief Sends a MODE change confirmation message to the client.
@@ -39,11 +38,11 @@ bool	Server::isValidMode(int i, std::string args)
  * 
  * @note The message format is: "<prefix> MODE <channel> <+/->mode".
  */
-void	Server::outputMode(int i, int chId, bool enable, char mode)
+void	Server::outputMode(int i, int chId, bool enable, char mode, std::string args)
 {
 	char sign = (enable) ? '+' : '-';
-	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + mode;
-	sendToClient(i, strToSend);
+	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + mode + " " +args;
+	channelBroadcast(chId, strToSend);
 }
 
 /**
@@ -62,7 +61,7 @@ void	Server::outputMode(int i, int chId, bool enable, char mode)
 void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 {
 	_channels[chId].setInviteMode(inviteOnlyOrNot);
-	outputMode(i, chId, inviteOnlyOrNot, 'i');
+	outputMode(i, chId, inviteOnlyOrNot, 'i', "");
 	if (inviteOnlyOrNot)
 		serverLog(_channels[chId].getName(), " is now invite only");
 	else
@@ -85,7 +84,7 @@ void	Server::modeInviteOnly(int i, int chId, bool inviteOnlyOrNot)
 void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
 {
 	_channels[chId].setTopicRestriction(topicRestrict);
-	outputMode(i, chId, topicRestrict, 't');
+	outputMode(i, chId, topicRestrict, 't', "");
 	if (topicRestrict)
 		serverLog(_channels[chId].getName(), " is now topic restricted");
 	else
@@ -109,15 +108,16 @@ void	Server::modeTopicRestriction(int i, int chId, bool topicRestrict)
  */
 void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 {
-	if (!setKey)
+	if (!setKey) {
 		_channels[chId].setChannelKey("");
-	else
-		_channels[chId].setChannelKey(key);
-	outputMode(i, chId, setKey, 'k');
-	if (setKey)
-		serverLog(_channels[chId].getName(), " is now key entry only");
-	else
+		outputMode(i, chId, setKey, 'k', "");
 		serverLog(_channels[chId].getName(), " is now NOT key entry only");
+	}
+	else {
+		_channels[chId].setChannelKey(key);
+		outputMode(i, chId, setKey, 'k', key);
+		serverLog(_channels[chId].getName(), " is now key entry only");
+	}
 }
 
 /**
@@ -139,17 +139,13 @@ void	Server::modeKey(int i, int chId, std::string key, bool setKey)
 void	Server::modeOp(int i, int chId, std::string args, bool opOrNot)
 {
 	if (_clients[i].getNick() == args)
-		return (sendToClient(i, " FIX THIS OUTPUT, you cannot op yourself"));
+		return (sendToClient(i, "you cannot op yourself"));
 	int toOpId = getClientId(args);
 	if (!isUserInChannel(toOpId, chId))
 		return (sendToClient(i, ERR_USERNOTINCHANNEL(_clients[i].getNick(), args, _channels[chId].getName())));
-
-	_channels[chId].setOp(_clients[toOpId].getId(), opOrNot);//might replace for toOpId
-	char sign = (opOrNot) ? '+' : '-';
-	std::string strToSend = _clients[i].getPrefix() + " MODE " +  _channels[chId].getName() + " " + sign + "o " + _clients[toOpId].getNick();
-	channelBroadcast(chId, strToSend);
-
-
+	
+	_channels[chId].setOp(toOpId, opOrNot);
+	outputMode(i, chId, opOrNot, 'o', _clients[toOpId].getNick());
 	if (opOrNot)
 		serverLog(args, " is now op");
 	else
@@ -181,11 +177,14 @@ void	Server::modeLim(int i, int chId, std::string limitStr)
 	else 
 		limit = atoi(limitStr.c_str());
 	_channels[chId].setLimit(limit);
-	outputMode(i, chId, limit, 'l');
-	if (limit == 0)
+	if (limit == 0) {
+		outputMode(i, chId, limit, 'l', limitStr);
 		serverLog(_channels[chId].getName(), "now has NO limit");
-	else
+	}
+	else {
+		outputMode(i, chId, limit, 'l', limitStr);
 		serverLog(_channels[chId].getName(), "now has limit of " + limitStr);
+	}
 }
 
 /**
@@ -254,12 +253,12 @@ void	Server::commandMode(int i, std::string line)
 	if (!isValidMode(i, line))
 		return ;
 
-	int pos = line.find(' ');
+	size_t pos = line.find(' ');
 	std::string channelTarget = line.substr(0, pos);
 	int chId = getChannelId(channelTarget);
 	if (!isUserInChannel(i, chId))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), channelTarget)));
-	if (line == channelTarget)
+	if (line == channelTarget || line == channelTarget + ' ')
 		return (sendToClient(i, RPL_CHANNELMODEIS(_clients[i].getNick(), channelTarget)));
 	
 	std::vector<std::string> opr;
@@ -285,7 +284,7 @@ void	Server::commandMode(int i, std::string line)
 		if (nextPos)
 			user.push_back(line.substr(nextPos, line.size() - nextPos));
 	}
-	int k = 0;
+	size_t k = 0;
 	for (std::vector<std::string>::iterator it = opr.begin(); it != opr.end(); ++it)
 	{
 		if ((*it).size() > 2)

@@ -1,24 +1,30 @@
 #include "../includes/Server.hpp"
 
-//todo parse the main
-//check order of parsing, like isOp, isInChannel
-//todo if op leaves a channel, it gets removed. check what happens with op
-//!change stuff for NEW instead of just pushback
+Server::Server() {
+	_name = "just why did you try";
+	throw (std::runtime_error(_name));
+}
+Server::Server(const Server& other) {
+	*this = other;
+}
+Server& Server::operator=(const Server& other) {
+	if (this != &other) {
+		_name = other._name;
+		_port = other._port;
+		_pass = other._pass;
+		_socket = other._socket;
+		server_addr = other.server_addr;
+		_srvPfd = other._srvPfd;
+		_motd = other._motd;
+		_pfds = other._pfds;
+		_clients = other._clients;
+		_channels = other._channels;
+	}
+	return (*this);
+}
 
-/*
-	PASS USER NICK 		FULLY done
-	QUIT				//? should be done
-	JOIN				//? done except key
-	PART 				//? should be done
-	PRIVMSG				//fully done?
-	KICK 				//needs parsing
-	MODE 				//needs parsing and outputs
-	TOPIC 				//broken
-	INVITE				//redone, needs parse
-*/
-
-
-Server::Server(char *port, char *pass) {
+Server::Server(char *port, char *pass)
+{
 	_name = "MyIRC";
 	_port = atoi(port);
 	_pass = pass;
@@ -42,7 +48,6 @@ Server::Server(char *port, char *pass) {
 	_srvPfd.events = POLLIN;
 	_srvPfd.revents = 0;
 
-	// _channels.push_back(Channel());//NEW
 	_motd = "it is wednesday my dudes";
 }
 
@@ -50,14 +55,9 @@ Server::Server(char *port, char *pass) {
 Server::~Server()
 {
 	serverLog("Server", "closing");
-	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); it++) {
-		//delete the channels
-	}
-	//channels.clear();
 	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++) {
 		close(it->second.getSocket());
 	}
-	//clients.clear();
 	close(_socket);
 }
 
@@ -85,12 +85,9 @@ int		Server::acceptClient()
 	memset(host, 0, NI_MAXHOST);
 	
 	inet_ntop(AF_INET, &clientAddr.sin_addr, host, NI_MAXHOST);
-	// std::cout << host << " manually connected on " << ntohs(clientAddr.sin_port) << std::endl;
 	return (tempSocket);
 }
 
-
-//todo skip all whitespaces
 /**
  * @brief Extracts the arguments from a command line string.
  * 
@@ -103,12 +100,13 @@ int		Server::acceptClient()
  */
 std::string parseLine(std::string line)
 {
-	int pos = line.find(' ');
+	size_t pos = line.find(' ');
 	if (pos == std::string::npos)
 		return ("");
 	std::string arguments = line.substr(pos + 1);
 	return (arguments);
 }
+
 
 /**
  * @brief Processes a command received from a client.
@@ -123,14 +121,13 @@ std::string parseLine(std::string line)
  */
 void	Server::processCommand(int i, std::string line)
 {
-	// std::cout << RED("--------------------------------------------------------------------------------\n");
-	std::cout << _clients[i].getNick() << " said: [" + line + "]\n";
-	if (line.compare(0, 6, "CAP LS") == 0)//todo figure out what to do
+	// std::cout << _clients[i].getNick() << " said: [" + line + "]\n";
+	if (line.compare(0, 6, "CAP LS") == 0)
+		return ;
+	if (line.compare(0, 3, "WHO") == 0)
 		return ;
 	else if (line.compare(0, 4, "exit") == 0)
 		throw (0);
-
-
 
 	typedef void (Server::*funcs)(int, std::string);
 	std::string commands[] = {"QUIT", "PASS", "USER", "NICK", "JOIN",  "PART", "PRIVMSG", "KICK", "MODE", "TOPIC", "INVITE" };
@@ -186,31 +183,6 @@ bool	Server::handleClientPoll(int i)
 }
 
 
-void	Server::testClients(int i)
-{
-	std::cout << "hardcoding client " << _clients[i].getId() << "\n";
-	if (_clients.size() == 1) {
-		_clients[i].setNick("First");
-		_clients[i].setUsername("First");
-		_clients[i].setRealname("First");
-	}
-	else if (_clients.size() == 2) {
-		_clients[i].setNick("Second");
-		_clients[i].setUsername("Second");
-		_clients[i].setRealname("Second");
-	}
-	else if (_clients.size() == 3) {
-		_clients[i].setNick("Third");
-		_clients[i].setUsername("Third");
-		_clients[i].setRealname("Third");
-	}
-	_clients[i].setAuthenticated(true);
-	_clients[i].setRegistered(true);
-	_clients[i].setHost(_name);
-	_clients[i].setPrefix();
-	welcomeClient(i);
-}
-
 void	Server::test()
 {
 	std::cout << RED("--------------------------------------------------------------------------------\n");
@@ -225,7 +197,7 @@ void	Server::test()
 		std::cout << it->first << ": [" << it->second.getNick() << "], ";
 	}
 	std::cout << std::endl; */
-/* 	serverLog("Each client info:", "");
+	serverLog("Each client info:", "");
 	for (std::map<int, Client>::iterator it1 = _clients.begin(); it1 != _clients.end(); it1++)	{
 		std::cout << _clients[it1->first].getId() << ": [" << _clients[it1->first].getNick() << "] is connected to channels: ";
 		
@@ -234,17 +206,18 @@ void	Server::test()
 			std::cout << it2->first << ": [" << it2->second << "], ";
 		}
 		std::cout << std::endl;
-	} */
-	serverLog("Each channel info:", "");
-	for (int i = 0; i < _channels.size(); i++) {
+	}
+/* 	serverLog("Each channel info:", "");
+	for (size_t i = 0; i < _channels.size(); i++) {
 		std::cout << i << ": [" << _channels[i].getName() << "] has these clients connected: ";
 		for (std::vector<int>::iterator it = _channels[i].getClientsInChannel().begin(); 
 			it != _channels[i].getClientsInChannel().end(); it++) {
 				std::cout << "[" << _clients[*it].getNick() << "], ";
 		}
 		std::cout << std::endl;
-	}
+	} */
 }
+
 
 /**
  * @brief Main server loop for handling client connections and events.
@@ -262,7 +235,7 @@ void	Server::srvRun()
 {
 	while (1)
 	{
-		test();
+		// test();
 		setPfds();
 		myPoll(_pfds.data(), _pfds.size(), -1);
 		
@@ -271,15 +244,13 @@ void	Server::srvRun()
 			int temp = acceptClient();
 			_clients.insert(std::make_pair(temp, Client(temp)));
 
-			//HARDCODED CLIENTS AND CHANNELS
-			// testClients(temp);
 		}
 	
-		for (int i = 1; i < _pfds.size(); i++)
+		for (size_t i = 1; i < _pfds.size(); i++)
 		{
 			if (_pfds[i].revents & POLLIN) {
 				int ret = handleClientPoll(_pfds[i].fd);
-				if (ret == false)//i dont like this
+				if (ret == false)
 					continue ;
 			}
 		}

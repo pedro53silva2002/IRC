@@ -1,7 +1,5 @@
 #include "../includes/Server.hpp"
 
-//todo PARSING AND KEY
-
 /**
  * @brief Validates the JOIN command arguments before execution.
  * 
@@ -43,7 +41,7 @@ bool	Server::isValidJoin(int i, std::string args)
  */
 void	setJoin(std::string args, std::string *chName, std::string *key)
 {
-	int pos = args.find(' ');
+	size_t pos = args.find(' ');
 	*chName = args.substr(0, pos);
 	if (pos != std::string::npos)
 		*key = args.substr(pos + 1);
@@ -64,7 +62,7 @@ void	setJoin(std::string args, std::string *chName, std::string *key)
  */
 bool ischNameValid(std::string chName)
 {
-	for (int i = 0; i < chName.size(); i++) {
+	for (size_t i = 0; i < chName.size(); i++) {
 		char c = chName[i];
 		if (c == 0x00 || c == 0x07 || c == 0x20 || c == 0x2C)
 			return (false);
@@ -90,11 +88,10 @@ bool ischNameValid(std::string chName)
  */
 int		Server::findOrCreateChannel(int i, std::string chName)
 {
-	for (int j = 0; j < _channels.size(); j++) {
+	for (size_t j = 0; j < _channels.size(); j++) {
 		if (chName == _channels[j].getName())
 			return (_channels[j].getId());
 	}
-
 	_channels.push_back(Channel(chName));
 	int chId = _channels.rbegin()->getId();
 	_channels[chId].setOp(i, true);
@@ -128,7 +125,6 @@ void	Server::commandJoin(int i, std::string args)
 	if (!ischNameValid(chName))
 		return (sendToClient(i, ERR_BADCHANMASK(_clients[i].getNick(), chName)));
 
-	
 	int chId = findOrCreateChannel(i, chName);
 	if (key != _channels[chId].getChannelKey())
 		return (sendToClient(i, ERR_BADCHANNELKEY(_clients[i].getNick(), chName)));
@@ -145,4 +141,15 @@ void	Server::commandJoin(int i, std::string args)
 	std::string strToSend = _clients[i].getPrefix() + " JOIN " + chName;
 	channelBroadcast(chId, strToSend);
 	sendToClient(i, RPL_TOPIC(_clients[i].getNick(), chName, _channels[chId].getTopic()));
+
+	std::string user_list;
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)	{
+		if (isUserInChannel(it->first, chId)) {
+			if (_channels[chId].isOp(it->first))
+				user_list += "@";
+			user_list += _clients[it->first].getNick();
+			user_list += " ";
+		}
+	}
+	sendToClient(i, RPL_NAMREPLY(_clients[i].getNick(), _channels[chId].getName(), user_list));
 }

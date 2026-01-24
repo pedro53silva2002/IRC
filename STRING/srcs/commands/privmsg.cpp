@@ -1,10 +1,4 @@
 #include "../includes/Server.hpp"
-//todo DO PRIVATE MESSAGES
-
-/*
-	check this output: 
-	PRIVMSG #CHANNEL :
-*/
 
 /**
  * @brief Validates the PRIVMSG command arguments before execution.
@@ -28,7 +22,7 @@ bool	Server::isValidPrivmsg(int i, std::string args)
 	if (args.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PRIVMSG")), false);
 	
-	int pos = args.find(' ');
+	size_t pos = args.find(' ');
 	if (pos == std::string::npos || args.substr(pos + 1).empty())
 		return (false);
 	return (true);
@@ -48,7 +42,7 @@ bool	Server::isValidPrivmsg(int i, std::string args)
  */
 void	setPrivmsg(std::string args, std::string *channel, std::string *message)
 {
-	int pos = args.find(' ');
+	size_t pos = args.find(' ');
 	*channel = args.substr(0, pos);
 	std::string rest = args.substr(pos + 1);
 	if (rest[0] == ':')
