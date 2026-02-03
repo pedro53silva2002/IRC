@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-//*Constructors
+//*CONSTRUCTORS
 Client::Client() {
 	_id = -1;
 }
@@ -38,6 +38,9 @@ Client& Client::operator=(const Client& other) {
 		_chans = other._chans;
 	}
 	return (*this);
+}
+Client::~Client() {
+	
 }
 
 
@@ -97,7 +100,7 @@ void	Client::setRealname(std::string realname) {
 	_realname = realname;
 }
 void	Client::setPrefix() {
-	_prefix = ":" + _nick + "!" + _username + "@127.0.0.1";
+	_prefix = _nick + "!" + _username + "@127.0.0.1";
 }
 void	Client::setHost(std::string host) {
 	_host = host;

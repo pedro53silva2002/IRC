@@ -30,6 +30,9 @@ Channel& Channel::operator=(const Channel& other) {
 	}
 	return (*this);
 }
+Channel::~Channel() {
+
+}
 
 //*GETTERS
 int				Channel::getId() {
@@ -41,7 +44,7 @@ std::string		Channel::getName() {
 std::string		Channel::getChannelKey() {
 	return (_channelKey);
 }
-int				Channel::getLimit() {
+size_t				Channel::getLimit() {
 	return (_limit);
 }
 std::string		Channel::getTopic() {
@@ -56,10 +59,11 @@ bool 			Channel::isTopicRestricted() {
 std::vector<int>	&Channel::getClientsInChannel() {
 	return (_clientsInChannel);
 }
-bool				Channel::isOp(int id) {
-	if (find(_ops.begin(), _ops.end(), id) != _ops.end())
-		return (true);
-	return (false);
+std::string		Channel::getTopicTimeSet() {
+	return (_topicTimeSet);
+}
+std::string	Channel::getTopicAuthor() {
+	return (_topicAuthor);
 }
 
 //*SETTERS
@@ -84,17 +88,62 @@ void	Channel::setInviteMode(bool value) {
 void	Channel::setTopicRestriction(bool value) {
 	_isTopicRestricted = value;
 }
+void	Channel::setTopicTimeSet() {
+	time_t timestamp = time(&timestamp);
+	std::stringstream ss;
+	ss << timestamp;
+	_topicTimeSet = ss.str();
+	if (_topicTimeSet.find('\n') != std::string::npos)
+		_topicTimeSet.erase(_topicTimeSet.find('\n'));
+}
+void	Channel::setTopicAuthor(std::string setter) {
+	_topicAuthor = setter;
+}
+
+
+//*OTHERS
+
+		bool			isOp(int id);
+		bool			isInvited(int id);
+		void			setOp(int id, bool opOrNot);
+		void			addInvited(int id);
+
+bool	Channel::isOp(int id) {
+	if (find(_ops.begin(), _ops.end(), id) != _ops.end())
+		return (true);
+	return (false);
+}
 void	Channel::setOp(int id, bool opOrNot) {
-	if (opOrNot == true)
+	if (opOrNot)
 		_ops.push_back(id);
 	else
 		_ops.erase(find(_ops.begin(), _ops.end(), id));
 }
+bool	Channel::isInvited(int id) {
+	if (find(_invited.begin(), _invited.end(), id) != _invited.end()) {
+		std::cout << "is invited??\n";
+		return (true);
+	}
+	return (false);
+}
+void	Channel::addInvited(int id) {
+	_invited.push_back(id);
+}
 
-//*OTHERS
+
+
+void		Channel::decrementId() {
+	_globalChannelId--;
+}
 void	Channel::addClient(int id) {
 	_clientsInChannel.push_back(id);
 }
 void	Channel::removeClient(int id) {
 	_clientsInChannel.erase(find(_clientsInChannel.begin(), _clientsInChannel.end(), id));
+	std::vector<int>::iterator pos = find(_invited.begin(), _invited.end(), id);
+	if (pos != _invited.end())
+		_invited.erase(pos);
+	pos = find(_ops.begin(), _ops.end(), id);
+	if (pos != _ops.end())
+		_ops.erase(pos);
 }

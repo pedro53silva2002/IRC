@@ -16,12 +16,13 @@ void	Server::leaveChannel(int i, int chId)
 	if (_channels[chId].getClientsInChannel().empty()) {
 		serverLog(_channels[chId].getName(), "is empty, deleting");
 		_channels.erase(_channels.begin() + chId);
+		_channels[chId].decrementId();
 	}
 }
 
 void	setPart(std::string args, std::string *chName, std::string *reason)
 {
-	int pos = args.find(' ');
+	size_t pos = args.find(' ');
 	*chName = args.substr(0, pos);
 	*reason = args.substr(pos + 1);
 }
@@ -36,13 +37,9 @@ void	Server::commandPart(int i, std::string args)
 	if (!isUserInChannel(i, chId))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 
+	channelBroadcast(chId, PART(_clients[i].getNick(), chName));
 	leaveChannel(i, chId);
-	std::string strToSend = _clients[i].getPrefix() + " PART " + chName;
-	clientBroadcast(i, chId, strToSend);
-	strToSend = _clients[i].getPrefix() + " PART " + chName;
-	sendToClient(i, strToSend);
 }
-
 
 void	Server::commandQuit(int i, std::string args)
 {

@@ -26,6 +26,7 @@ class Client
 		Client(int srvSocket);
 		Client(const Client& other);
 		Client& operator=(const Client& other);
+		~Client();
 
 		int			getId();
 		int			getSocket();

@@ -6,6 +6,8 @@
 # include "Defines.hpp"
 # include "Utils.hpp"
 
+const std::string SERVERNAME = "MyIRC";
+
 class Server
 {
 	private:
@@ -58,20 +60,17 @@ class Server
 		
 		void	commandMode(int, std::string);
 		bool	isValidMode(int, std::string);
-		void 	executeCommandMode(int, std::string, std::string, std::string);
-		void	outputMode(int, int, bool, char);
-		void	modeInviteOnly(int, int, bool);
-		void	modeTopicRestriction(int, int, bool);
-		void	modeKey(int, int, std::string, bool);
-		void	modeOp(int, int, std::string, bool);
-		void	modeLim(int, int, std::string);
+		void	modeInviteOnly(int, int, bool *);
+		void	modeTopicRestriction(int, int, bool *);
+		void	modeKey(int, int, std::vector<std::string>, bool *, int *);
+		void	modeOp(int, int, std::vector<std::string>, bool *, int *);
+		void	modeLim(int, int, std::vector<std::string>, bool *, int *);
 		
 		void	commandInvite(int, std::string);
 		bool	isValidInvite(int, std::string);
 
 		void	commandTopic(int, std::string);
 		bool	isValidTopic(int, std::string);
-		void	noArgsTopic(int, std::string);
 
 
 
@@ -79,9 +78,13 @@ class Server
 		int			getChannelId(std::string name);
 		bool		isUserInChannel(int i, int chId);
 
+		void	test();
+
 	public:
-	//todo other constructors
+		Server();
 		Server(char *port, char *pass);
+		Server(const Server& other);
+		Server& operator=(const Server& other);
 		~Server();
 
 		void	srvRun();	
@@ -97,5 +100,6 @@ size_t	myRecv(int __fd, char *__buf, size_t __n, int __flags);
 
 bool	parseMain(int ac, char **av);
 bool	isNum(std::string str);
+std::vector<std::string> getArgs(std::string line);
 
 #endif

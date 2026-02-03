@@ -9,24 +9,16 @@ bool	Server::isValidTopic(int i, std::string args)
 	return (true);
 }
 
-void	setTopicArgs(std::string line, std::string *channel, std::string *newTopic)
+void	setTopicArgs(std::string line, std::string *chName, std::string *newTopic)
 {
-	int pos = line.find(' ');
-	*channel = line.substr(0, pos);
+	size_t pos = line.find(' ');
+	*chName = line.substr(0, pos);
 	if (pos != std::string::npos) {
-		std::string rest = line.substr(pos + 1);
+		std::string rest = line.substr(pos + 2);
 		*newTopic = rest;
 	}
 	else
 		*newTopic = "";
-}
-
-void	Server::noArgsTopic(int i, std::string chName)
-{
-	int chId = getChannelId(chName);
-	if (_channels[chId].getTopic().empty())
-		return (sendToClient(i, RPL_NOTOPIC(_clients[i].getNick(), chName)));
-	return (sendToClient(i, RPL_TOPIC(_clients[i].getNick(), chName, _channels[chId].getTopic())));
 }
 
 void	Server::commandTopic(int i, std::string args)
@@ -40,11 +32,18 @@ void	Server::commandTopic(int i, std::string args)
 	int chId = getChannelId(chName);
 	if (!isUserInChannel(i, chId))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
-	if (newTopic.empty())
-		return (noArgsTopic(i, chName));
-	if (_channels[chId].isTopicRestricted() && !_channels[chId].isOp(_clients[i].getId()))
+	if (newTopic.empty()) {
+		if (_channels[chId].getTopic().empty() || _channels[chId].getTopic() == ":")
+			return (sendToClient(i, RPL_NOTOPIC(_clients[i].getNick(), chName)));
+		sendToClient(i, RPL_TOPIC( _clients[i].getNick(), chName, _channels[chId].getTopic()));
+		sendToClient(i, RPL_TOPICWHOTIME(_clients[i].getPrefix(), chName, _channels[chId].getTopicAuthor(), _channels[chId].getTopicTimeSet()));
+		return ;
+	}
+	if (_channels[chId].isTopicRestricted() && !_channels[chId].isOp(i))
 		return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), chName)));
 
 	_channels[chId].setTopic(newTopic);
-	channelBroadcast(chId, RPL_TOPIC(_clients[i].getNick(), chName, newTopic));
+	_channels[chId].setTopicTimeSet();
+	_channels[chId].setTopicAuthor(_clients[i].getPrefix());
+	channelBroadcast(chId, TOPIC(_clients[i].getNick(), chName, newTopic));
 }

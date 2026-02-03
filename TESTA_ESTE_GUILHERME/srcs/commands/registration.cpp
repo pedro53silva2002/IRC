@@ -7,7 +7,6 @@ void	Server::commandPass(int i, std::string line)
 	if (line.compare(_pass))
 		return (sendToClient(i, ERR_PASSWDMISMATCH(_clients[i].getNick())));
 	_clients[i].setAuthenticated(true);
-	serverLog(_clients[i].getNick(), "has authenticated");
 }
 
 bool	Server::isValidUser(int i, std::string args)
@@ -35,6 +34,7 @@ bool	Server::isValidUser(int i, std::string args)
 	sendToClient(i, "WHAT SHOULD I PUT HERE");
 	return (false);
 }
+
 void	Server::commandUser(int i, std::string args)
 {
 	if (!isValidUser(i, args))
@@ -47,9 +47,7 @@ void	Server::commandUser(int i, std::string args)
 	std::string user = args.substr(0, args.find(' '));
 	_clients[i].setRealname(real);
 	_clients[i].setUsername(user);
-		
-	std::cout << _clients[i].getNick() << " set their username to: ";
-	std::cout << _clients[i].getUsername() << " || " << _clients[i].getRealname() << std::endl;
+	
 	checkRegistration(i);
 }
 
@@ -61,41 +59,38 @@ bool	Server::isValidNick(int i,std::string args)
 		return (sendToClient(i, ERR_NONICKNAMEGIVEN()), false);
 	if (args.find(' ') != std::string::npos || args[0] == ':' || args[0] == '#' || args.compare(0, 2, "#&") == 0 || args.compare(0, 2, "&#") == 0)
 		return (sendToClient(i, ERR_ERRONEUSNICKNAME(_clients[i].getNick(), args)), false);
-	if (isNickInUse(args))
-		return (sendToClient(i, ERR_NICKNAMEINUSE(_clients[i].getNick(), args)), false);
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)	{
+		if (_clients[it->first].getNick() == args)
+			return (sendToClient(i, ERR_NICKNAMEINUSE(_clients[i].getNick(), args)), false);
+	}
 	return (true);
 }
-bool	Server::isNickInUse(std::string toFind)
-{
-	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)	{
-		if (_clients[it->first].getNick() == toFind)
-			return (true);
-	}
-	return (false);
-}
+
 void	Server::commandNick(int i, std::string args)
 {
 	if (!isValidNick(i, args))
 		return ;
-	
-	std::cout << _clients[i].getNick() << " set their nick to: ";
+	std::string oldNick = _clients[i].getNick();
 	_clients[i].setNick(args);
-	std::cout << _clients[i].getNick() << std::endl;
-
-	_clients[i].setPrefix();
+	if (_clients[i].isRegistered())
+		serverBroadcast(NICK(oldNick, args));
 	checkRegistration(i);
+	_clients[i].setPrefix();
 }
 
 
 void	Server::welcomeClient(int i)
 {
 	sendToClient(i, "CAP * LS");
-/* 	sendToClient(i, RPL_WELCOME(_clients[i].getNick(), _name));
-	sendToClient(i, RPL_YOURHOST(_name));
-	sendToClient(i, RPL_MYINFO(_name, _clients[i].getNick()));
-	sendToClient(i, RPL_MOTDSTART(_clients[i].getNick(), _name));
-	sendToClient(i, RPL_MOTD(_clients[i].getNick(), _motd));
-	sendToClient(i, RPL_ENDOFMOTD(_clients[i].getNick())); */
+	sendToClient(i, RPL_WELCOME(_clients[i].getNick(), _name));
+	//uncomment for full welcome
+	/*
+		sendToClient(i, RPL_YOURHOST);
+		sendToClient(i, RPL_MYINFO(_clients[i].getNick()));
+		sendToClient(i, RPL_MOTDSTART(_clients[i].getNick(), _name));
+		sendToClient(i, RPL_MOTD(_clients[i].getNick(), _motd));
+		sendToClient(i, RPL_ENDOFMOTD(_clients[i].getNick()));
+	*/
 }
 
 void	Server::checkRegistration(int i)
@@ -104,7 +99,7 @@ void	Server::checkRegistration(int i)
 		&& !_clients[i].getRealname().empty() && _clients[i].getNick() != "*")
 		{
 			_clients[i].setRegistered(true);
-			welcomeClient(i);
 			_clients[i].setPrefix();
+			welcomeClient(i);
 		}
 }

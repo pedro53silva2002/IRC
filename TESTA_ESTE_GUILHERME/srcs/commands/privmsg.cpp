@@ -7,7 +7,7 @@ bool	Server::isValidPrivmsg(int i, std::string args)
 	if (args.empty())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "PRIVMSG")), false);
 	
-	int pos = args.find(' ');
+	size_t pos = args.find(' ');
 	if (pos == std::string::npos || args.substr(pos + 1).empty())
 		return (false);
 	return (true);
@@ -15,7 +15,7 @@ bool	Server::isValidPrivmsg(int i, std::string args)
 
 void	setPrivmsg(std::string args, std::string *channel, std::string *message)
 {
-	int pos = args.find(' ');
+	size_t pos = args.find(' ');
 	*channel = args.substr(0, pos);
 	std::string rest = args.substr(pos + 1);
 	if (rest[0] == ':')
@@ -36,6 +36,5 @@ void	Server::commandPrivmsg(int i, std::string args)
 	if (!isUserInChannel(i, chId))
 		return (sendToClient(i, ERR_NOTONCHANNEL(_clients[i].getNick(), chName)));
 	
-	std::string toSend = _clients[i].getPrefix() + " PRIVMSG " + chName + " :" + message;
-	clientBroadcast(i, chId, toSend);
+	clientBroadcast(i, chId, PRIVMSG(_clients[i].getNick(), chName, message));
 }
