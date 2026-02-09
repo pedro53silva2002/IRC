@@ -1,9 +1,0 @@
-PRIVMSG should also do direct messages
-topic <chan> :				-> will erase topic
-NOSUCHCHANNEL when channel doesnt exist
-replace strToSend for RPL_s
-REPLACE GETNICK FOR GETPREFIX? (errors is ServerName, replies are getPrefix)
-remove OP and Invited if leaveChannel is called
-
-completely done:
-MODE
