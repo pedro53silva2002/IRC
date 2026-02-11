@@ -18,14 +18,14 @@
 # include <sstream>
 # include <ctime>
 
-#define RST "\033[1;0m"
-#define DRED "\033[1;31m"
-#define DGREEN "\033[1;32m"
-#define DYELLOW "\033[1;33m"
+# define RST "\033[1;0m"
+# define DRED "\033[1;31m"
+# define DGREEN "\033[1;32m"
+# define DYELLOW "\033[1;33m"
 
-#define RED(x) DRED x RST
-#define GREEN(x) DGREEN x RST
-#define YELLOW(x) DYELLOW x RST
+# define RED(x) DRED x RST
+# define GREEN(x) DGREEN x RST
+# define YELLOW(x) DYELLOW x RST
 
 int		mySocket(int __domain, int __type, int __protocol);
 void	myBind(int __fd, const sockaddr *__addr, socklen_t __len);

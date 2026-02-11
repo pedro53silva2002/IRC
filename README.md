@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by peferrei.*
+*This project has been created as part of the 42 curriculum by brfernan, peferrei.*
 
 # ft_irc - IRC Server
 
@@ -16,6 +16,8 @@ The server implements the core IRC protocol, supporting essential features such 
 The server uses `poll()` for handling multiple client connections efficiently, ensuring non-blocking I/O operations.
 
 ## Instructions
+- make
+- ./ircserv <port> <pass>
 
 ### Requirements
 - A C++ compiler with C++98 support (e.g., `c++`, `g++`, `clang++`)

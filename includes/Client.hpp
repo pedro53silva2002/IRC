@@ -40,15 +40,15 @@ class Client
 		std::map<int, std::string>	&getChannels();
 
 		//*SETTERS
-		void	setId(int id);
-		void	setAuthenticated(bool auth);
-		void	setRegistered(bool auth);
+		void	setId(int);
+		void	setAuthenticated(bool);
+		void	setRegistered(bool);
 		void	setPrefix();
-		void	setHost(std::string host);
-		void	setUsername(std::string username);
-		void	setNick(std::string nick);
-		void	setRealname(std::string realname);
-		void	setChannel(int chId, std::string chName);
+		void	setHost(std::string);
+		void	setUsername(std::string);
+		void	setNick(std::string);
+		void	setRealname(std::string);
+		void	setChannel(int, std::string);
 };
 
 #endif

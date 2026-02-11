@@ -25,7 +25,7 @@ void	Server::modeTopicRestriction(int i, int chId, bool *enableMode)
 		*enableMode = true;
 }
 
-void	Server::modeKey(int i, int chId, std::vector<std::string> args, bool *enableMode, int *argsIdx)
+void	Server::modeKey(int i, int chId, std::vector<std::string> args, bool *enableMode, size_t *argsIdx)
 {
 	if (!*enableMode) {
 		_channels[chId].setChannelKey("");
@@ -40,7 +40,7 @@ void	Server::modeKey(int i, int chId, std::vector<std::string> args, bool *enabl
 	(*argsIdx)++;
 }
 
-void	Server::modeOp(int i, int chId, std::vector<std::string> args, bool *enableMode, int *argsIdx)
+void	Server::modeOp(int i, int chId, std::vector<std::string> args, bool *enableMode, size_t *argsIdx)
 {
 	if (*argsIdx >= args.size())
 		return (sendToClient(i, ERR_NEEDMOREPARAMS(_clients[i].getNick(), "MODE")));
@@ -57,7 +57,7 @@ void	Server::modeOp(int i, int chId, std::vector<std::string> args, bool *enable
 	(*argsIdx)++;
 }
 
-void	Server::modeLim(int i, int chId, std::vector<std::string> args, bool *enableMode, int *argsIdx)
+void	Server::modeLim(int i, int chId, std::vector<std::string> args, bool *enableMode, size_t *argsIdx)
 {
 	if (!*enableMode) {
 		_channels[chId].setLimit(0);
@@ -90,7 +90,7 @@ void	Server::commandMode(int i, std::string line)
 		return (sendToClient(i, ERR_CHANOPRIVSNEEDED(_clients[i].getNick(), args[0])));
 
 	size_t j = 0;
-	int		argIdx = 2;
+	size_t	argIdx = 2;
 	bool	enableMode = (args[1][0] != '-');
 	if (args[1][0] == '+' || args[1][0] == '-')
 		j++;

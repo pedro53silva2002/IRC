@@ -115,10 +115,8 @@ void	Channel::setOp(int id, bool opOrNot) {
 		_ops.erase(find(_ops.begin(), _ops.end(), id));
 }
 bool	Channel::isInvited(int id) {
-	if (find(_invited.begin(), _invited.end(), id) != _invited.end()) {
-		std::cout << "is invited??\n";
+	if (find(_invited.begin(), _invited.end(), id) != _invited.end()) 
 		return (true);
-	}
 	return (false);
 }
 void	Channel::addInvited(int id) {

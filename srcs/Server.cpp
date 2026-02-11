@@ -82,7 +82,7 @@ void	setCommand(std::string line, std::string *command, std::string *args)
 		else
 			*args += temp + ' ';
 		i++;
-	}	
+	}
 	*args = (*args).substr(0, (*args).length() - 1);
 	std::transform((*command).begin(), (*command).end(), (*command).begin(), ::toupper);
 	std::cout << "command input [" + *command + "], arguments: [" + *args + "]\n";
@@ -92,15 +92,15 @@ void	Server::processCommand(int i, std::string line)
 {
 	std::cout << RED("--------------------------------------------------------------------------------\n");
 	std::cout << _clients[i].getNick() << " said: [" + line + "]\n";
-	if (line.compare(0, 6, "CAP LS") == 0)//what to do
+	if (line.compare(0, 6, "CAP LS") == 0)
 		return ;
-	else if (line.compare(0, 3, "WHO") == 0)//what to do
+	else if (line.compare(0, 3, "WHO") == 0)
 		return ;
 
 	typedef void (Server::*funcs)(int, std::string);
 	std::string commands[] = {"QUIT", "PASS", "USER", "NICK", "JOIN",  "PART", "PRIVMSG", "KICK", "MODE", "TOPIC", "INVITE" };
-	funcs function[] = {&Server::commandQuit, &Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin,  &Server::commandPart ,
-		&Server::commandPrivmsg, &Server::commandKick, &Server::commandMode, &Server::commandTopic, &Server::commandInvite};
+	funcs function[] = {&Server::commandQuit, &Server::commandPass, &Server::commandUser, &Server::commandNick, &Server::commandJoin, &Server::commandPart,
+						&Server::commandPrivmsg, &Server::commandKick, &Server::commandMode, &Server::commandTopic, &Server::commandInvite};
 
 	std::string userCommand, args;
 	setCommand(line, &userCommand, &args);

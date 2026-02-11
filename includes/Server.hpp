@@ -18,21 +18,20 @@ class Server
 		sockaddr_in		server_addr;
 		pollfd			_srvPfd;
 		std::string		_motd;
-
 		std::vector<pollfd>		_pfds;
 		std::map<int, Client> 	_clients;
 		std::vector<Channel>	_channels;
 
 		int		acceptClient();
 		void	setPfds();
-		bool	handleClientPoll(int i);
-		void	processCommand(int i, std::string line);
+		bool	handleClientPoll(int);
+		void	processCommand(int, std::string);
 		
 		
-		void	serverBroadcast(std::string str);
-		void	channelBroadcast(int chId, std::string str);
-		void	clientBroadcast(int i, int chId, std::string str);
-		void	sendToClient(int i, std::string str);
+		void	serverBroadcast(std::string);
+		void	channelBroadcast(int, std::string);
+		void	clientBroadcast(int, int, std::string);
+		void	sendToClient(int, std::string);
 		
 		//*COMMANDS
 		void	commandPass(int, std::string);
@@ -62,9 +61,9 @@ class Server
 		bool	isValidMode(int, std::string);
 		void	modeInviteOnly(int, int, bool *);
 		void	modeTopicRestriction(int, int, bool *);
-		void	modeKey(int, int, std::vector<std::string>, bool *, int *);
-		void	modeOp(int, int, std::vector<std::string>, bool *, int *);
-		void	modeLim(int, int, std::vector<std::string>, bool *, int *);
+		void	modeKey(int, int, std::vector<std::string>, bool *, size_t *);
+		void	modeOp(int, int, std::vector<std::string>, bool *, size_t *);
+		void	modeLim(int, int, std::vector<std::string>, bool *, size_t *);
 	
 		void	commandInvite(int, std::string);
 
@@ -72,9 +71,9 @@ class Server
 		bool	isValidTopic(int, std::string);
 
 
-		int		getClientId(std::string name);
-		int		getChannelId(std::string name);
-		bool	isUserInChannel(int i, int chId);
+		int		getClientId(std::string);
+		int		getChannelId(std::string);
+		bool	isUserInChannel(int, int);
 
 		void	test();
 

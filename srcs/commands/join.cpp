@@ -59,7 +59,7 @@ void	Server::commandJoin(int i, std::string args)
 	int chId = findOrCreateChannel(i, chName);
 	if (_channels[chId].isInviteOnly() && !_channels[chId].isInvited(i))
 		return (sendToClient(i, ERR_INVITEONLYCHAN(_clients[i].getNick(), chName)));
-	if (key != _channels[chId].getChannelKey())
+	if (key != _channels[chId].getChannelKey() && _channels[chId].getChannelKey() != "")
 		return (sendToClient(i, ERR_BADCHANNELKEY(_clients[i].getNick(), chName)));
 	if (_channels[chId].getClientsInChannel().size() >= _channels[chId].getLimit() && _channels[chId].getLimit() != 0)
 		return (sendToClient(i, ERR_CHANNELISFULL(_clients[i].getNick(), chName)));

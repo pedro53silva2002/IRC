@@ -31,7 +31,7 @@ bool	Server::isValidUser(int i, std::string args)
 	}
 	if (params.size() >= 4 && params[1][0] == '0' && params[2][0] == '*')	
 		return (true);
-	sendToClient(i, "WHAT SHOULD I PUT HERE");
+	sendToClient(i, ERR_INVUSERNAME(_clients[i].getNick()));
 	return (false);
 }
 
@@ -86,13 +86,12 @@ void	Server::welcomeClient(int i)
 	sendToClient(i, "CAP * LS");
 	sendToClient(i, RPL_WELCOME(_clients[i].getNick(), _name));
 	sendToClient(i, RPL_YOURHOST);
-	//uncomment for full welcome
-	/*
 	sendToClient(i, RPL_MYINFO(_clients[i].getNick()));
-	sendToClient(i, RPL_MOTDSTART(_clients[i].getNick(), _name));
 	sendToClient(i, RPL_MOTD(_clients[i].getNick(), _motd));
-	sendToClient(i, RPL_ENDOFMOTD(_clients[i].getNick()));
-	*/
+	//uncomment for full welcome
+	// sendToClient(i, RPL_MOTDSTART(_clients[i].getNick(), _name));
+	// sendToClient(i, RPL_ENDOFMOTD(_clients[i].getNick()));
+	
 }
 
 void	Server::checkRegistration(int i)

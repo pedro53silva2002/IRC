@@ -14,7 +14,7 @@ void	setTopicArgs(std::string line, std::string *chName, std::string *newTopic)
 	size_t pos = line.find(' ');
 	*chName = line.substr(0, pos);
 	if (pos != std::string::npos) {
-		std::string rest = line.substr(pos + 2);
+		std::string rest = line.substr(pos + 1);
 		*newTopic = rest;
 	}
 	else

@@ -57,8 +57,8 @@ class Channel
 		bool	isInvited(int);
 		void	addInvited(int);
 		void	decrementId();
-		void	addClient(int id);
-		void	removeClient(int id);
+		void	addClient(int);
+		void	removeClient(int);
 };
 
 #endif

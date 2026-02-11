@@ -10,9 +10,9 @@
 #define RPL_TOPIC(client, channel, topic) (":" + SERVERNAME + " 332 " + client + " " + channel + " " + topic)
 #define RPL_INVITING(client, nick, channel) (":" + SERVERNAME + " 341 " + client + " " + nick + " :" + channel)
 #define RPL_NAMREPLY(nick, channel, users) (":" + SERVERNAME + " 353 " + nick + " = " + channel + " :" + users + "")
-#define RPL_MOTD(nick, motd) (":" + SERVERNAME + " 372 " + nick + ":- " + motd)
+#define RPL_MOTD(nick, motd) (":" + SERVERNAME + " 372 " + nick + " :- " + motd)
 #define RPL_MOTDSTART(nick, server) (":" + SERVERNAME + " 375 " + nick + " :- " + server + " Message of the day - ")
-#define RPL_ENDOFMOTD(nick) (":" + SERVERNAME + " 376 " + nick + ":End of /MOTD command.")
+#define RPL_ENDOFMOTD(nick) (":" + SERVERNAME + " 376 " + nick + " :End of /MOTD command.")
 
 #define ERR_NOSUCHNICK(client, nick) (":" + SERVERNAME + " 401 " + client + " " + nick + " :No such nick")
 #define ERR_UNKNOWNCOMMAND(client, command) (":" + SERVERNAME + " 421 " + client + " "  + command + " :Unknown command")
@@ -42,5 +42,7 @@
 #define PRIVMSG(client, channel, message) (":" + client + " PRIVMSG " + channel + " " + message)
 #define NICK(oldNick, newNick) (":" + oldNick + " NICK " + newNick)
 #define TOPIC(client, channel, topic) (":" + client + " TOPIC " + channel + " :" + topic)
+
+#define ERR_INVUSERNAME(client) (":" + SERVERNAME + " " + client + " :Invalid Username ")
 
 #endif
